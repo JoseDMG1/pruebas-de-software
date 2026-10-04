@@ -1,0 +1,16 @@
+# Opcional: solo usar si no existe un servidor Ollama accesible.
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+  api:
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+    depends_on:
+      ollama:
+        condition: service_started
+volumes:
+  ollama_models:

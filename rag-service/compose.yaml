@@ -1,0 +1,53 @@
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: rag
+      POSTGRES_USER: rag
+      POSTGRES_PASSWORD: rag_local_dev
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./src/rag_service/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rag -d rag"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  api:
+    build: .
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      DATABASE_URL: postgresql://rag:rag_local_dev@db:5432/rag
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-amazon.titan-embed-text-v2:0}
+      EMBEDDING_BACKEND: ${EMBEDDING_BACKEND:-ollama}
+      OLLAMA_BASE_URL: ${OLLAMA_DOCKER_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-qwen3-embedding:0.6b}
+      OLLAMA_EMBEDDING_CONTEXT_LENGTH: ${OLLAMA_EMBEDDING_CONTEXT_LENGTH:-2048}
+      OLLAMA_DEFAULT_EMBEDDING_MODEL: ${OLLAMA_DEFAULT_EMBEDDING_MODEL:-qwen3-embedding:0.6b}
+      OLLAMA_CHAT_MODEL: ${OLLAMA_CHAT_MODEL:-qwen2.5:3b}
+      OLLAMA_CHAT_NUM_GPU: ${OLLAMA_CHAT_NUM_GPU:--1}
+      OLLAMA_CHAT_TIMEOUT: ${OLLAMA_CHAT_TIMEOUT:-120}
+      OLLAMA_TIMEOUT: ${OLLAMA_TIMEOUT:-120}
+      OLLAMA_PULL_TIMEOUT: ${OLLAMA_PULL_TIMEOUT:-1800}
+      EMBEDDING_CIRCUIT_SECONDS: ${EMBEDDING_CIRCUIT_SECONDS:-60}
+      OLLAMA_SHADOW_ENABLED: ${OLLAMA_SHADOW_ENABLED:-true}
+      CHUNK_SIZE_CHARS: ${CHUNK_SIZE_CHARS:-2000}
+      CHUNK_OVERLAP_CHARS: ${CHUNK_OVERLAP_CHARS:-200}
+      MAX_PDF_BYTES: ${MAX_PDF_BYTES:-20971520}
+      MAX_PDF_PAGES: ${MAX_PDF_PAGES:-300}
+      MAX_CHUNKS: ${MAX_CHUNKS:-1000}
+      DB_CONNECT_TIMEOUT: ${DB_CONNECT_TIMEOUT:-3}
+      BEDROCK_READ_TIMEOUT: ${BEDROCK_READ_TIMEOUT:-30}
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./data/inbox:/data/inbox:ro
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  pgdata:

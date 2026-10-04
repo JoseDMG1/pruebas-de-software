@@ -1,0 +1,15 @@
+# Nested Git metadata and history stay local; this repository tracks project files.
+**/.git/
+
+# Local credentials and machine-specific dependencies.
+rag-service/.env
+rag-service/.venv/
+rag-service/.cache/
+rag-service/.pytest_cache/
+rag-service/.ruff_cache/
+rag-service/**/__pycache__/
+rag-service/**/*.py[cod]
+
+# Local account and tool configuration.
+.aws/
+.codex/

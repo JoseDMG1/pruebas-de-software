@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Consulta académica · Prototipo RAG</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#182b3b;background:#f3f6fa;color-scheme:light}
+*{box-sizing:border-box}body{margin:0}main{max-width:850px;margin:48px auto;padding:0 24px}
+.badge{font-size:13px;letter-spacing:.08em;font-weight:700;color:#30615c}h1{font-size:36px;margin:12px 0}
+p{line-height:1.6}.notice{background:#fff2d8;border-left:4px solid #b77c13;padding:14px 18px}
+.panel{background:white;border:1px solid #dce4eb;border-radius:16px;padding:24px;margin-top:24px}
+label{display:block;font-weight:650;margin-bottom:10px}textarea{width:100%;resize:vertical;
+font:inherit;padding:14px;border:1px solid #95a8ba;border-radius:8px;min-height:110px}
+button{font:inherit;font-weight:650;background:#175a51;color:white;border:0;border-radius:8px;
+padding:12px 22px;margin-top:12px;cursor:pointer}button:disabled{opacity:.6;cursor:wait}
+#status{min-height:24px;color:#486175}#error{color:#a62f29}#answer{white-space:pre-wrap;line-height:1.7}
+.source{border-top:1px solid #dce4eb;padding:18px 0}.source h3{font-size:16px;margin:0 0 8px}
+.source p{margin:8px 0;color:#486175}.source blockquote{margin:12px 0;padding:12px 16px;
+background:#f3f6fa;white-space:pre-wrap;font-size:14px;line-height:1.6}
+footer{margin:28px 0;color:#486175;font-size:13px}a{color:#175a51}
+</style>
+</head>
+<body><main>
+<div class="badge">PROTOTIPO · SPRINT 1</div>
+<h1>Consulta académica</h1>
+<p>Haz una pregunta y consulta los fragmentos que sustentan la respuesta.</p>
+<p class="notice"><strong>Documentos ficticios de demostración.</strong> Las respuestas describen la
+Universidad Demo del Valle y no constituyen información oficial de una universidad real.</p>
+<section class="panel"><form id="query-form">
+<label for="question">Tu pregunta</label>
+<textarea id="question" maxlength="1000" required placeholder="¿Cuál es el plazo de matrícula ordinaria?"></textarea>
+<button id="submit" type="submit">Consultar documentos</button>
+</form><p id="status" role="status" aria-live="polite"></p>
+<p id="error" role="alert" hidden></p></section>
+<section id="result" class="panel" hidden aria-live="polite"><h2>Respuesta</h2>
+<div id="answer"></div><h2 id="sources-title">Fuentes utilizadas</h2><div id="sources"></div></section>
+<footer>Cada consulta es independiente. Pregunta también por créditos, certificados o retiro de cursos.</footer>
+</main><script>
+const form=document.getElementById('query-form'), question=document.getElementById('question');
+const submit=document.getElementById('submit'), status=document.getElementById('status');
+const error=document.getElementById('error'), result=document.getElementById('result');
+let pending=false;
+form.addEventListener('submit',async event=>{
+ event.preventDefault(); if(pending)return;
+ const query=question.value.trim(); if(!query){question.focus();return;}
+ pending=true;submit.disabled=true;question.disabled=true;
+ status.textContent='Buscando documentos y preparando la respuesta…';error.hidden=true;result.hidden=true;
+ const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),150000);
+ try{
+  const response=await fetch('/api/v1/chat/query',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({query}),signal:controller.signal});
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.message||'No se pudo procesar la consulta.');
+  document.getElementById('answer').textContent=data.answer;
+  const sources=document.getElementById('sources');sources.replaceChildren();
+  document.getElementById('sources-title').hidden=data.sources.length===0;
+  for(const source of data.sources){
+   const card=document.createElement('article');card.className='source';
+   const title=document.createElement('h3');title.textContent=`[${source.source_id}] ${source.title}`;
+   const meta=document.createElement('p');
+   meta.textContent=`${source.filename} · Páginas ${source.page_start}–${source.page_end} · Versión ${source.version}`;
+   const quote=document.createElement('blockquote');quote.textContent=source.excerpt;
+   card.append(title,meta,quote);sources.append(card);
+  }
+  result.hidden=false;
+  status.textContent=data.insufficient_context?'La información disponible no responde esta pregunta.':'Consulta completada.';
+ }catch(problem){
+  error.textContent=problem.name==='AbortError'?'La consulta agotó el tiempo de espera. Puedes repetirla.':
+   (problem.message||'No se pudo conectar con el servicio.');error.hidden=false;status.textContent='';
+ }finally{clearTimeout(timer);pending=false;submit.disabled=false;question.disabled=false;}
+});
+</script></body></html>

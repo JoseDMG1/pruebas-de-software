@@ -1,0 +1,149 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * This script allows a teacher to create, edit and delete question categories.
+ *
+ * @package    qbank_managecategories
+ * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
+ * @author     2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+require_once(__DIR__ . '/../../../config.php');
+require_once($CFG->dirroot . '/question/editlib.php');
+
+use core_question\output\qbank_action_menu;
+use core_question\output\qbank_actionbar;
+use core_question\category_manager;
+use qbank_managecategories\form\question_move_form;
+use qbank_managecategories\helper;
+use qbank_managecategories\output\categories;
+use qbank_managecategories\output\categories_header;
+use qbank_managecategories\question_categories;
+
+require_login();
+core_question\local\bank\helper::require_plugin_enabled(helper::PLUGINNAME);
+
+// Since Moodle 5.0 any request with the courseid parameter is deprecated and will redirect to the banks management page.
+if ($courseid = optional_param('courseid', 0, PARAM_INT)) {
+    redirect(new moodle_url('/question/banks.php', ['courseid' => $courseid]));
+}
+
+list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
+    question_edit_setup('categories', '/question/bank/managecategories/category.php');
+
+$todelete = optional_param('delete', 0, PARAM_INT); // The ID of a category to delete.
+
+$PAGE->set_url($thispageurl);
+$PAGE->add_body_class('limitedwidth');
+
+$manager = new category_manager($thispageurl);
+
+if ($todelete) {
+    if (!$category = $DB->get_record("question_categories", ["id" => $todelete])) {
+        throw new moodle_exception('nocate', 'question', $thispageurl->out(), $todelete);
+    }
+
+    helper::question_remove_stale_questions_from_category($todelete);
+
+    // Get category questions.
+    $allquestions = $manager->get_real_question_ids_in_category($todelete);
+    $allcount = count($allquestions);
+
+    // Get questions that are in use for the category.
+    $inusequestions = $manager->get_in_use_question_ids_in_category($todelete);
+    $inusecount = count($inusequestions);
+
+    // If there are questions in the category display the form.
+    if ($allquestions) {
+        $categorycontext = context::instance_by_id($category->contextid);
+        $moveform = new question_move_form(
+            $thispageurl,
+            [
+                'contexts' => [$categorycontext],
+                'currentcat' => "$todelete",
+                'allcount' => $allcount,
+                'inusecount' => $inusecount,
+            ],
+        );
+        if ($moveform->is_cancelled()) {
+            $thispageurl->remove_all_params();
+            if (!is_null($cmid)) {
+                $thispageurl->param('cmid', $cmid);
+            } else {
+                $thispageurl->param('courseid', $courseid);
+            }
+            redirect($thispageurl);
+        } else if ($formdata = $moveform->get_data()) {
+            // Which questions are we moving based on the form?
+            $questionstomove = $inusequestions;
+            if ($formdata->movequestions == category_manager::MOVEALLQUESTIONS) {
+                $questionstomove = $allquestions;
+            }
+            // If we have questions to move then move them and delete.
+            if (!empty($questionstomove)) {
+                [$tocategoryid, $tocontextid] = explode(',', $formdata->category);
+                $manager->move_questions_and_delete_category($formdata->delete, $tocategoryid, $questionstomove);
+            } else {
+                // Otherwise just delete the category.
+                $manager->delete_category($formdata->delete);
+            }
+            $thispageurl->remove_params('cat', 'category');
+            redirect($thispageurl);
+        }
+    }
+} else {
+    $allquestions = 0;
+}
+
+if ((!empty($todelete) && (!$allquestions) && confirm_sesskey())) {
+    $manager->delete_category($todelete);// Delete the category now no questions to move.
+    $thispageurl->remove_params('cat', 'category');
+    redirect($thispageurl);
+}
+
+$PAGE->set_title(get_string('editcategories', 'question'));
+$PAGE->set_heading($COURSE->fullname);
+$PAGE->activityheader->disable();
+$PAGE->set_show_navigation_footer(false);
+
+// Print horizontal nav if needed.
+$renderer = $PAGE->get_renderer('core_question', 'bank');
+
+echo $OUTPUT->header();
+$qbankaction = new qbank_action_menu($thispageurl);
+echo $renderer->render($qbankaction);
+if ($allquestions) {
+    $vars = new stdClass();
+    $vars->name = $category->name;
+    $vars->allcount = $allcount;
+    $vars->inusecount = $inusecount;
+    echo $OUTPUT->heading(get_string('movequestionsbeforedeleting', 'qbank_managecategories'));
+    echo $OUTPUT->box(get_string('movequestionsexplanation', 'qbank_managecategories', $vars), 'generalbox boxaligncenter');
+    $moveform->display();
+} else {
+    // Display the user interface.
+    $questioncategories = new question_categories(
+        $thispageurl,
+        cmid: $cmid,
+    );
+    $PAGE->requires->js_call_amd('qbank_managecategories/categorymanager', 'init'); // Load reactive module.
+    echo $OUTPUT->render(new categories_header($questioncategories));
+    echo $OUTPUT->render(new categories($questioncategories));
+}
+
+echo $OUTPUT->footer();

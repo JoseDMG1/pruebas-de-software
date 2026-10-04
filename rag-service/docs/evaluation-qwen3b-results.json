@@ -1,0 +1,758 @@
+{
+  "complete": true,
+  "timestamp_utc": "2026-10-02T04:55:33.516663+00:00",
+  "provider": "ollama",
+  "embedding_model": "qwen3-embedding:0.6b",
+  "chat_model": "qwen2.5:3b",
+  "summary": {
+    "positive_passed": 13,
+    "positive_total": 20,
+    "negative_passed": 5,
+    "negative_total": 5,
+    "accepted": false,
+    "median_seconds": 3.263,
+    "p95_seconds": 4.365,
+    "scoring": "Expected facts and document keys; inspect answers for semantic correctness."
+  },
+  "results": [
+    {
+      "case": {
+        "id": "P01",
+        "query": "¿Cuándo empieza y termina la matrícula ordinaria de 2026-II?",
+        "key": "matricula",
+        "facts": [
+          [
+            "3 de agosto"
+          ],
+          [
+            "14 de agosto"
+          ],
+          [
+            "2026"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 4.225,
+      "response": {
+        "answer": "La matrícula ordinaria de 2026-II empieza el 3 de agosto de 2026 y termina el 14 de agosto de 2026. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 3,
+            "document_id": 3,
+            "key": "demo-s1-matricula",
+            "title": "Matrícula — Universidad Demo del Valle (ficticio)",
+            "filename": "demo-s1-matricula.pdf",
+            "version": 1,
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Matrícula 2026-II. La matrícula ordinaria empieza el 3 de agosto de 2026 y termina el 14 de agosto de 2026. La matrícula extemporánea se realiza del 17 al 19 de agosto de 2026 y tiene un recargo de 25 soles. Para matricularse, el estudiante debe tener su documento de identidad vigente y no tener deudas pendientes."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "02e858cb-1e65-4b34-9b57-2ff83a9178e3"
+      }
+    },
+    {
+      "case": {
+        "id": "P02",
+        "query": "¿Cuál es el recargo por matrícula extemporánea?",
+        "key": "matricula",
+        "facts": [
+          [
+            "25",
+            "veinticinco"
+          ],
+          [
+            "soles"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 3.626,
+      "response": {
+        "answer": "El recargo por matrícula extemporánea es de 25 soles. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 3,
+            "document_id": 3,
+            "key": "demo-s1-matricula",
+            "title": "Matrícula — Universidad Demo del Valle (ficticio)",
+            "filename": "demo-s1-matricula.pdf",
+            "version": 1,
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Matrícula 2026-II. La matrícula ordinaria empieza el 3 de agosto de 2026 y termina el 14 de agosto de 2026. La matrícula extemporánea se realiza del 17 al 19 de agosto de 2026 y tiene un recargo de 25 soles. Para matricularse, el estudiante debe tener su documento de identidad vigente y no tener deudas pendientes."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "72f5bb8d-2f02-4a63-8b44-fc04f769ed0b"
+      }
+    },
+    {
+      "case": {
+        "id": "P03",
+        "query": "¿Cuántos créditos puedo matricular como estudiante regular?",
+        "key": "matricula",
+        "facts": [
+          [
+            "22",
+            "veintidós"
+          ],
+          [
+            "créditos"
+          ]
+        ]
+      },
+      "passed": false,
+      "elapsed_seconds": 3.092,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "fd13b357-ab19-46a8-b653-71e4b24534ee"
+      }
+    },
+    {
+      "case": {
+        "id": "P04",
+        "query": "¿Qué debo haber aprobado antes de matricularme en un curso?",
+        "key": "matricula",
+        "facts": [
+          [
+            "prerrequisito"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 3.551,
+      "response": {
+        "answer": "Para matricularse en un curso debe haber aprobado sus prerrequisitos. [2]",
+        "sources": [
+          {
+            "source_id": 2,
+            "fragment_id": 4,
+            "document_id": 3,
+            "key": "demo-s1-matricula",
+            "title": "Matrícula — Universidad Demo del Valle (ficticio)",
+            "filename": "demo-s1-matricula.pdf",
+            "version": 1,
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Matrícula 2026-II. Un estudiante regular puede matricularse hasta en 22 créditos por semestre. Para matricularse en un curso debe haber aprobado sus prerrequisitos. El cambio de sección puede solicitarse hasta el 21 de agosto de 2026, sujeto a disponibilidad de vacantes. No se permite cambiar de sección después de esa fecha."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "b5b2d571-bf38-4835-bba3-83a92b2192d0"
+      }
+    },
+    {
+      "case": {
+        "id": "P05",
+        "query": "¿Hasta qué fecha puedo solicitar cambio de sección?",
+        "key": "matricula",
+        "facts": [
+          [
+            "21 de agosto"
+          ],
+          [
+            "2026"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 4.06,
+      "response": {
+        "answer": "El cambio de sección puede solicitarse hasta el 21 de agosto de 2026, sujeto a disponibilidad de vacantes. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 4,
+            "document_id": 3,
+            "key": "demo-s1-matricula",
+            "title": "Matrícula — Universidad Demo del Valle (ficticio)",
+            "filename": "demo-s1-matricula.pdf",
+            "version": 1,
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Matrícula 2026-II. Un estudiante regular puede matricularse hasta en 22 créditos por semestre. Para matricularse en un curso debe haber aprobado sus prerrequisitos. El cambio de sección puede solicitarse hasta el 21 de agosto de 2026, sujeto a disponibilidad de vacantes. No se permite cambiar de sección después de esa fecha."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "cbb2d116-b713-4574-b675-eafc40cd9ae8"
+      }
+    },
+    {
+      "case": {
+        "id": "P06",
+        "query": "¿Cuál es el horario de la Oficina de Matrícula?",
+        "key": "matricula",
+        "facts": [
+          [
+            "lunes"
+          ],
+          [
+            "viernes"
+          ],
+          [
+            "9:00",
+            "09:00"
+          ],
+          [
+            "16:00"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 4.365,
+      "response": {
+        "answer": "La Oficina de Matrícula atiende de lunes a viernes, de 9:00 a 16:00 horas. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 5,
+            "document_id": 3,
+            "key": "demo-s1-matricula",
+            "title": "Matrícula — Universidad Demo del Valle (ficticio)",
+            "filename": "demo-s1-matricula.pdf",
+            "version": 1,
+            "page_start": 3,
+            "page_end": 3,
+            "excerpt": "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Matrícula 2026-II. La Oficina de Matrícula atiende de lunes a viernes, de 9:00 a 16:00 horas. Las consultas se reciben en matricula@demo.invalid. La solicitud de reserva de matrícula debe presentarse antes del inicio de clases y permite reservar hasta dos semestres consecutivos."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "663a2df6-8edc-4ef6-bf0e-5ed18b53797e"
+      }
+    },
+    {
+      "case": {
+        "id": "P07",
+        "query": "¿Cuántos semestres consecutivos puedo reservar mi matrícula?",
+        "key": "matricula",
+        "facts": [
+          [
+            "dos",
+            "2"
+          ],
+          [
+            "semestre"
+          ]
+        ]
+      },
+      "passed": false,
+      "elapsed_seconds": 2.743,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "3d4e1007-69d3-4f96-9a84-cc07edbf39ed"
+      }
+    },
+    {
+      "case": {
+        "id": "P08",
+        "query": "¿Cuál es la nota mínima aprobatoria?",
+        "key": "reglamento",
+        "facts": [
+          [
+            "11",
+            "once"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 3.695,
+      "response": {
+        "answer": "La nota mínima aprobatoria es 11 en la escala de 0 a 20. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 6,
+            "document_id": 4,
+            "key": "demo-s1-reglamento",
+            "title": "Reglamento académico — Universidad Demo del Valle (ficticio)",
+            "filename": "demo-s1-reglamento.pdf",
+            "version": 1,
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Reglamento académico. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "7d2cec45-89db-4f68-99a0-a4343da5d833"
+      }
+    },
+    {
+      "case": {
+        "id": "P09",
+        "query": "¿Qué asistencia mínima se requiere para rendir la evaluación final?",
+        "key": "reglamento",
+        "facts": [
+          [
+            "70",
+            "setenta"
+          ],
+          [
+            "por ciento",
+            "%"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 3.326,
+      "response": {
+        "answer": "La asistencia mínima requerida para rendir la evaluación final es del 70 por ciento. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 6,
+            "document_id": 4,
+            "key": "demo-s1-reglamento",
+            "title": "Reglamento académico — Universidad Demo del Valle (ficticio)",
+            "filename": "demo-s1-reglamento.pdf",
+            "version": 1,
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Reglamento académico. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "96a28ee8-0b81-4889-a3d4-3e854be2d96c"
+      }
+    },
+    {
+      "case": {
+        "id": "P10",
+        "query": "¿Qué peso tienen la evaluación continua y la evaluación final?",
+        "key": "reglamento",
+        "facts": [
+          [
+            "60",
+            "sesenta"
+          ],
+          [
+            "40",
+            "cuarenta"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 3.453,
+      "response": {
+        "answer": "La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 6,
+            "document_id": 4,
+            "key": "demo-s1-reglamento",
+            "title": "Reglamento académico — Universidad Demo del Valle (ficticio)",
+            "filename": "demo-s1-reglamento.pdf",
+            "version": 1,
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Reglamento académico. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "cd64ffa6-c8ff-47ad-9e78-51d5a950020a"
+      }
+    },
+    {
+      "case": {
+        "id": "P11",
+        "query": "¿Hasta qué semana se puede solicitar el retiro de un curso?",
+        "key": "reglamento",
+        "facts": [
+          [
+            "octava",
+            "ocho",
+            "8"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 3.122,
+      "response": {
+        "answer": "El retiro de un curso se solicita hasta la octava semana del semestre. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 7,
+            "document_id": 4,
+            "key": "demo-s1-reglamento",
+            "title": "Reglamento académico — Universidad Demo del Valle (ficticio)",
+            "filename": "demo-s1-reglamento.pdf",
+            "version": 1,
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Reglamento académico. El retiro de un curso se solicita hasta la octava semana del semestre. Se permite retirar hasta dos cursos por semestre. Si el estudiante desaprueba un curso tres veces, debe asistir a una asesoría académica obligatoria antes de volver a matricularse en ese curso."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "1884a752-c28d-4f0a-8bf8-1fec7bea14df"
+      }
+    },
+    {
+      "case": {
+        "id": "P12",
+        "query": "¿Cuántos cursos se permite retirar por semestre?",
+        "key": "reglamento",
+        "facts": [
+          [
+            "dos",
+            "2"
+          ],
+          [
+            "curso"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 3.872,
+      "response": {
+        "answer": "El retiro de un curso se solicita hasta la octava semana del semestre. Se permite retirar hasta dos cursos por semestre. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 7,
+            "document_id": 4,
+            "key": "demo-s1-reglamento",
+            "title": "Reglamento académico — Universidad Demo del Valle (ficticio)",
+            "filename": "demo-s1-reglamento.pdf",
+            "version": 1,
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Reglamento académico. El retiro de un curso se solicita hasta la octava semana del semestre. Se permite retirar hasta dos cursos por semestre. Si el estudiante desaprueba un curso tres veces, debe asistir a una asesoría académica obligatoria antes de volver a matricularse en ese curso."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "2f0747e3-1342-456f-98bd-e73f96a676a7"
+      }
+    },
+    {
+      "case": {
+        "id": "P13",
+        "query": "¿Qué debo hacer si desapruebo un curso tres veces?",
+        "key": "reglamento",
+        "facts": [
+          [
+            "asesoría académica"
+          ],
+          [
+            "obligatoria"
+          ]
+        ]
+      },
+      "passed": false,
+      "elapsed_seconds": 2.699,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "40e3c7cc-ea11-4524-ba79-a3ef0ee87769"
+      }
+    },
+    {
+      "case": {
+        "id": "P14",
+        "query": "¿En qué plazo puedo reclamar una calificación publicada?",
+        "key": "reglamento",
+        "facts": [
+          [
+            "tres",
+            "3"
+          ],
+          [
+            "días hábiles"
+          ]
+        ]
+      },
+      "passed": false,
+      "elapsed_seconds": 3.086,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "5136f2fe-da3f-4b08-8aef-a1351b69a0a9"
+      }
+    },
+    {
+      "case": {
+        "id": "P15",
+        "query": "¿Cuánto cuesta un certificado de estudios y cuánto tarda su entrega?",
+        "key": "tramites",
+        "facts": [
+          [
+            "35",
+            "treinta y cinco"
+          ],
+          [
+            "cinco",
+            "5"
+          ],
+          [
+            "días hábiles"
+          ]
+        ]
+      },
+      "passed": false,
+      "elapsed_seconds": 3.263,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "38b9a7db-9d0e-4aa1-bf1b-03198efd73b1"
+      }
+    },
+    {
+      "case": {
+        "id": "P16",
+        "query": "¿Qué documentos necesito para solicitar el certificado de estudios?",
+        "key": "tramites",
+        "facts": [
+          [
+            "identidad"
+          ],
+          [
+            "comprobante de pago"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 3.748,
+      "response": {
+        "answer": "Para solicitar el certificado de estudios se presenta una copia del documento de identidad y el comprobante de pago. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 9,
+            "document_id": 5,
+            "key": "demo-s1-tramites",
+            "title": "Trámites — Universidad Demo del Valle (ficticio)",
+            "filename": "demo-s1-tramites.pdf",
+            "version": 1,
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Trámites documentarios. El certificado de estudios cuesta 35 soles y se entrega en cinco días hábiles. Para solicitarlo se presenta una copia del documento de identidad y el comprobante de pago. La constancia de matrícula cuesta 10 soles y se entrega en un día hábil."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "a3bbd6a0-2f0a-42ba-b722-151d81ac5806"
+      }
+    },
+    {
+      "case": {
+        "id": "P17",
+        "query": "¿Cuánto cuesta una constancia de matrícula y cuánto tarda?",
+        "key": "tramites",
+        "facts": [
+          [
+            "10",
+            "diez"
+          ],
+          [
+            "un día hábil",
+            "1 día hábil"
+          ]
+        ]
+      },
+      "passed": false,
+      "elapsed_seconds": 3.155,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "cd397fd8-2a58-4b85-a7e4-c7ae4bbff445"
+      }
+    },
+    {
+      "case": {
+        "id": "P18",
+        "query": "¿Cómo consulto el estado de una solicitud en mesa de partes?",
+        "key": "tramites",
+        "facts": [
+          [
+            "número de expediente"
+          ]
+        ]
+      },
+      "passed": false,
+      "elapsed_seconds": 3.192,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "d3b2b85d-882d-40be-84f6-aab4370cc84e"
+      }
+    },
+    {
+      "case": {
+        "id": "P19",
+        "query": "¿Cuánto cuesta rectificar el nombre de un documento y cuánto tarda?",
+        "key": "tramites",
+        "facts": [
+          [
+            "gratuito",
+            "gratis",
+            "sin costo"
+          ],
+          [
+            "dos",
+            "2"
+          ],
+          [
+            "días hábiles"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 3.428,
+      "response": {
+        "answer": "La rectificación del nombre en un documento tarda dos días hábiles y es gratuito. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 10,
+            "document_id": 5,
+            "key": "demo-s1-tramites",
+            "title": "Trámites — Universidad Demo del Valle (ficticio)",
+            "filename": "demo-s1-tramites.pdf",
+            "version": 1,
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Trámites documentarios. La mesa de partes atiende de lunes a viernes, de 8:30 a 17:00 horas. El estado de una solicitud se consulta con el número de expediente entregado al registrarla. La rectificación del nombre en un documento requiere una copia del documento de identidad; este trámite es gratuito y tarda dos días hábiles."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "87e6a886-2236-4eb3-a5de-7f04c4dd2913"
+      }
+    },
+    {
+      "case": {
+        "id": "P20",
+        "query": "¿Qué documentos debo presentar para convalidar cursos?",
+        "key": "tramites",
+        "facts": [
+          [
+            "certificado de estudios"
+          ],
+          [
+            "sílabos"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 7.853,
+      "response": {
+        "answer": "Para convalidar cursos en la Universidad Demo del Valle, debes presentar el certificado de estudios y los sílabos de los cursos aprobados. El plazo de evaluación de la convalidación es de diez días hábiles. La decisión es emitida por la coordinación académica. El certificado de estudios cuesta 35 soles y se entrega en cinco días hábiles. Para solicitarlo se presenta una copia del documento de identidad y el comprobante de pago. La constancia de matrícula cuesta 10 soles y se entrega en un día hábil. [1] [2]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 11,
+            "document_id": 5,
+            "key": "demo-s1-tramites",
+            "title": "Trámites — Universidad Demo del Valle (ficticio)",
+            "filename": "demo-s1-tramites.pdf",
+            "version": 1,
+            "page_start": 3,
+            "page_end": 3,
+            "excerpt": "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Trámites documentarios. La solicitud de convalidación de cursos debe incluir el certificado de estudios y los sílabos de los cursos aprobados. El plazo de evaluación de la convalidación es de diez días hábiles. La decisión es emitida por la coordinación académica."
+          },
+          {
+            "source_id": 2,
+            "fragment_id": 9,
+            "document_id": 5,
+            "key": "demo-s1-tramites",
+            "title": "Trámites — Universidad Demo del Valle (ficticio)",
+            "filename": "demo-s1-tramites.pdf",
+            "version": 1,
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Trámites documentarios. El certificado de estudios cuesta 35 soles y se entrega en cinco días hábiles. Para solicitarlo se presenta una copia del documento de identidad y el comprobante de pago. La constancia de matrícula cuesta 10 soles y se entrega en un día hábil."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "e0df4f1f-0c54-4699-9afb-10ed7ced4e71"
+      }
+    },
+    {
+      "case": {
+        "id": "N01",
+        "query": "¿Quién ganó el mundial de fútbol de 2022?",
+        "insufficient": true
+      },
+      "passed": true,
+      "elapsed_seconds": 3.001,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "c7d487c1-6399-4e66-b64a-65c4b0eaff21"
+      }
+    },
+    {
+      "case": {
+        "id": "N02",
+        "query": "¿Qué becas ofrece la universidad y cuáles son sus montos?",
+        "insufficient": true
+      },
+      "passed": true,
+      "elapsed_seconds": 2.958,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "c7706a55-03cc-4171-9113-5ec7a96a2dec"
+      }
+    },
+    {
+      "case": {
+        "id": "N03",
+        "query": "¿Cuál es el nombre del rector de la universidad?",
+        "insufficient": true
+      },
+      "passed": true,
+      "elapsed_seconds": 2.932,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "8d38ab26-6dbb-498e-8b36-9990d77f8611"
+      }
+    },
+    {
+      "case": {
+        "id": "N04",
+        "query": "¿Cuánto cuesta el alojamiento en la residencia universitaria?",
+        "insufficient": true
+      },
+      "passed": true,
+      "elapsed_seconds": 3.14,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "2941440f-7bb0-44b6-91ba-0f0d8c52d3fe"
+      }
+    },
+    {
+      "case": {
+        "id": "N05",
+        "query": "¿Cuál es la nota aprobatoria oficial de la Universidad Nacional Mayor de San Marcos?",
+        "insufficient": true
+      },
+      "passed": true,
+      "elapsed_seconds": 3.214,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "48f2974c-785c-466d-9880-c36f1e0194f4"
+      }
+    }
+  ]
+}

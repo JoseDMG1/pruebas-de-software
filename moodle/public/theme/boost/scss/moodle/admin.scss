@@ -1,0 +1,902 @@
+/* admin.less */
+.formtable tbody th {
+    font-weight: normal;
+    text-align: right;
+}
+
+.path-admin #assignrole {
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.path-admin .admintable .leftalign {
+    text-align: left;
+}
+
+.path-admin .admintable.environmenttable .name,
+.path-admin .admintable.environmenttable .info,
+.path-admin #assignrole .admintable .role,
+.path-admin #assignrole .admintable .userrole,
+.path-admin #assignrole .admintable .roleholder {
+    white-space: nowrap;
+}
+
+.path-admin .incompatibleblockstable td.c0 {
+    font-weight: bold;
+}
+
+#page-admin-course-category .addcategory {
+    padding: 10px;
+}
+
+#page-admin-course-index .editcourse {
+    margin: 20px auto;
+}
+
+#page-admin-course-index .editcourse th,
+#page-admin-course-index .editcourse td {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.timewarninghidden {
+    display: none;
+}
+
+#page-admin-qtypes #qtypes div,
+#page-admin-qtypes #qtypes form,
+#page-admin-qbehaviours #qbehaviours div,
+#page-admin-qbehaviours #qbehaviours form {
+    display: inline;
+}
+
+#page-admin-qtypes #qtypes img.spacer,
+#page-admin-qbehaviours #qbehaviours img.spacer {
+    width: 16px;
+}
+
+#page-admin-qbehaviours .cell.c3,
+#page-admin-qtypes .cell.c3 {
+    font-size: $font-size-sm;
+}
+
+#page-admin-lang .generalbox,
+#page-admin-course-index .singlebutton,
+#page-admin-course-index .addcategory,
+#page-course-index .buttons,
+#page-course-index-category .buttons,
+#page-admin-course-category .addcategory,
+#page-admin-stickyblocks .generalbox,
+#page-admin-maintenance .buttons,
+#page-admin-course-index .buttons,
+#page-admin-course-category .buttons,
+#page-admin-index .copyright,
+#page-admin-index .copyrightnotice,
+#page-admin-index .adminerror .singlebutton,
+#page-admin-index .adminwarning .singlebutton,
+#page-admin-index #layout-table .singlebutton {
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+.path-admin-roles .capabilitysearchui {
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: $spacer;
+}
+
+#page-admin-roles-define .topfields {
+    margin: 1em 0 2em;
+}
+
+#page-admin-roles-override .capcurrent,
+#page-admin-roles-define .capdefault {
+    background-color: $table-hover-bg;
+}
+
+#page-filter-manage .backlink,
+.path-admin-roles .backlink {
+    margin-top: 1em;
+}
+
+#page-admin-roles-explain #chooseuser h3,
+#page-admin-roles-usersroles .contextname {
+    margin-top: 0;
+}
+
+#page-admin-roles-explain #chooseusersubmit {
+    margin-top: 0;
+    text-align: center;
+}
+
+#page-admin-roles-usersroles p {
+    margin: 0;
+}
+
+#page-admin-roles-override .cell.c1,
+#page-admin-roles-assign .cell.c3,
+#page-admin-roles-assign .cell.c1 {
+    padding-top: 0.75em;
+}
+
+#page-admin-roles-override .overridenotice,
+#page-admin-roles-define .definenotice {
+    margin: 1em 10% 2em 10%;
+    text-align: left;
+}
+
+#page-admin-index .upgradekeyreq {
+    min-width: 220px;
+}
+
+#page-admin-index .adminwarning.availableupdatesinfo .moodleupdateinfo span {
+    display: block;
+}
+
+#page-admin-index .updateplugin div {
+    margin-bottom: 0.5em;
+}
+
+#page-admin-user-user_bulk #users .fgroup {
+    white-space: nowrap;
+}
+
+#page-admin-report-stats-index .graph {
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+#page-admin-report-courseoverview-index .graph {
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+#page-admin-lang .translator {
+    border-width: 1px;
+    border-style: solid;
+}
+
+// This is the CSS for the role assignment control.
+.path-admin .roleassigntable {
+    width: 100%;
+}
+
+.path-admin .roleassigntable td {
+    vertical-align: top;
+    padding: 0.2em 0.3em;
+}
+
+.path-admin .roleassigntable p {
+    text-align: left;
+    margin: 0.2em 0;
+}
+
+.path-admin .roleassigntable #existingcell,
+.path-admin .roleassigntable #potentialcell {
+    width: 42%;
+}
+
+// Targetting the label at the top.
+.path-admin .roleassigntable #existingcell p > label:first-child,
+.path-admin .roleassigntable #potentialcell p > label:first-child {
+    font-weight: bold;
+}
+
+.path-admin .roleassigntable #buttonscell {
+    width: 16%;
+}
+
+.path-admin .roleassigntable #buttonscell #assignoptions {
+    font-size: $font-size-sm;
+}
+
+.path-admin .roleassigntable #removeselect_wrapper,
+.path-admin .roleassigntable #addselect_wrapper {
+    width: 100%;
+}
+
+.path-admin table.rolecap tr.rolecap th {
+    text-align: left;
+    font-weight: normal;
+}
+
+.path-admin .rolecap .hiddenrow {
+    display: none;
+}
+
+.path-admin #defineroletable {
+    .rolecap {
+        .inherit,
+        .allow,
+        .prevent,
+        .prohibit {
+            text-align: center;
+            padding: 0;
+            min-width: 3.5em;
+        }
+    }
+}
+
+.path-admin .rolecap .cap-name,
+.path-admin .rolecap .note {
+    display: block;
+    font-size: $font-size-sm;
+    white-space: nowrap;
+    font-weight: normal;
+}
+
+.path-admin .rolecap label {
+    display: block;
+    text-align: center;
+    padding: 0.5em;
+    margin: 0;
+}
+
+.path-admin,
+.format-site {
+    .header-maxwidth,
+    .secondary-navigation .navigation .nav-tabs {
+        max-width: none;
+    }
+}
+.path-admin.path-admin-roles:not(.format-site),
+.path-admin.path-admin-tool-lp {
+    .header-maxwidth,
+    .secondary-navigation .navigation .nav-tabs {
+        max-width: $course-content-maxwidth;
+    }
+}
+
+.plugincheckwrapper {
+    width: 100%;
+}
+
+.environmentbox {
+    margin-top: 1em;
+}
+
+#mnetconfig table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.environmenttable .cell {
+    padding: .15em .5em;
+}
+
+#trustedhosts .table {
+    margin-left: auto;
+    margin-right: auto;
+    width: 500px;
+}
+
+#trustedhosts .standard {
+    width: auto;
+}
+
+// This usage of legend is a bit weird,
+// seems to be using them as error text
+// that's only sometimes visible. Should
+// look into sorting it.
+#adminsettings legend {
+    display: none;
+}
+
+#adminsettings fieldset.error {
+    margin: .2em 0 .5em 0;
+}
+
+#adminsettings fieldset.error legend {
+    display: block;
+}
+
+#admin-spelllanguagelist textarea {
+    /* rtl:ignore */
+    text-align: left;
+    /* rtl:ignore */
+    direction: ltr;
+}
+
+/* Styles for flags on admin settings */
+.adminsettingsflags {
+    float: right;
+}
+
+.adminsettingsflags label {
+    margin-right: 7px;
+}
+
+.form-description pre,
+.formsettingheading pre {
+    /*rtl:ignore*/
+    direction: ltr;
+}
+
+.form-item .form-setting .form-htmlarea {
+    display: inline;
+}
+
+.form-item .form-setting .form-htmlarea .htmlarea {
+    width: 640px;
+    display: block;
+}
+
+.form-item .form-setting .form-multicheckbox ul {
+    list-style: none;
+    padding: 0;
+    margin: 7px 0 0 0;
+}
+
+.form-item .form-setting .defaultsnext {
+    display: inline-block;
+}
+
+.form-item .form-setting .locked-checkbox {
+    margin-right: 0.2em;
+    margin-left: 0.5em;
+    display: inline;
+}
+
+.form-item .form-setting .form-password .unmask,
+.form-item .form-setting .form-defaultinfo {
+    display: inline-block;
+}
+
+.form-item .form-setting .form-defaultinfo {
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+#admin-emoticons td input {
+    width: 8em;
+}
+
+#admin-emoticons td.c0 input {
+    width: 4em;
+}
+
+.admin_colourpicker,
+.admin_colourpicker_preview {
+    display: none;
+}
+
+.jsenabled .admin_colourpicker_preview {
+    display: inline;
+}
+
+@include media-breakpoint-up(md) {
+    .jsenabled .admin_colourpicker {
+        display: block;
+        height: 102px;
+        width: 410px;
+        margin-bottom: 10px;
+        box-sizing: content-box;
+    }
+    .admin_colourpicker .colourdialogue {
+        float: left;
+        border: 1px solid $input-border-color;
+    }
+    .admin_colourpicker .previewcolour {
+        border: 1px solid $input-border-color;
+        margin-left: 301px;
+    }
+
+    .admin_colourpicker .currentcolour {
+        border: 1px solid $input-border-color;
+        margin-left: 301px;
+        border-top-width: 0;
+    }
+}
+
+@include media-breakpoint-down(md) {
+    .jsenabled .admin_colourpicker {
+        height: 150px;
+        margin-bottom: 10px;
+        display: block;
+        position: relative;
+    }
+    .admin_colourpicker .previewcolour {
+        display: none;
+    }
+    .admin_colourpicker .currentcolour {
+        position: absolute;
+        border: 1px solid $border-color;
+        top: 100px;
+        left: 0;
+    }
+
+}
+.admin_colourpicker .loadingicon {
+    vertical-align: middle;
+    margin-left: auto;
+}
+
+#page-admin-index #notice .checkforupdates {
+    text-align: center;
+}
+
+#page-admin-index #page-content .alert a {
+    font-weight: normal;
+    text-decoration: underline;
+}
+
+// Plugins overview page at admin/plugins.php
+#page-admin-plugins {
+    #plugins-overview-panel {
+        .info {
+            display: inline-block;
+            margin-right: 1em;
+
+            [data-filterby].active {
+                font-weight: bold;
+            }
+        }
+        .updateavailableinstallall {
+            margin-right: 1em;
+        }
+    }
+
+    .checkforupdates {
+        margin: 10px 0;
+
+        .singlebutton {
+            margin: 5px 0;
+            padding: 0;
+
+            div,
+            input {
+                margin: 0 3px 0 0;
+            }
+        }
+    }
+
+    .updateavailableinstallall {
+        margin: 5px 0;
+        padding: 0;
+
+        div,
+        input {
+            margin: 0 3px 5px 0;
+        }
+    }
+
+    #plugins-control-panel {
+        .status-missing td,
+        .deprecatedtype td {
+            background-color: $state-warning-bg;
+        }
+
+        .pluginname {
+            .componentname {
+                font-size: $font-size-sm;
+                color: $text-muted;
+                margin-left: 22px;
+            }
+        }
+
+        .version {
+            .versionnumber {
+                font-size: $font-size-sm;
+                color: $text-muted;
+            }
+        }
+
+        .uninstall {
+            a {
+                color: $danger;
+            }
+        }
+
+        .notes {
+            .label {
+                margin-right: 3px;
+            }
+
+            .requiredby {
+                font-size: $font-size-sm;
+                color: $text-muted;
+            }
+        }
+    }
+}
+
+
+// Plugins check page displayed during upgrade.
+#plugins-check-page {
+
+    // Plugins check table.
+    #plugins-check {
+        .status-missing,
+        .deprecatedtype,
+        .status-downgrade {
+            td {
+                background-color: $state-danger-bg;
+            }
+        }
+    }
+}
+
+// Available plugin update notification.
+
+#plugins-check-page,
+#plugins-control-panel {
+    .pluginupdateinfo {
+        background-color: $state-info-bg;
+
+        &.maturity50 {
+            background-color: $state-danger-bg;
+        }
+
+        &.maturity100,
+        &.maturity150 {
+            background-color: $state-warning-bg;
+        }
+        padding: 5px;
+        margin: 10px 0;
+
+        @include border-radius(5px);
+
+        .info {
+            display: inline-block;
+        }
+
+        .separator:after {
+            content: " | ";
+        }
+
+        .singlebutton {
+            margin: 5px 0;
+            padding: 0;
+
+            div,
+            input {
+                margin: 0 3px 0 0;
+            }
+        }
+    }
+}
+
+.plugins-management-confirm-buttons {
+    > div {
+        display: inline-block;
+        margin: 1em 1em 1em 0;
+    }
+
+    .continue {
+        padding: 0;
+
+        div,
+        input {
+            margin: 0;
+        }
+    }
+}
+
+#page-admin-index .upgradepluginsinfo {
+    text-align: center;
+}
+
+#page-admin-index .adminwarning.availableupdatesinfo .moodleupdateinfo .separator:after {
+    content: " | ";
+}
+
+/** MNet networking */
+#page-admin-mnet-peers .box.deletedhosts {
+    margin-bottom: 1em;
+    font-size: $font-size-sm;
+}
+
+#core-cache-plugin-summaries table,
+#core-cache-store-summaries table {
+    width: 100%;
+}
+
+#core-cache-lock-summary table,
+#core-cache-definition-summaries table,
+#core-cache-mode-mappings table {
+    margin: 0 auto;
+}
+
+#core-cache-store-summaries .default-store td {
+    font-style: italic;
+}
+
+#core-cache-rescan-definitions,
+#core-cache-mode-mappings .edit-link,
+#core-cache-lock-additional-actions .new-instance {
+    margin-top: 0.5em;
+    text-align: center;
+}
+
+.maintenancewarning {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    margin: 1rem;
+    overflow: hidden;
+    z-index: $zindex-dropdown;
+}
+.jsenabled .maintenancewarning {
+    @include transition(0.2s);
+}
+
+.modal.modal-in-page {
+    z-index: 0;
+}
+
+#page-admin-search {
+    .adminpagetitle {
+        margin-bottom: 0;
+        border-bottom: none;
+    }
+    .adminpagepath {
+        display: flex;
+        flex-wrap: wrap;
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1.5rem 0;
+        li {
+            + li:before {
+                padding-right: 0.5rem;
+                padding-left: 0.5rem;
+                content: "#{$breadcrumb-divider}";
+            }
+        }
+    }
+    @media (min-width: 576px) {
+        .container {
+            overflow-wrap: break-word;
+        }
+    }
+}
+
+#page-admin-tasklogs {
+    .task-class {
+        font-size: $font-size-sm;
+        color: var(--#{$prefix}gray-600);
+    }
+}
+
+.path-admin-tool-uploaduser {
+    .uuwarning {
+        background-color: $state-warning-bg;
+    }
+
+    .uuerror {
+        background-color: $state-danger-bg;
+    }
+
+    .uuinfo {
+        background-color: $state-success-bg;
+    }
+}
+
+/* Custom fields management */
+.path-admin .customfield-category-list {
+    .categorieslist {
+        tbody,
+        tr,
+        td {
+            border-style: inherit;
+        }
+    }
+    .sharedcategorieslist {
+        .card.disabled {
+            opacity: .65;
+        }
+    }
+}
+
+#page-admin-oauth2server-client-create {
+    [data-groupname="clienttypegroup"] fieldset,
+    [data-groupname="primaryflowsgroup"] fieldset {
+        // Targets the very first div inside the fieldset.
+        > div:first-of-type {
+            padding: 1rem;
+            border: 1px solid $table-border-color;
+            border-radius: $input-border-radius;
+        }
+    }
+}
+
+/**
+ * "From Moodle" CTA card brand colours (MDL-89290).
+ *
+ * Moodle brand values rather than theme colours, so they are literals here rather than being derived from the
+ * palette. They live in the theme, not in core_admin\output\notification_ctas, because colours emitted from PHP
+ * land in a style attribute and no stylesheet rule can override one: the dark colour mode overrides below would
+ * have no way to take effect.
+ *
+ *   band         The header strip the brand logo sits on.
+ *   button       The CTA button fill. Not always the band colour: the Partners and feedback bands are light,
+ *                so their buttons are near black instead.
+ *   button-hover The hover and active fill. Given rather than derived, because it does not move in one
+ *                direction across the four cards: the two brand fills darken, and the two near black ones
+ *                lighten, having no room left to darken.
+ *   tick         The check icons in the card body.
+ */
+$notification-cta-brands: (
+    "marketplace": (band: #570d82, button: #570d82, button-hover: #32064c, tick: #570d82),
+    "moodlecloud": (band: #194866, button: #194866, button-hover: #102f42, tick: #194866),
+    "partners":    (band: #fedfc1, button: #282828, button-hover: #545454, tick: #194866),
+    "feedback":    (band: #f98012, button: #282828, button-hover: #545454, tick: shade-color(#f98012, 12%)),
+) !default;
+
+/* "From Moodle" CTA card grid on the admin notifications page (MDL-89290). */
+.admin-notification-ctas {
+    margin-top: var(--mds-spacing-xl, 2rem);
+    padding: var(--mds-spacing-xl, 2rem) 0;
+    background-color: var(--mds-bg-surface-subtle, #{$gray-100});
+    border-top: 1px solid var(--mds-border-subtle, #{$gray-200});
+
+    .admin-notification-ctas-heading {
+        margin-bottom: var(--mds-spacing-lg, 1.25rem);
+
+        h3 {
+            margin-bottom: var(--mds-spacing-xxs, .25rem);
+        }
+    }
+
+    .admin-notification-ctas-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--mds-spacing-xl, 2rem);
+
+        @include media-breakpoint-down(sm) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .admin-notification-cta {
+        display: flex;
+        flex-direction: column;
+        background-color: var(--mds-bg-surface-default, #{$white});
+        border: 1px solid var(--mds-border-subtle, #{$gray-200});
+        border-radius: var(--mds-border-radius-lg, .75rem);
+        overflow: hidden;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+
+        // The subtle border and the drop shadow both disappear against a dark page, so the card leans on the
+        // same border the dark palette gives .card, modals and dropdowns.
+        @include dark-mode {
+            border-color: var(--#{$prefix}gray-300);
+        }
+
+        @each $key, $brand in $notification-cta-brands {
+            &[data-cta-key="#{$key}"] {
+                --cta-band: #{map-get($brand, band)};
+                --cta-button: #{map-get($brand, button)};
+                --cta-button-hover: #{map-get($brand, button-hover)};
+                --cta-tick: #{map-get($brand, tick)};
+
+                // The button fills are picked for a white page and are darker than the card behind them once
+                // that page is dark: 1.02:1 to 1.28:1, so the button stops reading as a button at all (WCAG
+                // 1.4.11 asks 3:1 of the fill that identifies it). Lifting the fill is what .btn-secondary does
+                // in dark.scss for the same reason, and a fill light enough to clear 3:1 there takes dark text,
+                // which is where the label colour below comes from. Hover goes lighter still rather than darker,
+                // the same inversion the link colours make.
+                //
+                // Derived against the label rather than against the card, because the label is the tighter of
+                // the two constraints: 4.5:1 for text on the fill lands the fill at 3.2:1 or better against the
+                // card anyway, whereas deriving against the card at 3:1 leaves the label as low as 4.33:1.
+                //
+                // The ticks are drawn on the card rather than on a fill, so they are lifted as text.
+                @include dark-mode {
+                    --cta-button: #{dark-readable(map-get($brand, button), $gray-900)};
+                    --cta-button-hover: #{dark-readable(map-get($brand, button), $gray-900, 7)};
+                    --cta-tick: #{dark-readable(map-get($brand, tick))};
+                }
+            }
+        }
+
+        .admin-notification-cta-band {
+            display: flex;
+            align-items: center;
+            height: 6rem;
+            padding: 0 var(--mds-spacing-lg, 1.25rem);
+            background-color: var(--cta-band);
+        }
+
+        .admin-notification-cta-logo {
+            width: auto;
+            max-height: 100%;
+        }
+
+        // $white rather than --mds-bg-surface-default: the pill exists to back the orange and dark grey ink of
+        // the Moodle logo against the orange band, so it has to stay light when the surface token goes dark.
+        .admin-notification-cta-logo-pill {
+            display: inline-flex;
+            padding: var(--mds-spacing-xs, .5rem) var(--mds-spacing-sm, .75rem);
+            background-color: $white;
+            border-radius: var(--mds-border-radius-sm, .375rem);
+        }
+
+        .admin-notification-cta-body {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            gap: var(--mds-spacing-sm, .5rem);
+            padding: var(--mds-spacing-lg, 1.25rem);
+        }
+
+        .admin-notification-cta-ticks {
+            display: flex;
+            flex-direction: column;
+            gap: var(--mds-spacing-xxs, .25rem);
+            margin: 0;
+
+            li {
+                display: flex;
+                align-items: flex-start;
+                gap: var(--mds-spacing-xxs, .25rem);
+            }
+
+            .admin-notification-cta-tick {
+                color: var(--cta-tick);
+            }
+        }
+
+        .admin-notification-cta-action {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--mds-spacing-xs, .5rem);
+            margin-top: auto;
+            padding-top: var(--mds-spacing-xxs, .25rem);
+
+            // The Bootstrap button custom properties rather than the declarations themselves, so that the
+            // hover, focus, active and disabled states all follow the brand fill instead of only the two
+            // states named here. This is how dark.scss re-points .btn-secondary.
+            //
+            // --cta-button-text rather than --mds-text-inverse: the label is read against the button's own
+            // fill, not against the page, and the inverse token flips to near black in dark mode, which took
+            // these labels down to 1.10:1 - 1.67:1 on fills that had not moved with it.
+            .admin-notification-cta-button {
+                --cta-button-text: #{$white};
+                --#{$prefix}btn-color: var(--cta-button-text);
+                --#{$prefix}btn-bg: var(--cta-button);
+                --#{$prefix}btn-border-color: var(--cta-button);
+                --#{$prefix}btn-hover-color: var(--cta-button-text);
+                --#{$prefix}btn-hover-bg: var(--cta-button-hover);
+                --#{$prefix}btn-hover-border-color: var(--cta-button-hover);
+                --#{$prefix}btn-active-color: var(--cta-button-text);
+                --#{$prefix}btn-active-bg: var(--cta-button-hover);
+                --#{$prefix}btn-active-border-color: var(--cta-button-hover);
+
+                @include dark-mode {
+                    --cta-button-text: #{$gray-900};
+                }
+
+                // The .btn default outlines focus in darken($secondary, 40%), a compile time dark grey which
+                // is drawn on the card behind the button and disappears once that card is dark. The emphasis
+                // token is near black on a light card and near white on a dark one, so the indicator keeps its
+                // 3:1 (WCAG 2.4.11) either way, and the inset ring follows the label colour so that it stays
+                // visible on the fill.
+                &:focus-visible,
+                &:focus.focus {
+                    outline: $btn-focus-width solid var(--mds-text-emphasis);
+                    box-shadow: inset 0 0 0 2px var(--cta-button-text);
+                }
+            }
+        }
+
+        .admin-notification-cta-caption {
+            font-size: var(--mds-font-size-paragraph-small, .875rem);
+        }
+    }
+}
+
+/* Bold category label prefix on admin notification items (MDL-89290). */
+.notification-label-danger {
+    color: var(--mds-text-feedback-danger, #791d13);
+}
+
+.notification-label-warning {
+    color: var(--mds-text-feedback-warning, #60451f);
+}
+
+.notification-label-notice {
+    color: var(--mds-text-feedback-info, #00475a);
+}

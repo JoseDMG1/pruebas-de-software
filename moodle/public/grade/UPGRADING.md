@@ -1,0 +1,153 @@
+# core_grades (subsystem) Upgrade notes
+
+## 5.3dev
+
+### Added
+
+- Outcomes can now be created without an associated scale and linked to course modules. The `grade_outcome` class now provides the methods `add_outcome_to_module()`, `remove_outcome_from_module()`, `get_outcomes_in_module()`, and `get_used_outcomes_in_course()` to manage and query scale-less outcomes in course modules.
+
+  For more information see [MDL-88881](https://tracker.moodle.org/browse/MDL-88881)
+
+### Changed
+
+- - The `grade/classes/output/general_action_bar.php` now uses the template name `core/navigation_action_bar` instead of `core_grades/general_action_bar`. - The `grade/templates/general_action_bar.mustache` file will be relocated to `lib/templates/navigation_action_bar.mustache` to enable usage across multiple components. - The `grade/report/grader/classes/output/action_bar.php` now uses the template name `core/action_bar` instead of `gradereport_grader/action_bar`. - The `grade/report/grader/templates/action_bar.mustache` file will be relocated to
+        `lib/templates/action_bar.mustache` to enable usage across multiple components.
+
+  For more information see [MDL-81096](https://tracker.moodle.org/browse/MDL-81096)
+- Courses containing a grade with a penalty deducted from it are now frozen on upgrade to prevent existing grades from being changed unexpectedly by a regrade (see MDL-88407). Courses with no grades identified as affected are not frozen. The pre-MDL-88407 calculation is retained until a user with the `moodle/grade:manage` capability reviews the affected grades and chooses whether to keep the existing grades or apply the fix. When the fix is applied, Assignment grades are used as the authoritative source to restore the affected `rawgrade` values before normal gradebook processing recalculates the final grades. Grades from other activity modules cannot be confidently identified as affected but are still recalculated with the fixed formula once the fix is applied, as every grade item in the course is regraded at that point.
+
+  For more information see [MDL-89497](https://tracker.moodle.org/browse/MDL-89497)
+
+### Deprecated
+
+- The `grade_item::update_deducted_mark()` method has been deprecated and will be removed in a future release (See MDL-88663 for the final deprecation). Penalties are now applied directly in `penalty_manager` via `adjust_raw_grade()`. There is no replacement for this method.
+
+  For more information see [MDL-88407](https://tracker.moodle.org/browse/MDL-88407)
+
+## 5.2
+
+### Removed
+
+- In Moodle 4.2, the legacy Gradebook base widget from 4.1 has been removed and replaced with a simpler class-based system due to a breaking change and excessive complexity in the old pattern. The files `core/grades/basewidget.js` and templates in `grade/templates/searchwidget/` have been deleted, with minimal expected third-party impact.
+
+  For more information see [MDL-78325](https://tracker.moodle.org/browse/MDL-78325)
+- - The `\grade_report::get_lang_string()` has been removed from `public/grade/report/lib.php`.
+  - The following methods have been removed from `public/grade/tests/behat/behat_grade.php`:
+    - `\behat_grade::select_in_gradebook_tabs()`
+    - `\behat_grade::select_in_gradebook_navigation_selector()`
+  - The following methods have been removed from `public/grade/lib.php`:
+    - `\grade_structure::get_element_icon()`
+    - `\grade_structure::get_element_type_string()`
+    - `\grade_structure::get_element_header()`
+    - `\grade_structure::get_activity_link()`
+    - `\grade_structure::get_grade_analysis_icon()`
+    - `\grade_structure::get_reset_icon()`
+    - `\grade_structure::get_edit_icon()`
+    - `\grade_structure::get_hiding_icon()`
+    - `\grade_structure::get_locking_icon()`
+    - `\grade_structure::get_calculation_icon()`
+    - `\grade_helper::get_lang_string()`
+
+  For more information see [MDL-87425](https://tracker.moodle.org/browse/MDL-87425)
+
+## 5.1
+
+### Added
+
+- New 'is_gradable()' function has been created to return whether the item has any gradeitem that is GRADE_TYPE_VALUE or GRADE_TYPE_SCALE.
+
+  For more information see [MDL-85837](https://tracker.moodle.org/browse/MDL-85837)
+- - New grade_item::is_gradable function has been created to return whether the grade item is GRADE_TYPE_VALUE or GRADE_TYPE_SCALE.
+
+  For more information see [MDL-86173](https://tracker.moodle.org/browse/MDL-86173)
+
+### Removed
+
+- The previously deprecate methods have been removed:
+    - grade_structure::get_grade_analysis_icon
+    - grade_structure::get_reset_icon
+    - grade_structure::get_edit_icon
+    - grade_structure::get_hiding_icon
+    - grade_structure::get_locking_icon
+    - grade_structure::get_calculation_icon
+
+  For more information see [MDL-77307](https://tracker.moodle.org/browse/MDL-77307)
+
+## 5.0
+
+### Added
+
+- `grade_regrade_final_grades()` now has an additional `async` parameter, which allows full course
+  regrades to be performed in the background. This avoids blocking the user for long periods and
+  while making changes to a large course. The actual regrade is performed using the
+  `\core_course\task\regrade_final_grades` adhoc task, which calls `grade_regrade_final_grades()`
+  with `async: false`.
+
+  For more information see [MDL-81714](https://tracker.moodle.org/browse/MDL-81714)
+
+### Changed
+
+- The `grade_object::fetch_all_helper()` now accepts a new `$sort` parameter with a default value is `id ASC` to sort the grade instances
+
+  For more information see [MDL-85115](https://tracker.moodle.org/browse/MDL-85115)
+
+### Deprecated
+
+- Deprecate print_graded_users_selector() from Moodle 2 era
+
+  For more information see [MDL-84673](https://tracker.moodle.org/browse/MDL-84673)
+
+### Removed
+
+- Removed unused grade_edit_tree_column_select class
+
+  For more information see [MDL-77668](https://tracker.moodle.org/browse/MDL-77668)
+- The previously deprecated `grade_helper::get_lang_string` method has been removed
+
+  For more information see [MDL-78780](https://tracker.moodle.org/browse/MDL-78780)
+- Final deprecation of
+    grade_structure::get_element_type_string(),
+    grade_structure::get_element_header(),
+    grade_structure::get_element_icon(),
+    grade_structure::get_activity_link()
+
+  For more information see [MDL-79907](https://tracker.moodle.org/browse/MDL-79907)
+- The external function core_grades_get_enrolled_users_for_search_widget has been fully removed.
+
+  For more information see [MDL-84036](https://tracker.moodle.org/browse/MDL-84036)
+- The external function core_grades_get_groups_for_search_widget has been fully removed.
+
+  For more information see [MDL-84036](https://tracker.moodle.org/browse/MDL-84036)
+
+## 4.5
+
+### Changed
+
+- The grade `itemname` property contained in the return structure of the following external methods is now PARAM_RAW:
+    - `core_grades_get_gradeitems`
+    - `gradereport_user_get_grade_items`
+
+  For more information see [MDL-80017](https://tracker.moodle.org/browse/MDL-80017)
+
+### Deprecated
+
+- The behat step definition `\behat_grade::i_confirm_in_search_within_the_gradebook_widget_exists()` has been deprecated. Please use `\behat_general::i_confirm_in_search_combobox_exists()` instead.
+
+  For more information see [MDL-80744](https://tracker.moodle.org/browse/MDL-80744)
+- The behat step definition `\behat_grade::i_confirm_in_search_within_the_gradebook_widget_does_not_exist()` has been deprecated. Please use `\behat_general::i_confirm_in_search_combobox_does_not_exist()` instead.
+
+  For more information see [MDL-80744](https://tracker.moodle.org/browse/MDL-80744)
+- The behat step definition `\behat_grade::i_click_on_in_search_widget()` has been deprecated. Please use `\behat_general::i_click_on_in_search_combobox()` instead.
+
+  For more information see [MDL-80744](https://tracker.moodle.org/browse/MDL-80744)
+- The `\core_grades_renderer::group_selector()` method has been deprecated. Please use `\core_course\output\actionbar\renderer` to render a `group_selector` renderable instead.
+
+  For more information see [MDL-80745](https://tracker.moodle.org/browse/MDL-80745)
+
+### Removed
+
+- The following previously deprecated Behat step helper methods have been removed and can no longer be used:
+   - `\behat_grade::select_in_gradebook_navigation_selector()`
+   - `\behat_grade::select_in_gradebook_tabs()`
+
+  For more information see [MDL-74581](https://tracker.moodle.org/browse/MDL-74581)

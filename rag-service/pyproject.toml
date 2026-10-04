@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rag-service"
+version = "0.1.0"
+description = "Servicio independiente de ingesta documental para el gestor académico RAG"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.30,<1",
+    "pydantic-settings>=2.6,<3",
+    "psycopg[binary]>=3.2,<4",
+    "pypdf>=5,<7",
+    "boto3>=1.35,<2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "httpx>=0.27,<1", "ruff>=0.11,<1", "playwright>=1.50,<2"]
+
+[project.scripts]
+rag = "rag_service.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+rag_service = ["migrations/*.sql", "web/*", "demo/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["integration: requiere TEST_DATABASE_URL apuntando a una base de pruebas vacía"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/test_pdf_extraction.py" = ["E402"]
+"tests/test_repository_integration.py" = ["E402"]
+"tests/test_api_config_cli.py" = ["E402"]
