@@ -603,3 +603,29 @@ def test_unnamed_task_reference_requires_native_disambiguation_without_document_
     )
     assert plan.categories == ["assignments"] and plan.ambiguous_task
     assert not plan.document_question
+
+
+def test_general_teacher_request_cannot_keep_a_previous_course_filter():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"intents": ["teachers"], "scope_explicit": True, "follow_up": True}
+            if data["format"]["title"] == "ConversationPlan":
+                response = {"intent": "academic", "categories": ["teachers"],
+                            "scope_question": "mis profesores en Biologia 102"}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    query = "¿Qué profes tengo este ciclo?"
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query=query, runtime=payload()["runtime"],
+            state={"topic": {"intent": "academic", "categories": ["teachers"],
+                             "scope_question": "mis profesores en Biologia 102"}})
+    )
+    assert plan.categories == ["teachers"] and plan.scope_question == query

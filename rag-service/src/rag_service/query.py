@@ -421,6 +421,7 @@ class OllamaChatProvider:
                     {"role": "assistant", "content": json.dumps({
                         "rationale": rationale, "planning": "weekly_plan" in intents,
                         "confirmation": False, "task_reference": False,
+                        "scope_explicit": bool(ACADEMIC_CATEGORIES.intersection(intents)),
                         "intents": [item for item in intents if item != "weekly_plan"],
                         "social": social,
                         "follow_up": False, "finance": finance,
@@ -452,7 +453,8 @@ class OllamaChatProvider:
         try:
             schema = RoutingDecision.model_json_schema() | {"additionalProperties": False}
             schema["required"] = [
-                "rationale", "planning", "confirmation", "task_reference", "intents", "social",
+                "rationale", "planning", "confirmation", "task_reference", "scope_explicit",
+                "intents", "social",
                 "follow_up", "finance",
             ]
             route = RoutingDecision.model_validate_json(
@@ -593,7 +595,8 @@ class OllamaChatProvider:
                 if "document" not in route.intents:
                     schema["properties"]["document_question"]["enum"] = [""]
                     scope_quotes = [request.query]
-                    if previous and route.follow_up and previous.scope_question:
+                    if (previous and route.follow_up and not route.scope_explicit
+                            and previous.scope_question):
                         scope_quotes.append(previous.scope_question)
                     schema["properties"]["scope_question"]["enum"] = scope_quotes
                 data = json.loads(generate_plan(INTERPRET_PROMPT, schema, message))

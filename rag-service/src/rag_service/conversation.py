@@ -288,6 +288,7 @@ class RoutingDecision(BaseModel):
     planning: StrictBool = False
     confirmation: StrictBool = False
     task_reference: StrictBool = False
+    scope_explicit: StrictBool = False
     intents: list[Literal[
         "social", "capabilities", "courses", "teachers", "assignments", "grades", "calendar",
         "document", "clarify", "blocked"
@@ -334,6 +335,12 @@ confirmation=true SOLO si pide verificar una afirmación, por ejemplo si una doc
 confirmation=false al pedir nombres o cambiar de curso; mencionar un curso no es una afirmación.
 task_reference=true si query se refiere a UNA tarea sin nombrarla (esa, aquella, su fecha/hora).
 Moodle comprobará si hay varias tareas posibles. Listar tareas no es esa referencia; false.
+scope_explicit=true si query pide una lista general propia (cursos/docentes/tareas),
+o elige explícitamente un curso o actividad. Esa petición reemplaza un filtro previo.
+Pedir todos los profesores de este ciclo es una lista general: scope_explicit=true.
+scope_explicit=false SOLO si es una referencia sin nuevo alcance: ella, esa, su hora/fecha.
+Una reformulación que vuelve a pedir nombres del ciclo conserva la petición GLOBAL,
+no el curso anterior.
 El plan YA incluye la lectura necesaria de pendientes; NO añadas assignments por eso.
 Registra otras operaciones SOLO si el usuario formula otra pregunta independiente del plan.
 social: saludo, gracias, despedida. Puede acompañar otra petición; nunca reemplaza esa petición.
