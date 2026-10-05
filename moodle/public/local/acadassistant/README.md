@@ -13,9 +13,9 @@ Use HTTPS entre Moodle y RAG, excepto en desarrollo sobre loopback. Genere un se
 
 ## Petición firmada
 
-El plugin hace `POST /api/v1/chat/query` con un cuerpo JSON que contiene `query` y `academic_context`. El encabezado `Authorization: Bearer` lleva un JWT HS256 con emisor `moodle`, audiencia `rag-service`, el ID del usuario Moodle actual en `sub`, los IDs de curso autorizados en `courses`, `iat`, `exp`, un `jti` aleatorio y el SHA-256 hexadecimal del cuerpo HTTP exacto en `body_sha256`. El plugin emite tokens válidos por 60 segundos; RAG acepta como máximo 120 segundos.
+El plugin llama primero a `POST /api/v1/chat/interpret` con pregunta, contexto temporal y reloj Moodle. Valida el plan devuelto y ejecuta únicamente lecturas nativas autorizadas. Después hace `POST /api/v1/chat/query` con `query`, `academic_context`, `conversation_plan` y `runtime`. Ambos cuerpos se firman por separado. El encabezado `Authorization: Bearer` lleva un JWT HS256 con emisor `moodle`, audiencia `rag-service`, el ID del usuario Moodle actual en `sub`, los IDs de curso autorizados en `courses`, `iat`, `exp`, un `jti` aleatorio y el SHA-256 hexadecimal del cuerpo HTTP exacto en `body_sha256`. El plugin emite tokens válidos por 60 segundos; RAG acepta como máximo 120 segundos.
 
-El cliente comprueba `can_access_course` para cada curso antes de firmar, confirma que la sesión pertenece al mismo usuario para el que fue creado y obtiene `sub` de `$USER`; no recibe un ID de usuario desde el navegador. El contrato limita `academic_context` a `courses` (cursos visibles), `assignments` (actividades, fechas y estados visibles), `grades` (calificaciones visibles) y `calendar` (eventos Moodle visibles). El proveedor consulta esos datos en vivo y solo cuando la pregunta lo requiere. Los datos de otra persona requieren capacidades efectivas de Moodle en el contexto del curso; no se incluyen perfiles ajenos ni se confía en el cargo declarado. Pagos y matrícula quedan fuera del Sprint 2. El RAG distingue los eventos del calendario Moodle de documentos institucionales oficiales e informa discrepancias dando prioridad al documento institucional. El `body_sha256` vincula pregunta y contexto al token e impide cambiarlos después de firmar.
+El cliente comprueba `can_access_course` para cada curso antes de firmar, confirma que la sesión pertenece al mismo usuario para el que fue creado y obtiene `sub` de `$USER`; no recibe un ID de usuario desde el navegador. El contrato limita `academic_context` a `courses` (cursos visibles), `assignments` (actividades, fechas y estados visibles), `grades` (calificaciones visibles) `teachers` (docentes visibles con identidades diferenciadas) y `calendar` (eventos Moodle visibles). El proveedor consulta esos datos en vivo y solo cuando la pregunta lo requiere. Los datos de otra persona requieren capacidades efectivas de Moodle en el contexto del curso; no se incluyen perfiles ajenos ni se confía en el cargo declarado. Pagos y matrícula quedan fuera del Sprint 2. El RAG distingue los eventos del calendario Moodle de documentos institucionales oficiales e informa discrepancias dando prioridad al documento institucional. El `body_sha256` vincula pregunta y contexto al token e impide cambiarlos después de firmar.
 
 RAG responde `401` para aserciones ausentes, inválidas, vencidas o con cuerpo distinto, `422` para cuerpos que no cumplen el contrato y `503` cuando no tiene un secreto de servicio configurado. La rotación requiere actualizar el mismo secreto en Moodle y RAG; prográmela como una operación coordinada.
 
@@ -32,3 +32,23 @@ docker run --rm \
 ```
 
 El contrato no requiere una instalación Moodle ni una conexión RAG; comprueba el cliente servidor y el formato que comparte con el verificador Python.
+
+## Conversación y organización del estudio
+
+El clasificador enumera las intenciones del mensaje; una parte prohibida no anula
+una petición académica permitida. La interpretación recibe el tema temporal y un
+turno reciente; la extracción de argumentos conserva hasta tres turnos y el estado
+pertinente. La respuesta académica se compone de datos autorizados y la documental
+usa citas literales comprobadas contra fragmentos recuperados, con procedencias separadas.
+
+El plan semanal consulta todos los pendientes disponibles dentro de sus límites,
+incluye borradores y vencimientos efectivos, y luego solicita disponibilidad si falta.
+Las lecturas parciales se identifican como tales. Horarios, referencias y cursores quedan
+solo en la sesión Moodle y se borran con nueva conversación, logout o expiración.
+Una mezcla de planificación y otra consulta independiente pide elegir el orden; conserva
+la solicitud pendiente y aclara el curso si no puede resolver su alcance con seguridad.
+
+El chat se limita a vida universitaria; no realiza pagos, tutoría de contenidos,
+escrituras ni conserva un historial permanente. La guía verificada cubre actividades
+Assignment del portal local: [guía y límites](../../../../docs/portal/moodle-5.3dev-guia.md).
+Véase también [verificación conversacional](../../../../.scratch/asistente-conversacional/verification.md).

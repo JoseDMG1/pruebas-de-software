@@ -88,7 +88,15 @@ compartido o desplegado.
 La aserción autenticada establece identidad y cursos autorizados. El RAG filtra documentos de curso
 en PostgreSQL antes de recuperar fragmentos; los documentos institucionales comunes siguen
 disponibles para cualquier cuenta Moodle autenticada. El campo `academic_context` queda autenticado
-por el hash del cuerpo; el uso de esos datos en respuestas se implementa en el ticket 03.
+por el hash del cuerpo y se usa únicamente para responder consultas académicas autorizadas.
+
+El flujo conversacional de Moodle usa primero `POST /api/v1/chat/interpret`, con
+la misma aserción firmada y vinculada al cuerpo. Recibe `query`, `conversation_context`,
+`state` y `runtime` (fecha y zona horaria calculadas por Moodle), y devuelve un plan
+cerrado de operaciones permitidas. Moodle vuelve a validar y autorizar esas operaciones;
+la interpretación no concede acceso. El segundo envío a `/api/v1/chat/query` añade
+`conversation_plan` y `runtime` al contexto académico autorizado. Los clientes existentes
+pueden continuar usando el contrato anterior sin esos campos.
 
 El endpoint acepta `query`, no vacía, de hasta 1000 caracteres. Devuelve `answer`, `sources`,
 `insufficient_context` y `request_id`. Las fuentes contienen `source_id`, `fragment_id`, `document_id`,

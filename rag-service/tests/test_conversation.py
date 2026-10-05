@@ -424,3 +424,27 @@ def test_unresolved_pending_plan_asks_course_instead_of_expanding_mixed_scope():
     )
     assert plan.intent == "clarify" and plan.clarification == "course"
     assert not plan.categories and not plan.document_question
+
+
+def test_social_reply_uses_current_message_instead_of_previous_courtesy():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"intents": ["social"], "social": "thanks"}
+            if data["format"]["title"] == "SocialDecision":
+                assert json.loads(data["messages"][-1]["content"]) == {"query": "hasta luego"}
+                response = {"social": "bye"}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query="hasta luego", runtime=payload()["runtime"],
+            conversation_context=[{"question": "muchas gracias", "answer": "De nada."}])
+    )
+    assert plan.intent == "social" and plan.social == "bye"

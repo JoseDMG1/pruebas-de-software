@@ -25,6 +25,8 @@ from rag_service.conversation import (
     INTERPRET_PROMPT,
     Runtime,
     ScheduleOutput,
+    SocialDecision,
+    SOCIAL_PROMPT,
     SCHEDULE_FIELDS,
     SCHEDULE_PROMPT,
     routing_schema,
@@ -456,7 +458,16 @@ class OllamaChatProvider:
                     intent="clarify", clarification="requests", scope_question=request.query,
                     blocked_part=route.blocked_part,
                 ).model_dump()
-            elif route.intent in ("social", "capabilities", "blocked", "clarify"):
+            elif route.intent == "social":
+                social = SocialDecision.model_validate_json(generate_plan(
+                    SOCIAL_PROMPT, SocialDecision.model_json_schema(),
+                    json.dumps({"query": request.query}, ensure_ascii=False),
+                )).social
+                data = ConversationPlan(
+                    intent="blocked" if social == "none" else "social", social=social,
+                    finance=route.finance,
+                ).model_dump()
+            elif route.intent in ("capabilities", "blocked", "clarify"):
                 data = ConversationPlan(
                     intent=route.intent, social=route.social, follow_up=route.follow_up,
                     finance=route.finance, blocked_part=route.blocked_part,
@@ -530,7 +541,8 @@ class OllamaChatProvider:
                 data = ConversationPlan.model_validate(data).model_dump()
                 data["blocked_part"] = route.blocked_part
                 data["finance"] = route.finance or data["finance"]
-            data["social"] = route.social if "social" in route.intents else "none"
+            if data["intent"] not in ("social", "blocked"):
+                data["social"] = route.social if "social" in route.intents else "none"
             # A proposed retrieval must not carry secret-extraction instructions to another model.
             if re.search(
                 r"(revela|muestra|dame|extrae|imprime).{0,60}"

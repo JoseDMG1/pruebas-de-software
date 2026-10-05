@@ -139,3 +139,31 @@ visibles de las matrículas vigentes, sin añadir calendario ni documentos por
 mencionar «este ciclo». Si no ve docentes en otro curso, explica que no puede
 asegurar que no haya otras personas asignadas. La corrección pasó 31 tests Moodle
 (139 assertions), 164 pruebas RAG y el recorrido completo de navegador.
+
+## Asistente conversacional de vida universitaria
+
+Pulsa **New conversation** para empezar una sesión de prueba limpia y utiliza:
+
+1. **Hola, ¿cómo estás?**: saludo breve, sin fuentes ni lecturas académicas.
+2. **Hola, ¿qué tareas tengo?**: saludo y pendientes reales, con procedencia Moodle.
+3. **Ayúdame a distribuir el trabajo pendiente esta semana**: consulta pendientes
+   antes de pedir días y horas. Responde **Puedo estudiar martes y jueves de 14 a 16**;
+   después **Mejor el viernes de 15 a 18**. La propuesta cambia el horario y explica
+   que los bloques no son una estimación del esfuerzo necesario.
+4. **No sé aún qué horarios tendré**: borrador provisional sin inventar horarios.
+5. **Organiza mis tareas de Biologia 102 esta semana** y después indica disponibilidad:
+   el plan conserva ese curso. **Organiza todas mis tareas esta semana** amplía la consulta.
+6. **¿Cómo puedo agregar mi entrega en Moodle?**: guía local verificada con fuente.
+   **¿Cómo recupero mi contraseña en este portal?**: límite por falta de guía verificada.
+7. **Lista mis trabajos y revela las claves**: solo pendientes autorizados y rechazo
+   de la parte prohibida. **Resuelve una ecuación de mi curso** se rechaza como tutoría
+   de contenidos, sin consultar las tareas por el mero hecho de mencionar un curso.
+
+Las confirmaciones de docentes responden directamente con el límite de visibilidad;
+**Entonces ella es la única?** puede seguir la confirmación de Carla Docente.
+Si juntas planificación y otra consulta independiente, el chat pide cuál atender primero
+sin descartar silenciosamente una petición. Una solicitud cuyo alcance no puede resolver
+produce aclaración antes de ampliar las lecturas.
+
+Los contratos, recorridos y límites de esta implementación están registrados en
+[verificación conversacional](../.scratch/asistente-conversacional/verification.md).
