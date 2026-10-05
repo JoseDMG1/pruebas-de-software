@@ -442,6 +442,12 @@ class OllamaChatProvider:
                 raise ValueError("Incomplete interpretation")
             return result["message"]["content"]
 
+        clauses = [part.strip() for part in re.split(
+            r"\s+(?:y|además|también)\s+|[;,.?!¿¡]", request.query, flags=re.I
+        ) if part.strip()]
+        independent_quotes = (
+            {part for part in clauses if len(part) >= 10} if len(clauses) > 1 else set()
+        )
         proposed_document_question = ""
         try:
             schema = RoutingDecision.model_json_schema() | {"additionalProperties": False}
@@ -496,12 +502,6 @@ class OllamaChatProvider:
                     except ValueError:
                         pass
                 schedule_schema["properties"]["week_start"]["enum"] = ["", *sorted(explicit_dates)]
-                clauses = [part.strip() for part in re.split(
-                    r"\s+(?:y|además|también)\s+|[;,.?!¿¡]", request.query, flags=re.I
-                ) if part.strip()]
-                independent_quotes = (
-                    {part for part in clauses if len(part) >= 10} if len(clauses) > 1 else set()
-                )
                 schedule_schema["properties"]["independent_question"]["enum"] = [
                     "", *sorted(independent_quotes)
                 ]
@@ -527,7 +527,10 @@ class OllamaChatProvider:
                     and schedule.independent_question not in request.query):
                     if not ACADEMIC_CATEGORIES.intersection(route.intents):
                         schedule.independent_question = ""
-                if schedule.independent_question:
+                other_readers = ACADEMIC_CATEGORIES - {"assignments", "calendar"} | {"document"}
+                if schedule.independent_question or (
+                    independent_quotes and other_readers.intersection(route.intents)
+                ):
                     data = ConversationPlan(
                         intent="clarify", clarification="requests", scope_question=request.query,
                         blocked_part=route.blocked_part,

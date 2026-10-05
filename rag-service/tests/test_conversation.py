@@ -401,7 +401,7 @@ def test_mixed_requests_preserve_permitted_operations_and_requested_greeting(
             elif data["format"]["title"] == "ScheduleOutput":
                 response = {"scope_question": "mis tareas", "independent_question": (
                     "dime qué tareas ya entregué" if "ya entregué" in question
-                    else "dime la nota mínima" if "nota mínima" in question else ""
+                    else ""
                 )}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
