@@ -15,6 +15,8 @@ report = {}
 
 def login(page, username):
     page.goto(base + "/login/index.php")
+    # Moodle replaces the password widget asynchronously; fill after that initialization.
+    page.wait_for_load_state("networkidle")
     page.locator("#username").fill(username)
     page.locator("#password").fill(password)
     with page.expect_navigation():
