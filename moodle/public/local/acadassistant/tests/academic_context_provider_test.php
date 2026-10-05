@@ -268,6 +268,34 @@ final class academic_context_provider_test extends \advanced_testcase {
         $this->assertSame('Luis Alumno', $context['academic_context']['grades'][0]['participant']);
         $this->assertStringContainsString('90', $context['academic_context']['grades'][0]['grade']);
     }
+    public function test_teacher_cycle_conversation_does_not_request_dates_or_documents(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course(['fullname' => 'Biologia 102']);
+        $student = $this->getDataGenerator()->create_user();
+        $teacher = $this->getDataGenerator()->create_user(['firstname' => 'Carla', 'lastname' => 'Docente']);
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
+        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, 'editingteacher');
+        $this->setUser($student);
+        $provider = new \local_acadassistant\local\academic_context_provider();
+        $history = [];
+        foreach ([
+            'qué profesores me enseñan en este ciclo?',
+            'me refería a los nombres de los docentes con quienes estoy inscrito a este ciclo',
+            'entonces la única docente que tengo registrado para este ciclo es Carla Docente y nadie más?',
+        ] as $question) {
+            $result = $provider->collect_for_question($question, $history);
+            $this->assertSame(['teachers'], $result['requested_categories']);
+            $this->assertSame('', $result['academic_context']['query']['document_question']);
+            $this->assertSame(['Carla Docente'], $result['academic_context']['teachers'][0]['names']);
+            $this->assertSame(str_starts_with($question, 'entonces'),
+                $result['academic_context']['query']['teacher_confirmation']);
+            $history[] = ['question' => $result['context_question'], 'answer' => 'Carla Docente'];
+        }
+        $mixed = $provider->collect_for_question('¿Qué profesores me enseñan y cuándo empieza el segundo ciclo?');
+        $this->assertContains('calendar', $mixed['requested_categories']);
+        $this->assertStringContainsString('segundo ciclo', $mixed['academic_context']['query']['document_question']);
+    }
+
     public function test_equivalent_course_questions_do_not_inherit_unrelated_tasks(): void {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course(['fullname' => 'Álgebra 101']);

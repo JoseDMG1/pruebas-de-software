@@ -70,6 +70,18 @@ with sync_playwright() as playwright:
     assert "Carla Docente" in ask(page, "¿Y en Biologia 102?")
     assert "Algebra 101" in ask(page, "¿Y en Algebra 101?")
     assert "Carla Docente" in ask(page, "¿Y en Biologia 102?")
+    for question in [
+        "qué profesores me enseñan en este ciclo?",
+        "me refería a los nombres de los docentes con quienes estoy inscrito a este ciclo",
+        "entonces la única docente que tengo registrado para este ciclo es Carla Docente y nadie más?",
+    ]:
+        answer = ask(page, question)
+        assert "Carla Docente" in answer
+        assert "Calendario" not in answer and "Documentos:" not in answer and "Diseño 204" not in answer
+        assert page.locator(".local-acadassistant-turn").last.locator("details").count() == 0
+    assert answer.startswith("Sí,") and "única docente visible" in answer
+    assert "No puedo asegurar" in answer and "Algebra 101" in answer
+    report["teacher_confirmation_sequence"] = answer
     for question in ["qué cursos tengo?", "qué cursos tengo?", "¿Qué materias llevo?", "¿En qué estoy matriculado?"]:
         answer = ask(page, question)
         assert "Algebra 101" in answer and "Biologia 102" in answer, answer

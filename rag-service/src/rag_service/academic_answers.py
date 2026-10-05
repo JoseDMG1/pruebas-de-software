@@ -13,12 +13,13 @@ class AcademicPlan(BaseModel):
     has_more: StrictBool = False
     complete: StrictBool = True
     continuing: StrictBool = False
+    teacher_confirmation: StrictBool = False
     notices: list[str] = Field(default_factory=list, max_length=10)
     document_course_ids: list[StrictInt] | None = Field(default=None, max_length=500)
     document_question: str = Field(default="", max_length=1000)
 
 
-def compose_academic(context: dict, plan: AcademicPlan) -> str:
+def compose_academic(context: dict, plan: AcademicPlan, question: str = "") -> str:
     """Missing or malformed data fails closed; a known empty result remains a fact."""
     parts = []
     for category in plan.categories:
@@ -83,6 +84,9 @@ def compose_academic(context: dict, plan: AcademicPlan) -> str:
                 + "."
             )
         elif category == "teachers":
+            if plan.teacher_confirmation:
+                parts.append(confirm_teacher(rows, plan, question))
+                continue
             items = []
             for row in rows:
                 names = ", ".join(row["names"])
@@ -119,7 +123,7 @@ def compose_academic(context: dict, plan: AcademicPlan) -> str:
                 )
                 + "."
             )
-    if parts:
+    if parts and not (plan.teacher_confirmation and plan.categories == ["teachers"]):
         parts.insert(0, "Según Moodle:")
     parts.extend(plan.notices)
     if plan.has_more:
@@ -130,6 +134,37 @@ def compose_academic(context: dict, plan: AcademicPlan) -> str:
             "este resultado no representa todos tus datos."
         )
     return "\n".join(parts)
+
+
+def confirm_teacher(rows: list, plan: AcademicPlan, question: str) -> str:
+    """Confirm only a visible, complete set; unseen assignments remain unknown."""
+    import unicodedata
+
+    def normalise(text):
+        return unicodedata.normalize("NFKD", text.casefold()).encode("ascii", "ignore").decode()
+
+    names = list(dict.fromkeys(name for row in rows for name in row["names"]))
+    matched = [name for name in names if normalise(name) in normalise(question)]
+    gaps = list(dict.fromkeys(row["course_name"] for row in rows
+                              if not row["names"] or row.get("state") == "unavailable"))
+    if not names:
+        return ("No puedo confirmar quién te enseña con los datos visibles de Moodle. "
+                "No ver docentes no significa que no haya docentes asignados.")
+    if plan.has_more or not plan.complete:
+        return ("No puedo confirmar que sea la única docente: la consulta es parcial. "
+                "Según Moodle, aparecen: " + ", ".join(names) + ".")
+    if len(matched) == 1 and len(names) == 1:
+        answer = f"Sí, {names[0]} es la única docente visible en los cursos consultados de Moodle."
+    elif len(matched) == 1:
+        others = [name for name in names if name != matched[0]]
+        answer = (f"No, además de {matched[0]}, Moodle muestra a " + ", ".join(others) + ".")
+    else:
+        answer = ("No puedo confirmar esa afirmación. Según Moodle, los docentes visibles son: "
+                  + ", ".join(names) + ".")
+    if gaps:
+        answer += (" No puedo asegurar que no haya otros docentes asignados: no tengo nombres "
+                   "visibles en " + ", ".join(gaps) + ".")
+    return answer
 
 
 def calendar_discrepancies(context: dict, sources: list) -> list[str]:

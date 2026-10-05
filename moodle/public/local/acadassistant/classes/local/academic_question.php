@@ -29,7 +29,7 @@ final class academic_question {
             return true;
         }
         $text = preg_replace('/^[\p{P}\s]+/u', '', $text);
-        if (preg_match('/^(?:y\b|entonces\b|eso\b|esa\b|ese\b|tambien\b|ademas\b|en ese\b|en esa\b|de ese\b|de esa\b)|\b(?:fecha exacta|hora exacta|cual de ellos|esa tarea|esa entrega)\b/u', $text)) {
+        if (preg_match('/^(?:y\b|entonces\b|me referia\b|queria decir\b|eso\b|esa\b|ese\b|tambien\b|ademas\b|en ese\b|en esa\b|de ese\b|de esa\b)|\b(?:fecha exacta|hora exacta|cual de ellos|esa tarea|esa entrega)\b/u', $text)) {
             return true;
         }
         $last = $history ? $history[count($history) - 1] : null;
@@ -45,7 +45,10 @@ final class academic_question {
         $documentclauses = [];
         foreach ($clauses as $clause) {
             $normal = self::normalise($clause);
-            $isdocument = (bool)preg_match('/reglamento|normativa|nota minima|aprobatori|documento|silabo|codigo|tutoria|biblioteca|ciclo/', $normal);
+            $asksaboutcycle = str_contains($normal, 'ciclo') &&
+                !preg_match('/profesor|docente|mis cursos|cursos tengo|materias llevo|matriculad|inscrit|tareas|entregas|calificaciones/', $normal);
+            $isdocument = $asksaboutcycle ||
+                (bool)preg_match('/reglamento|normativa|nota minima|aprobatori|documento|silabo|codigo|tutoria|biblioteca/', $normal);
             if ($isdocument) {
                 $documentclauses[] = $clause;
             }
@@ -73,7 +76,8 @@ final class academic_question {
         if (preg_match('/\b(calificacion(?:es)?|calificadas?|notas?|promedios?|puntajes?)\b/', $text) && !$documentary) {
             $categories[] = 'grades';
         }
-        if (preg_match('/\b(calendario|eventos?|fechas?|cuando|inicia|empieza|comienza|ciclo|examen(?:es)?)\b/', $text) && !in_array('assignments', $categories)) {
+        if ((preg_match('/\b(calendario|eventos?|fechas?|cuando|inicia|empieza|comienza|examen(?:es)?)\b/', $text) ||
+                (str_contains($text, 'ciclo') && !$categories)) && !in_array('assignments', $categories)) {
             $categories[] = 'calendar';
         }
         if ($followup && $previous) {
@@ -100,6 +104,8 @@ final class academic_question {
         return [
             'categories' => array_values(array_unique($categories)),
             'course_mode' => $mode,
+            'teacher_confirmation' => in_array('teachers', $categories, true) &&
+                (bool)preg_match('/\b(unic[oa]s?|nadie mas|ningun[oa]? otr[oa]|solo (?:un|una|ese|esa|el|la))\b/', $text),
             'assignment_filter' => $filter,
             'finance' => $finance,
             'follow_up' => $followup,

@@ -118,6 +118,7 @@ final class academic_context_provider {
         $context['query'] = [
             'categories' => $requested, 'course_mode' => $plan['course_mode'],
             'assignment_filter' => $plan['assignment_filter'], 'has_more' => $hasmore,
+            'teacher_confirmation' => $plan['teacher_confirmation'],
             'complete' => $this->scopecomplete, 'continuing' => (bool)$seen, 'notices' => $notices,
             'document_question' => $plan['document_question'],
             'document_course_ids' => $documentcourseids,

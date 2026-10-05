@@ -374,7 +374,7 @@ class QueryService:
         if academic_context and "query" in academic_context:
             plan = AcademicPlan.model_validate(academic_context["query"])
             try:
-                academic_answer = compose_academic(academic_context, plan)
+                academic_answer = compose_academic(academic_context, plan, question)
             except (KeyError, TypeError, ValueError) as exc:
                 raise AppError(
                     "invalid_academic_context", "No se pudieron leer los datos académicos."

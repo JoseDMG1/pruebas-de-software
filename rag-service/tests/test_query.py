@@ -525,3 +525,54 @@ def test_document_failure_keeps_verified_academic_part_and_explains_failure():
     assert 'Algebra 101' in result.answer
     assert 'No pude consultar la parte documental' in result.answer
     assert not result.insufficient_context and not result.sources
+
+
+def test_teacher_confirmation_is_direct_and_bounded_by_visible_data():
+    secret = 'a-local-test-secret-with-at-least-32-chars'
+    settings = Settings(_env_file=None, moodle_service_secret=secret)
+    chat = Chat(GenerationOutput(
+        answer='Diseño 204 — Carla Docente. [3]', insufficient_context=False, source_ids=[3]
+    ))
+    app = create_app(settings, repository=Repository(), query_service=service(chat=chat))
+    payload = {
+        'query': ('entonces la única docente que tengo registrado para este ciclo '
+                  'es Carla Docente y nadie más?'),
+        'academic_context': {
+            'teachers': [
+                {'course_id': 2, 'course_name': 'Algebra 101', 'names': [], 'state': 'ok'},
+                {'course_id': 3, 'course_name': 'Biologia 102',
+                 'names': ['Carla Docente'], 'state': 'ok'},
+            ],
+            'query': {'categories': ['teachers'], 'teacher_confirmation': True},
+        },
+    }
+    body = json.dumps(payload).encode()
+    response = TestClient(app).post('/api/v1/chat/query', content=body,
+        headers=signed_moodle_headers(secret, body, courses=[2, 3]))
+    assert response.status_code == 200
+    answer = response.json()['answer']
+    assert answer.startswith('Sí,')
+    assert 'única docente visible' in answer
+    assert 'No puedo asegurar' in answer and 'Algebra 101' in answer
+    assert 'Docentes por curso' not in answer
+    assert 'Diseño 204' not in answer and 'Calendario' not in answer
+    assert response.json()['sources'] == [] and chat.calls == 0
+
+
+@pytest.mark.parametrize("names,complete,has_more,expected", [
+    (["Carla Docente", "Diego Profesor"], True, False, "No, además de Carla Docente"),
+    (["Carla Docente"], False, False, "No puedo confirmar que sea la única"),
+    (["Carla Docente"], True, True, "No puedo confirmar que sea la única"),
+    ([], True, False, "No puedo confirmar quién te enseña"),
+])
+def test_teacher_confirmation_never_confuses_partial_or_empty_results_with_exclusivity(
+    names, complete, has_more, expected,
+):
+    context = {
+        'teachers': [{'course_name': 'Biologia 102', 'names': names, 'state': 'ok'}],
+        'query': {'categories': ['teachers'], 'teacher_confirmation': True,
+                  'complete': complete, 'has_more': has_more},
+    }
+    result = service().ask('¿Carla Docente es mi única docente?', academic_context=context)
+    assert result.answer.startswith(expected)
+    assert not result.sources
