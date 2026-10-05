@@ -37,7 +37,7 @@ class Repository:
         self.fragments = [fragment()] if fragments is None else fragments
         self.current = current
 
-    def retrieve(self, space, vector, *, limit):
+    def retrieve(self, space, vector, *, course_ids=(), limit):
         assert space.provider == "ollama" and space.dimensions == 3 and limit == 4
         return self.fragments
 
@@ -142,7 +142,7 @@ def test_corpus_change_prevents_stale_response(insufficient):
 )
 def test_api_error_mapping_and_safe_logging(code, status, caplog):
     class Failed:
-        def ask(self, question, request_id):
+        def ask(self, question, request_id, *, course_ids=()):
             raise AppError(code, "Error controlado.")
 
     secret = "test-shared-secret-that-is-long-enough"

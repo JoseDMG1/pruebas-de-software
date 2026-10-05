@@ -15,7 +15,7 @@ export OLLAMA_BASE_URL=http://localhost:11434
 rag prepare-ollama
 rag check-ollama
 rag init-db
-rag ingest data/inbox/reglamento.pdf --key reglamento --kind REGLAMENTO
+rag ingest data/inbox/reglamento.pdf --key reglamento --kind REGLAMENTO --scope institutional
 rag list
 rag index-status
 ```
@@ -38,7 +38,7 @@ entre fragmentos. Las dimensiones reales se conservan, sin rellenar ni recortar 
 Para usar solo el modelo local, evitando inferencias de AWS:
 
 ```bash
-rag ingest data/inbox/reglamento.pdf --key reglamento --backend ollama
+rag ingest data/inbox/reglamento.pdf --key reglamento --backend ollama --scope institutional
 # O configurar EMBEDDING_BACKEND=ollama en .env.
 ```
 
@@ -105,7 +105,7 @@ docker compose -f compose.yaml -f compose.ollama.yaml run --rm api rag init-db
 docker compose -f compose.yaml -f compose.ollama.yaml run --rm api rag prepare-ollama
 docker compose -f compose.yaml -f compose.ollama.yaml run --rm api rag check-ollama
 docker compose -f compose.yaml -f compose.ollama.yaml run --rm api \
-  rag ingest /data/inbox/reglamento.pdf --key reglamento --backend ollama
+  rag ingest /data/inbox/reglamento.pdf --key reglamento --backend ollama --scope institutional
 ```
 
 No usar ese archivo adicional si el puerto 11434 ya está ocupado por el servicio existente. El

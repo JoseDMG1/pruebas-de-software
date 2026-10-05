@@ -34,7 +34,13 @@ def parser() -> argparse.ArgumentParser:
     upload.add_argument("--key", help="Clave estable; por defecto, el nombre del archivo")
     upload.add_argument("--title", help="Título; por defecto, el nombre sin extensión")
     upload.add_argument("--kind", choices=DOCUMENT_KINDS, default="OTRO")
+    upload.add_argument("--scope", choices=("institutional", "course"), required=True)
+    upload.add_argument("--course-id", type=int, action="append", default=[])
     upload.add_argument("--force", action="store_true", help="Reindexar aunque no haya cambios")
+    sync = commands.add_parser(
+        "sync-courses", help="Actualizar cursos válidos desde un catálogo exportado por Moodle"
+    )
+    sync.add_argument("catalog", type=Path, help="JSON Moodle con la propiedad course_ids")
     commands.add_parser("list", help="Listar documentos indexados y número de fragmentos")
     remove = commands.add_parser("delete", help="Eliminar un documento y todos sus fragmentos")
     remove.add_argument("key", help="Clave exacta del documento")
@@ -74,7 +80,24 @@ def main(argv=None) -> int:
         repository = Repository(settings)
         if args.command == "init-db":
             repository.initialize()
-            result = {"status": "ok", "schema_version": 2}
+            result = {"status": "ok", "schema_version": 3}
+        elif args.command == "sync-courses":
+            try:
+                catalog = json.loads(args.catalog.read_text())
+            except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+                raise AppError(
+                    "invalid_course_catalog", "No se pudo leer el catálogo Moodle."
+                ) from exc
+            if (
+                not isinstance(catalog, dict)
+                or set(catalog) != {"course_ids"}
+                or not isinstance(catalog["course_ids"], list)
+            ):
+                raise AppError(
+                    "invalid_course_catalog", "El catálogo debe contener solo course_ids."
+                )
+            synced = repository.sync_course_catalog(catalog["course_ids"])
+            result = {"status": "ok", "courses_synced": synced}
         elif args.command == "ingest":
             result = ingest(
                 args.pdf,
@@ -84,6 +107,8 @@ def main(argv=None) -> int:
                 key=args.key,
                 title=args.title,
                 kind=args.kind,
+                scope=args.scope,
+                course_ids=tuple(args.course_id),
                 force=args.force,
             )
         elif args.command == "ask":

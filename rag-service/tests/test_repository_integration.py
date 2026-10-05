@@ -16,6 +16,7 @@ from psycopg.conninfo import make_conninfo
 from conftest import pdf_bytes
 from rag_service.api import create_app
 from rag_service.config import Settings
+from rag_service.errors import AppError
 from rag_service.ingestion import ingest
 from rag_service.repository import Repository
 
@@ -67,7 +68,10 @@ def repository(request):
 
 
 def test_pdf_ingestion_update_and_delete(repository, sample_pdf):
-    first = ingest(sample_pdf, repository.settings, repository, FakeProvider(), key="reglamento")
+    first = ingest(
+        sample_pdf, repository.settings, repository, FakeProvider(),
+        key="reglamento", scope="institutional",
+    )
     with repository.connect() as connection:
         original = connection.execute(
             "SELECT contenido, vector_dims(embedding) AS dims, pagina_inicio FROM fragmento "
@@ -77,9 +81,14 @@ def test_pdf_ingestion_update_and_delete(repository, sample_pdf):
     assert all(row["dims"] == 1024 for row in original)
     assert [row["pagina_inicio"] for row in original] == [1, 2]
     sample_pdf.write_bytes(pdf_bytes(["Updated regulations."]))
-    second = ingest(sample_pdf, repository.settings, repository, FakeProvider(), key="reglamento")
+    second = ingest(
+        sample_pdf, repository.settings, repository, FakeProvider(),
+        key="reglamento", scope="institutional",
+    )
     assert first["id_documento"] == second["id_documento"] and second["version"] == 2
     assert repository.list_documents()[0]["total_fragmentos"] == 1
+    assert repository.list_documents()[0]["alcance"] == "institutional"
+    assert repository.list_documents()[0]["course_ids"] == []
     assert repository.delete("reglamento")
     with repository.connect() as connection:
         assert connection.execute("SELECT count(*) AS n FROM fragmento").fetchone()["n"] == 0
@@ -88,15 +97,195 @@ def test_pdf_ingestion_update_and_delete(repository, sample_pdf):
     assert not repository.delete("reglamento")
 
 
+def test_course_document_requires_an_active_moodle_course(repository, sample_pdf):
+    repository.sync_course_catalog([18, 19])
+    result = ingest(
+        sample_pdf, repository.settings, repository, FakeProvider(), key="course-18",
+        scope="course", course_ids=(18,),
+    )
+
+    assert result["alcance"] == "course" and result["course_ids"] == [18]
+
+    sample_pdf.write_bytes(pdf_bytes(["Updated course material."]))
+    updated = ingest(
+        sample_pdf, repository.settings, repository, FakeProvider(), key="course-18",
+        scope="course", course_ids=(19,),
+    )
+    assert updated["version"] == 2
+    from rag_service.local_embeddings import OllamaEmbeddingProvider
+    from test_local_embeddings import OllamaAPI
+
+    repository.prepare_local_index(
+        OllamaEmbeddingProvider(repository.settings, OllamaAPI(dimensions=3))
+    )
+    reindexed = repository.list_documents()[0]
+    assert reindexed["alcance"] == "course" and reindexed["course_ids"] == [19]
+    repository.initialize()
+    document = repository.list_documents()[0]
+    assert document["alcance"] == "course" and document["course_ids"] == [19]
+
+    repository.sync_course_catalog([])
+    with pytest.raises(AppError) as error:
+        ingest(
+            sample_pdf, repository.settings, repository, FakeProvider(), key="course-19",
+            scope="course", course_ids=(19,),
+        )
+    assert error.value.code == "invalid_course"
+
+
+def test_moodle_course_catalog_import_replaces_active_course_ids(
+    repository, tmp_path, monkeypatch, capsys
+):
+    import json
+
+    from rag_service.cli import main
+
+    catalog = tmp_path / "courses.json"
+    catalog.write_text(json.dumps({"course_ids": [18, 19]}))
+    monkeypatch.setattr("rag_service.cli.Settings", lambda: repository.settings)
+
+    assert main(["sync-courses", str(catalog)]) == 0
+    first = json.loads(capsys.readouterr().out)
+    assert first == {"status": "ok", "courses_synced": 2}
+
+    catalog.write_text(json.dumps({"course_ids": [19]}))
+    assert main(["sync-courses", str(catalog)]) == 0
+    second = json.loads(capsys.readouterr().out)
+    assert second == {"status": "ok", "courses_synced": 1}
+
+    with pytest.raises(AppError) as error:
+        repository.validate_course_ids((18,))
+    assert error.value.code == "invalid_course"
+
+
+def test_retrieval_filters_course_documents_before_returning_fragments(repository, tmp_path):
+    from rag_service.local_embeddings import EmbeddingSpace
+
+    repository.sync_course_catalog([18, 19])
+    documents = [
+        ("restricted-19", "COURSE NINETEEN SECRET", "course", (19,)),
+        ("allowed-18", "COURSE EIGHTEEN MATERIAL", "course", (18,)),
+        ("shared", "INSTITUTIONAL COMMON MATERIAL", "institutional", ()),
+    ]
+    for key, text, scope, course_ids in documents:
+        path = tmp_path / f"{key}.pdf"
+        path.write_bytes(pdf_bytes([text]))
+        ingest(
+            path, repository.settings, repository, FakeProvider(), key=key, scope=scope,
+            course_ids=course_ids,
+        )
+
+    rows = repository.retrieve(
+        EmbeddingSpace("bedrock", repository.settings.bedrock_model_id, "", 1024),
+        [1.0] + [0.0] * 1023,
+        course_ids=(18,),
+        limit=10,
+    )
+
+    contents = [row["contenido"] for row in rows]
+    assert any("COURSE EIGHTEEN MATERIAL" in text for text in contents)
+    assert any("INSTITUTIONAL COMMON MATERIAL" in text for text in contents)
+    assert all("COURSE NINETEEN SECRET" not in text for text in contents)
+
+    common_only = repository.retrieve(
+        EmbeddingSpace("bedrock", repository.settings.bedrock_model_id, "", 1024),
+        [1.0] + [0.0] * 1023,
+        limit=10,
+    )
+    common_contents = [row["contenido"] for row in common_only]
+    assert any("INSTITUTIONAL COMMON MATERIAL" in text for text in common_contents)
+    assert all("COURSE EIGHTEEN MATERIAL" not in text for text in common_contents)
+    assert all("COURSE NINETEEN SECRET" not in text for text in common_contents)
+
+
+def test_protected_api_filters_course_documents_before_prompt_and_sources(repository, tmp_path):
+    import json
+
+    from fastapi.testclient import TestClient
+
+    from rag_service.api import create_app
+    from rag_service.config import Settings
+    from rag_service.local_embeddings import EmbeddingBatch, EmbeddingSpace
+    from rag_service.query import GenerationOutput, QueryService
+    from moodle_auth_support import signed_moodle_headers
+
+    repository.sync_course_catalog([18, 19])
+    documents = [
+        ("restricted-19", "COURSE NINETEEN SECRET", "course", (19,)),
+        ("allowed-18", "COURSE EIGHTEEN MATERIAL", "course", (18,)),
+        ("shared", "INSTITUTIONAL COMMON MATERIAL", "institutional", ()),
+    ]
+    for key, text, scope, course_ids in documents:
+        path = tmp_path / f"{key}.pdf"
+        path.write_bytes(pdf_bytes([text]))
+        ingest(
+            path, repository.settings, repository, FakeProvider(), key=key, scope=scope,
+            course_ids=course_ids,
+        )
+
+    class QueryEmbeddings:
+        def embed_query(self, question):
+            space = EmbeddingSpace(
+                "bedrock", repository.settings.bedrock_model_id, "", 1024,
+            )
+            return EmbeddingBatch(space, [[1.0] + [0.0] * 1023])
+
+    class InspectingChat:
+        def __init__(self):
+            self.prompt_fragments = []
+
+        def generate(self, question, fragments):
+            self.prompt_fragments = [row["contenido"] for row in fragments]
+            return GenerationOutput(
+                answer="Contenido disponible. [1]", insufficient_context=False, source_ids=[1],
+            )
+
+    secret = "test-shared-secret-that-is-long-enough"
+    chat = InspectingChat()
+    service = QueryService(repository.settings, repository, QueryEmbeddings(), chat)
+    settings = Settings(
+        _env_file=None, database_url=repository.settings.database_url,
+        moodle_service_secret=secret,
+    )
+    client = TestClient(create_app(settings, repository, service))
+    body = json.dumps(
+        {"query": "¿Qué material del curso puedo consultar?", "academic_context": {}},
+        ensure_ascii=False,
+        separators=(",", ":"),
+    ).encode()
+    headers = signed_moodle_headers(secret, body, courses=[18])
+
+    response = client.post("/api/v1/chat/query", content=body, headers=headers)
+
+    assert response.status_code == 200
+    assert any("COURSE EIGHTEEN MATERIAL" in text for text in chat.prompt_fragments)
+    assert any("INSTITUTIONAL COMMON MATERIAL" in text for text in chat.prompt_fragments)
+    assert all("COURSE NINETEEN SECRET" not in text for text in chat.prompt_fragments)
+    assert all(
+        "COURSE NINETEEN SECRET" not in source["excerpt"]
+        for source in response.json()["sources"]
+    )
+
+    chat.prompt_fragments = []
+    common_only_headers = signed_moodle_headers(secret, body, courses=[])
+    common_only_response = client.post(
+        "/api/v1/chat/query", content=body, headers=common_only_headers,
+    )
+    assert common_only_response.status_code == 200
+    assert any("INSTITUTIONAL COMMON MATERIAL" in text for text in chat.prompt_fragments)
+    assert all("COURSE EIGHTEEN MATERIAL" not in text for text in chat.prompt_fragments)
+    assert all("COURSE NINETEEN SECRET" not in text for text in chat.prompt_fragments)
+
+
 def test_database_failure_rolls_back_existing_fragments(repository, sample_pdf):
-    ingest(sample_pdf, repository.settings, repository, FakeProvider())
+    ingest(sample_pdf, repository.settings, repository, FakeProvider(), scope="institutional")
     with repository.connect() as connection:
         connection.execute(
             "ALTER TABLE fragmento ADD CONSTRAINT test_reject CHECK (length(contenido) > 10)"
         )
     sample_pdf.write_bytes(pdf_bytes(["short"]))
     with pytest.raises(psycopg.errors.CheckViolation):
-        ingest(sample_pdf, repository.settings, repository, FakeProvider())
+        ingest(sample_pdf, repository.settings, repository, FakeProvider(), scope="institutional")
     documents = repository.list_documents()
     assert documents[0]["version"] == 1 and documents[0]["total_fragmentos"] == 2
     with repository.connect() as connection:
@@ -108,7 +297,10 @@ def test_concurrent_ingestions_do_not_duplicate_versions(repository, sample_pdf)
     from concurrent.futures import ThreadPoolExecutor
 
     def run():
-        return ingest(sample_pdf, repository.settings, repository, FakeProvider(), key="shared")
+        return ingest(
+            sample_pdf, repository.settings, repository, FakeProvider(),
+            key="shared", scope="institutional",
+        )
 
     with ThreadPoolExecutor(max_workers=2) as executor:
         results = list(executor.map(lambda _: run(), range(2)))
@@ -139,7 +331,7 @@ def test_local_copy_preserves_cloud_vectors_and_tracks_updates_and_deletes(repos
     from rag_service.local_embeddings import EmbeddingRouter, OllamaEmbeddingProvider
     from test_local_embeddings import Bedrock, OllamaAPI
 
-    ingest(sample_pdf, repository.settings, repository, FakeProvider())
+    ingest(sample_pdf, repository.settings, repository, FakeProvider(), scope="institutional")
     provider = OllamaEmbeddingProvider(repository.settings, OllamaAPI(dimensions=3))
     status = repository.prepare_local_index(provider)
     assert {space["proveedor"] for space in status} == {"bedrock", "ollama"}
@@ -154,7 +346,7 @@ def test_local_copy_preserves_cloud_vectors_and_tracks_updates_and_deletes(repos
     settings = repository.settings.model_copy(update={"embedding_backend": "ollama"})
     sample_pdf.write_bytes(pdf_bytes(["Updated local regulations."]))
     router = EmbeddingRouter(settings, Bedrock(), provider)
-    result = ingest(sample_pdf, settings, repository, router)
+    result = ingest(sample_pdf, settings, repository, router, scope="institutional")
     assert result["dimension_embedding"] == 3 and result["proveedor_embedding"] == "ollama"
     status = repository.index_status()
     assert next(space for space in status if space["proveedor"] == "ollama")["listo"]
@@ -176,7 +368,7 @@ def test_local_copy_preserves_cloud_vectors_and_tracks_updates_and_deletes(repos
 def test_bad_local_copy_does_not_destroy_existing_index(repository, sample_pdf):
     from rag_service.local_embeddings import EmbeddingBatch, EmbeddingSpace
 
-    ingest(sample_pdf, repository.settings, repository, FakeProvider())
+    ingest(sample_pdf, repository.settings, repository, FakeProvider(), scope="institutional")
     with repository.connect() as connection:
         fragments = connection.execute(
             "SELECT id_fragmento FROM fragmento ORDER BY posicion"
@@ -196,6 +388,8 @@ def test_bad_local_copy_does_not_destroy_existing_index(repository, sample_pdf):
 @pytest.mark.parametrize("repository", ["legacy"], indirect=True)
 def test_migration_preserves_legacy_vectors_and_is_repeatable(repository):
     import json
+
+    from rag_service.local_embeddings import EmbeddingSpace
 
     with repository.connect() as connection:
         document = connection.execute(
@@ -222,6 +416,11 @@ def test_migration_preserves_legacy_vectors_and_is_repeatable(repository):
         ).fetchone()
         assert row["same"]
     assert repository.index_status()[0]["listo"]
+    # Existing rows have no trusted scope, so migration keeps their vectors but hides them.
+    assert repository.retrieve(
+        EmbeddingSpace("bedrock", repository.settings.bedrock_model_id, "", 1024),
+        [1.0] + [0.0] * 1023,
+    ) == []
 
 
 def test_retrieval_requires_exact_complete_space_and_rejects_stale_sources(repository, sample_pdf):
@@ -229,7 +428,7 @@ def test_retrieval_requires_exact_complete_space_and_rejects_stale_sources(repos
     from rag_service.local_embeddings import EmbeddingSpace, OllamaEmbeddingProvider
     from test_local_embeddings import OllamaAPI
 
-    ingest(sample_pdf, repository.settings, repository, FakeProvider())
+    ingest(sample_pdf, repository.settings, repository, FakeProvider(), scope="institutional")
     provider = OllamaEmbeddingProvider(repository.settings, OllamaAPI(dimensions=3))
     batch = provider.embed_many(["regulations"])
     with pytest.raises(AppError) as error:
@@ -242,7 +441,7 @@ def test_retrieval_requires_exact_complete_space_and_rejects_stale_sources(repos
     with pytest.raises(AppError):
         repository.retrieve(wrong, batch.vectors[0])
     sample_pdf.write_bytes(pdf_bytes(["New regulations."]))
-    ingest(sample_pdf, repository.settings, repository, FakeProvider())
+    ingest(sample_pdf, repository.settings, repository, FakeProvider(), scope="institutional")
     assert not repository.sources_current(rows)
     with pytest.raises(AppError):
         repository.retrieve(batch.space, batch.vectors[0])

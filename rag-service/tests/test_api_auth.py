@@ -18,9 +18,11 @@ def request_body(**overrides):
 class QuerySpy:
     def __init__(self):
         self.calls = []
+        self.course_scopes = []
 
-    def ask(self, query, request_id):
+    def ask(self, query, request_id, *, course_ids=()):
         self.calls.append((query, request_id))
+        self.course_scopes.append(tuple(course_ids))
         return {"answer": "Respuesta", "sources": [], "insufficient_context": False,
                 "request_id": request_id}
 
@@ -75,6 +77,21 @@ def test_query_accepts_a_valid_signed_request_from_moodle():
     assert response.status_code == 200
     assert response.json()["answer"] == "Respuesta"
     assert len(service.calls) == 1 and service.calls[0][0] == "¿Qué tareas me faltan?"
+
+
+def test_query_passes_only_verified_moodle_courses_to_document_access_scope():
+    secret = "test-shared-secret-that-is-long-enough"
+    service = QuerySpy()
+    client = TestClient(create_app(
+        Settings(_env_file=None, moodle_service_secret=secret), query_service=service,
+    ))
+    body = request_body()
+    headers = signed_moodle_headers(secret, body, courses=[18, 21])
+
+    response = client.post("/api/v1/chat/query", content=body, headers=headers)
+
+    assert response.status_code == 200
+    assert service.course_scopes == [(18, 21)]
 
 
 def test_query_rejects_expired_or_forged_assertions_before_calling_rag():

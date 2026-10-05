@@ -47,7 +47,7 @@ def test_invalid_overlap_configuration():
 
 
 def test_cli_errors_are_controlled(tmp_path, capsys):
-    code = main(["ingest", str(tmp_path / "missing.pdf")])
+    code = main(["ingest", str(tmp_path / "missing.pdf"), "--scope", "institutional"])
     assert code == 1
     assert '"pdf_unreadable"' in capsys.readouterr().err
 
@@ -78,5 +78,7 @@ def test_cli_backend_override_reaches_ingestion(monkeypatch, capsys):
         return {"status": "indexed", "proveedor_embedding": "ollama"}
 
     monkeypatch.setattr("rag_service.cli.ingest", fake_ingest)
-    assert main(["ingest", "sample.pdf", "--backend", "ollama"]) == 0
+    assert main([
+        "ingest", "sample.pdf", "--backend", "ollama", "--scope", "institutional",
+    ]) == 0
     assert '"ollama"' in capsys.readouterr().out

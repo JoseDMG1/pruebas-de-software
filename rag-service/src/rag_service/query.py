@@ -258,14 +258,16 @@ class QueryService:
         self.embeddings = embeddings or OllamaEmbeddingProvider(settings)
         self.chat = chat or OllamaChatProvider(settings)
 
-    def ask(self, question, request_id=None):
+    def ask(self, question, request_id=None, *, course_ids=()):
         question = QueryRequest(query=question).query
         request_id = request_id or str(uuid.uuid4())
         batch = self.embeddings.embed_query(question)
         vector = batch.vectors[0]
         if not any(vector):
             raise AppError("invalid_embedding", "El vector de la pregunta es inválido.")
-        fragments = self.repository.retrieve(batch.space, vector, limit=4)
+        fragments = self.repository.retrieve(
+            batch.space, vector, course_ids=tuple(course_ids), limit=4,
+        )
         empty = QueryResponse(
             answer=INSUFFICIENT_ANSWER, sources=[], insufficient_context=True, request_id=request_id
         )

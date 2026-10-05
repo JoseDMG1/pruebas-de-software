@@ -16,6 +16,8 @@ from rag_service.local_embeddings import EmbeddingBatch, EmbeddingSpace
 if TYPE_CHECKING:
     from rag_service.config import Settings
 
+COURSE_CATALOG_LOCK_ID = 7829032
+
 
 class Repository:
     def __init__(self, settings: "Settings"):
@@ -34,18 +36,22 @@ class Repository:
         with self.connect() as connection, connection.transaction():
             connection.execute("SELECT pg_advisory_xact_lock(7829031)")
             connection.execute(migration)
-            if not connection.execute(
-                "SELECT 1 FROM schema_version WHERE version = 2"
-            ).fetchone():
-                connection.execute(files("rag_service").joinpath(
-                    "migrations/002_embedding_spaces.sql",
-                ).read_text())
+            for version, filename in (
+                (2, "002_embedding_spaces.sql"),
+                (3, "003_document_scopes.sql"),
+            ):
+                if not connection.execute(
+                    "SELECT 1 FROM schema_version WHERE version = %s", (version,),
+                ).fetchone():
+                    connection.execute(
+                        files("rag_service").joinpath("migrations", filename).read_text()
+                    )
 
     def health(self) -> bool:
         with self.connect() as connection:
             row = connection.execute(
                 "SELECT EXISTS(SELECT 1 FROM pg_extension WHERE extname = 'vector') AS vector, "
-                "EXISTS(SELECT 1 FROM schema_version WHERE version = 2) AS schema"
+                "EXISTS(SELECT 1 FROM schema_version WHERE version = 3) AS schema"
             ).fetchone()
             return bool(row["vector"] and row["schema"])
 
@@ -59,9 +65,57 @@ class Repository:
 
     def find(self, connection, key: str):
         return connection.execute(
-            "SELECT d.*, t.nombre AS tipo_documento FROM documento d "
-            "JOIN tipo_documento t USING (id_tipo_documento) WHERE clave = %s", (key,)
+            "SELECT d.*, t.nombre AS tipo_documento, "
+            "COALESCE(array_agg(dc.course_id ORDER BY dc.course_id) "
+            "FILTER (WHERE dc.course_id IS NOT NULL), ARRAY[]::BIGINT[]) AS course_ids "
+            "FROM documento d JOIN tipo_documento t USING (id_tipo_documento) "
+            "LEFT JOIN documento_curso dc USING (id_documento) "
+            "WHERE d.clave = %s GROUP BY d.id_documento, t.nombre", (key,)
         ).fetchone()
+
+    def sync_course_catalog(self, course_ids: list[int]) -> int:
+        """Replace active course IDs using an export produced by the trusted Moodle site."""
+        if not isinstance(course_ids, list) or any(
+            type(course_id) is not int or course_id < 1 for course_id in course_ids
+        ):
+            raise AppError(
+                "invalid_course", "El catálogo contiene un identificador de curso inválido."
+            )
+        if len(set(course_ids)) != len(course_ids):
+            raise AppError("invalid_course", "El catálogo contiene cursos duplicados.")
+        with self.connect() as connection, connection.transaction():
+            connection.execute("SELECT pg_advisory_xact_lock(%s)", (COURSE_CATALOG_LOCK_ID,))
+            connection.execute("UPDATE curso_moodle SET active = FALSE")
+            if course_ids:
+                with connection.cursor() as cursor:
+                    cursor.executemany(
+                        "INSERT INTO curso_moodle (course_id, active, synced_at) "
+                        "VALUES (%s, TRUE, now()) ON CONFLICT (course_id) DO UPDATE SET "
+                        "active = TRUE, synced_at = EXCLUDED.synced_at",
+                        [(course_id,) for course_id in course_ids],
+                    )
+        return len(course_ids)
+
+    def validate_course_ids(self, course_ids: tuple[int, ...]) -> None:
+        if not course_ids:
+            raise AppError("invalid_scope", "Un documento de curso requiere al menos un curso.")
+        if any(type(course_id) is not int or course_id < 1 for course_id in course_ids):
+            raise AppError("invalid_course", "Los identificadores de curso deben ser positivos.")
+        if len(set(course_ids)) != len(course_ids):
+            raise AppError("invalid_course", "Los identificadores de curso están duplicados.")
+        with self.connect() as connection:
+            self._validate_active_course_ids(connection, course_ids)
+
+    @staticmethod
+    def _validate_active_course_ids(connection, course_ids: tuple[int, ...]) -> None:
+        active = connection.execute(
+            "SELECT course_id FROM curso_moodle WHERE active AND course_id = ANY(%s)",
+            (list(course_ids),),
+        ).fetchall()
+        if {row["course_id"] for row in active} != set(course_ids):
+            raise AppError(
+                "invalid_course", "El catálogo Moodle no contiene todos los cursos indicados."
+            )
 
     def save(
         self,
@@ -74,6 +128,8 @@ class Repository:
         vectors: list[list[float]],
         started_at: datetime,
         *,
+        scope: str,
+        course_ids: tuple[int, ...],
         batches: list[EmbeddingBatch] | None = None,
     ) -> dict:
         batches = batches or [EmbeddingBatch(EmbeddingSpace(
@@ -84,6 +140,9 @@ class Repository:
         if any(len(batch.vectors) != len(chunks) for batch in batches):
             raise AppError("invalid_embedding", "El lote de embeddings está incompleto.")
         with connection.transaction():
+            connection.execute("SELECT pg_advisory_xact_lock(%s)", (COURSE_CATALOG_LOCK_ID,))
+            if scope == "course":
+                self._validate_active_course_ids(connection, course_ids)
             category = connection.execute(
                 "SELECT id_tipo_documento FROM tipo_documento WHERE nombre = %s", (kind,)
             ).fetchone()
@@ -94,8 +153,8 @@ class Repository:
                     clave, id_tipo_documento, titulo, nombre_archivo, ruta_archivo, sha256,
                     total_paginas, paginas_sin_texto, modelo_embedding, dimension_embedding,
                     chunk_size_chars, chunk_overlap_chars, estado, proveedor_embedding,
-                    revision_embedding
-                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'INDEXADO',%s,%s)
+                    revision_embedding, alcance
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'INDEXADO',%s,%s,%s)
                 ON CONFLICT (clave) DO UPDATE SET
                     id_tipo_documento = EXCLUDED.id_tipo_documento,
                     titulo = EXCLUDED.titulo, nombre_archivo = EXCLUDED.nombre_archivo,
@@ -106,18 +165,28 @@ class Repository:
                     dimension_embedding = EXCLUDED.dimension_embedding,
                     proveedor_embedding = EXCLUDED.proveedor_embedding,
                     revision_embedding = EXCLUDED.revision_embedding,
+                    alcance = EXCLUDED.alcance,
                     chunk_size_chars = EXCLUDED.chunk_size_chars,
                     chunk_overlap_chars = EXCLUDED.chunk_overlap_chars,
                     version = documento.version + 1, fecha_actualizacion = now()
-                RETURNING id_documento, clave, titulo, version, estado""",
+                RETURNING id_documento, clave, titulo, version, estado, alcance""",
                 (
                     key, category["id_tipo_documento"], title, pdf.filename, pdf.path, pdf.sha256,
                     pdf.total_pages, Jsonb(list(pdf.skipped_pages)), primary.model,
                     primary.dimensions, self.settings.chunk_size_chars,
-                    self.settings.chunk_overlap_chars, primary.provider, primary.revision,
+                    self.settings.chunk_overlap_chars, primary.provider, primary.revision, scope,
                 ),
             ).fetchone()
             document_id = row["id_documento"]
+            connection.execute(
+                "DELETE FROM documento_curso WHERE id_documento = %s", (document_id,)
+            )
+            if scope == "course":
+                with connection.cursor() as cursor:
+                    cursor.executemany(
+                        "INSERT INTO documento_curso (id_documento, course_id) VALUES (%s, %s)",
+                        [(document_id, course_id) for course_id in course_ids],
+                    )
             connection.execute("DELETE FROM fragmento WHERE id_documento = %s", (document_id,))
             with connection.cursor() as cursor:
                 cursor.executemany(
@@ -156,16 +225,20 @@ class Repository:
                 proveedor_embedding=primary.provider, modelo_embedding=primary.model,
                 revision_embedding=primary.revision, dimension_embedding=primary.dimensions,
                 copia_local=any(batch.space.provider == "ollama" for batch in batches),
+                course_ids=list(course_ids),
             )
 
     def list_documents(self):
         with self.connect() as connection:
             return connection.execute(
-                """SELECT d.id_documento, d.clave, d.titulo, d.version, d.estado,
+                """SELECT d.id_documento, d.clave, d.titulo, d.version, d.estado, d.alcance,
                 d.modelo_embedding, d.dimension_embedding,
                 d.proveedor_embedding, d.revision_embedding,
-                count(f.id_fragmento) AS total_fragmentos
+                count(DISTINCT f.id_fragmento) AS total_fragmentos,
+                COALESCE(array_agg(DISTINCT dc.course_id) FILTER (WHERE dc.course_id IS NOT NULL),
+                    ARRAY[]::BIGINT[]) AS course_ids
                 FROM documento d LEFT JOIN fragmento f USING (id_documento)
+                LEFT JOIN documento_curso dc USING (id_documento)
                 GROUP BY d.id_documento ORDER BY d.id_documento"""
             ).fetchall()
 
@@ -220,7 +293,18 @@ class Repository:
                 GROUP BY e.id_espacio ORDER BY e.id_espacio"""
             ).fetchall()
 
-    def retrieve(self, space, vector, *, limit=4):
+    def retrieve(self, space, vector, *, course_ids: tuple[int, ...] = (), limit=4):
+        if any(type(course_id) is not int or course_id < 1 for course_id in course_ids):
+            raise AppError("invalid_scope", "El alcance de cursos no es válido.")
+        access_filter = """(
+            d.alcance = 'institutional'
+            OR (d.alcance = 'course' AND EXISTS (
+                SELECT 1 FROM documento_curso dc
+                JOIN curso_moodle mc USING (course_id)
+                WHERE dc.id_documento = d.id_documento AND mc.active
+                    AND dc.course_id = ANY(%s)
+            ))
+        )"""
         with self.connect() as connection, connection.transaction():
             connection.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
             embedding_space = connection.execute(
@@ -229,8 +313,9 @@ class Repository:
                 (space.provider, space.model, space.revision, space.dimensions),
             ).fetchone()
             total = connection.execute(
-                "SELECT count(*) AS n FROM fragmento JOIN documento USING (id_documento) "
-                "WHERE vigente"
+                f"SELECT count(*) AS n FROM fragmento f JOIN documento d USING (id_documento) "
+                f"WHERE d.vigente AND {access_filter}",
+                (list(course_ids),),
             ).fetchone()["n"]
             if not total:
                 return []
@@ -242,21 +327,22 @@ class Repository:
             coverage = connection.execute(
                 "SELECT count(*) AS n FROM fragmento_embedding fe "
                 "JOIN fragmento f USING (id_fragmento) JOIN documento d USING (id_documento) "
-                "WHERE fe.id_espacio = %s AND d.vigente", (space_id,),
+                f"WHERE fe.id_espacio = %s AND d.vigente AND {access_filter}",
+                (space_id, list(course_ids)),
             ).fetchone()["n"]
             if coverage != total:
                 raise AppError(
                     "index_incomplete", "El índice local no cubre los documentos actuales.",
                 )
             return connection.execute(
-                """SELECT f.id_fragmento, f.id_documento, f.contenido, f.pagina_inicio,
+                f"""SELECT f.id_fragmento, f.id_documento, f.contenido, f.pagina_inicio,
                 f.pagina_fin, d.clave, d.titulo, d.nombre_archivo, d.version
                 FROM fragmento_embedding fe JOIN fragmento f USING (id_fragmento)
                 JOIN documento d USING (id_documento)
-                WHERE fe.id_espacio = %s AND d.vigente
+                WHERE fe.id_espacio = %s AND d.vigente AND {access_filter}
                     AND (fe.embedding <=> %s::vector) IS NOT NULL
                 ORDER BY fe.embedding <=> %s::vector, f.id_fragmento LIMIT %s""",
-                (space_id, json.dumps(vector), json.dumps(vector), limit),
+                (space_id, list(course_ids), json.dumps(vector), json.dumps(vector), limit),
             ).fetchall()
 
     def sources_current(self, fragments):

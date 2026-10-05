@@ -17,7 +17,7 @@ El cliente comprueba `can_access_course` para cada curso antes de firmar, confir
 
 RAG responde `401` para aserciones ausentes, inválidas, vencidas o con cuerpo distinto, `422` para cuerpos que no cumplen el contrato y `503` cuando no tiene un secreto de servicio configurado. La rotación requiere actualizar el mismo secreto en Moodle y RAG; prográmela como una operación coordinada.
 
-Esta primera entrega establece el límite firmado, pero aún no filtra documentos por curso ni usa `academic_context` para generar respuestas. Hasta completar esos tickets dependientes, use únicamente el corpus compartido de demostración.
+El RAG filtra los documentos de curso en PostgreSQL antes de recuperar fragmentos, según los IDs firmados en `courses`; los documentos institucionales comunes siguen disponibles para toda cuenta autenticada. Moodle es la fuente confiable de existencia de cursos: exporte su catálogo con `cli/export_course_catalog.php` y sincronícelo en RAG con `rag sync-courses`. Cada documento nuevo requiere clasificación explícita durante la ingesta. El campo `academic_context` aún no se usa para generar respuestas; esa integración pertenece al ticket 03.
 
 ## Prueba del contrato
 

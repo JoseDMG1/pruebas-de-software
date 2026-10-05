@@ -42,7 +42,7 @@ rag prepare-demo
 docker compose up --build -d api
 ```
 
-`prepare-demo` comprueba o prepara ambos modelos, aplica las migraciones 001 y 002, genera tres PDF
+`prepare-demo` comprueba o prepara ambos modelos, aplica las migraciones 001–003, genera tres PDF
 ficticios e ingesta su contenido. Es repetible: documentos idénticos devuelven `unchanged` y no
 incrementan versiones. No sobrescribe un PDF existente con contenido diferente. También prepara
 el índice local para los demás documentos ya almacenados; no los elimina.
@@ -85,11 +85,10 @@ el [contrato del plugin](../moodle/public/local/acadassistant/README.md). Las ru
 local activa esa opción y publica el puerto en `127.0.0.1`; desactívala en cualquier entorno
 compartido o desplegado.
 
-La aserción autenticada establece identidad y ámbito, pero esta etapa aún no implementa metadata ni
-filtrado documental por curso. Hasta completar el ticket 02, mantén en el RAG únicamente documentos
-compartidos que todas las cuentas Moodle autenticadas puedan consultar. El campo
-`academic_context` queda autenticado por el hash del cuerpo; el uso de esos datos en respuestas se
-implementa en el ticket 03.
+La aserción autenticada establece identidad y cursos autorizados. El RAG filtra documentos de curso
+en PostgreSQL antes de recuperar fragmentos; los documentos institucionales comunes siguen
+disponibles para cualquier cuenta Moodle autenticada. El campo `academic_context` queda autenticado
+por el hash del cuerpo; el uso de esos datos en respuestas se implementa en el ticket 03.
 
 El endpoint acepta `query`, no vacía, de hasta 1000 caracteres. Devuelve `answer`, `sources`,
 `insufficient_context` y `request_id`. Las fuentes contienen `source_id`, `fragment_id`, `document_id`,
@@ -117,12 +116,29 @@ no registran preguntas, texto documental, vectores ni credenciales.
 ## Administración de PDF
 
 ```bash
-rag ingest data/inbox/reglamento.pdf --key reglamento --title 'Reglamento académico' --kind REGLAMENTO
+# En la raíz Moodle (directorio `public/` en este checkout), exportar los cursos existentes:
+cd /path/to/moodle/public
+php local/acadassistant/cli/export_course_catalog.php > /secure/course-catalog.json
+# Transferir el JSON de forma segura al host RAG y reemplazar el catálogo activo:
+rag sync-courses /secure/course-catalog.json
+
+# Todos los documentos requieren alcance explícito:
+rag ingest data/inbox/reglamento.pdf --key reglamento --title 'Reglamento académico' --kind REGLAMENTO --scope institutional
+# Un documento puede asociarse a varios cursos válidos del catálogo (repetir --course-id):
+rag ingest data/inbox/silabo.pdf --key silabo-123 --kind SILABO --scope course --course-id 123
 rag list
-rag ingest data/inbox/reglamento.pdf --key reglamento --kind REGLAMENTO --force
+rag ingest data/inbox/reglamento.pdf --key reglamento --kind REGLAMENTO --scope institutional --force
 rag delete reglamento
 rag index-status
 ```
+
+El exportador consulta Moodle como fuente confiable de existencia de cursos. `sync-courses` reemplaza
+el conjunto activo: si se omite un curso, los documentos asociados dejan de recuperarse hasta que
+el curso vuelva a sincronizarse. La ingesta rechaza cursos ausentes del catálogo. Un documento sin
+alcance explícito se rechaza; los documentos anteriores a la migración 003 conservan sus vectores,
+pero quedan fuera de las respuestas hasta reingerirse con una clasificación revisada. El archivo del
+catálogo puede contener identificadores internos y debe transferirse y almacenarse con acceso
+restringido.
 
 Los tipos son `REGLAMENTO`, `PROCEDIMIENTO`, `SILABO`, `GUIA` y `OTRO`. La clave identifica el documento
 entre versiones; se recomienda especificarla. La extracción conserva página y posición y usa hasta

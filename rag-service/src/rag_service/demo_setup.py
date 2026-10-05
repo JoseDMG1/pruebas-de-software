@@ -79,6 +79,7 @@ def prepare_demo(settings, repository, directory=Path("data/inbox")):
                 key=f"demo-s1-{item['key']}",
                 title=item["title"],
                 kind=item["kind"],
+                scope="institutional",
             )
         )
     return {

@@ -21,7 +21,10 @@ class MemoryRepository:
     def find(self, connection, key):
         return self.document
 
-    def save(self, connection, key, title, kind, pdf, chunks, vectors, started_at, *, batches=None):
+    def save(
+        self, connection, key, title, kind, pdf, chunks, vectors, started_at, *,
+        scope, course_ids, batches=None,
+    ):
         self.saves += 1
         self.saved_chunks = chunks
         self.document = {
@@ -29,6 +32,7 @@ class MemoryRepository:
             "dimension_embedding": 1024, "chunk_size_chars": 2000, "chunk_overlap_chars": 200,
             "titulo": title, "tipo_documento": kind, "nombre_archivo": pdf.filename,
             "ruta_archivo": pdf.path, "id_documento": 1, "version": self.saves,
+            "alcance": scope, "course_ids": list(course_ids),
         }
         if batches:
             space = batches[0].space
@@ -63,18 +67,25 @@ def pdf(monkeypatch):
 def test_identical_document_skips_aws_calls_and_save(settings, pdf):
     repository = MemoryRepository()
     first = Provider()
-    assert ingest(Path("a.pdf"), settings, repository, first)["status"] == "indexed"
+    assert ingest(
+        Path("a.pdf"), settings, repository, first, scope="institutional",
+    )["status"] == "indexed"
     second = Provider()
-    assert ingest(Path("a.pdf"), settings, repository, second)["status"] == "unchanged"
+    assert ingest(
+        Path("a.pdf"), settings, repository, second, scope="institutional",
+    )["status"] == "unchanged"
     assert second.calls == 0 and repository.saves == 1
 
 
 def test_failure_mid_embedding_preserves_previous_document(settings, pdf):
     repository = MemoryRepository()
-    ingest(Path("a.pdf"), settings, repository, Provider())
+    ingest(Path("a.pdf"), settings, repository, Provider(), scope="institutional")
     original_document, original_chunks = repository.document, repository.saved_chunks
     with pytest.raises(AppError):
-        ingest(Path("a.pdf"), settings, repository, Provider(fail_at=2), force=True)
+        ingest(
+            Path("a.pdf"), settings, repository, Provider(fail_at=2),
+            scope="institutional", force=True,
+        )
     assert repository.saves == 1
     assert repository.document is original_document and repository.saved_chunks is original_chunks
 
@@ -82,21 +93,32 @@ def test_failure_mid_embedding_preserves_previous_document(settings, pdf):
 def test_first_ingestion_failure_does_not_persist_anything(settings, pdf):
     repository = MemoryRepository()
     with pytest.raises(AppError):
-        ingest(Path("a.pdf"), settings, repository, Provider(fail_at=1))
+        ingest(Path("a.pdf"), settings, repository, Provider(fail_at=1), scope="institutional")
     assert repository.document is None and repository.saves == 0
 
 
 def test_force_reindexes(settings, pdf):
     repository = MemoryRepository()
-    ingest(Path("a.pdf"), settings, repository, Provider())
-    result = ingest(Path("a.pdf"), settings, repository, Provider(), force=True)
+    ingest(Path("a.pdf"), settings, repository, Provider(), scope="institutional")
+    result = ingest(
+        Path("a.pdf"), settings, repository, Provider(), scope="institutional", force=True,
+    )
     assert result["version"] == 2 and repository.saves == 2
 
 
 def test_invalid_metadata_rejected_before_reading_pdf(settings):
     with pytest.raises(AppError) as error:
-        ingest(Path("missing.pdf"), settings, MemoryRepository(), Provider(), key=" ")
+        ingest(
+            Path("missing.pdf"), settings, MemoryRepository(), Provider(),
+            scope="institutional", key=" ",
+        )
     assert error.value.code == "invalid_metadata"
+
+
+def test_unclassified_document_is_rejected_before_reading_pdf(settings):
+    with pytest.raises(AppError) as error:
+        ingest(Path("missing.pdf"), settings, MemoryRepository(), Provider(), scope="unclassified")
+    assert error.value.code == "invalid_scope"
 
 
 def test_router_fallback_saves_only_local_vectors_and_skips_unchanged(settings, pdf):
@@ -107,12 +129,14 @@ def test_router_fallback_saves_only_local_vectors_and_skips_unchanged(settings, 
     api = OllamaAPI()
     router = EmbeddingRouter(settings, Bedrock("bedrock_throttled", fail_at=2),
                              OllamaEmbeddingProvider(settings, api))
-    result = ingest(Path("a.pdf"), settings, repository, router)
+    result = ingest(Path("a.pdf"), settings, repository, router, scope="institutional")
     assert result["fallback"] == "bedrock_throttled"
     assert repository.document["proveedor_embedding"] == "ollama"
     assert all(len(vector) == 3 for vector in repository.vectors)
     before = len([call for call in api.calls if call[1] == "/api/embed"])
-    assert ingest(Path("a.pdf"), settings, repository, router)["status"] == "unchanged"
+    assert ingest(
+        Path("a.pdf"), settings, repository, router, scope="institutional",
+    )["status"] == "unchanged"
     assert len([call for call in api.calls if call[1] == "/api/embed"]) == before
 
 
@@ -121,10 +145,10 @@ def test_both_providers_fail_preserving_previous_document(settings, pdf):
     from test_local_embeddings import Bedrock, OllamaAPI
 
     repository = MemoryRepository()
-    ingest(Path("a.pdf"), settings, repository, Provider())
+    ingest(Path("a.pdf"), settings, repository, Provider(), scope="institutional")
     previous = repository.document
     router = EmbeddingRouter(settings, Bedrock("bedrock_throttled"),
                              OllamaEmbeddingProvider(settings, OllamaAPI([])))
     with pytest.raises(AppError):
-        ingest(Path("a.pdf"), settings, repository, router, force=True)
+        ingest(Path("a.pdf"), settings, repository, router, scope="institutional", force=True)
     assert repository.document is previous and repository.saves == 1
