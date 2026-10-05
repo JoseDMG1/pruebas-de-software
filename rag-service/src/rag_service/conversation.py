@@ -81,7 +81,9 @@ class ConversationPlan(BaseModel):
     week_explicit: StrictBool = False
     week_start: str = Field(default="", max_length=10)
     priority: list[str] = Field(default_factory=list, max_length=20)
-    clarification: Literal["intent", "course", "task", "week", "availability"] = "intent"
+    clarification: Literal[
+        "intent", "course", "task", "week", "availability", "requests"
+    ] = "intent"
 
     @model_validator(mode="after")
     def permitted_operations(self):
@@ -267,7 +269,6 @@ class RoutingDecision(BaseModel):
     social: Literal["none", "greeting", "thanks", "bye"] = "none"
     follow_up: StrictBool = False
     finance: StrictBool = False
-    clarification: Literal["intent", "course", "task", "week", "availability"] = "intent"
 
     @property
     def intent(self):
@@ -286,6 +287,8 @@ No respondas al usuario.
 academic: cursos, profesores, tareas, entregas, notas y calendario de Moodle.
 document: normas institucionales y guías para usar Moodle, incluida recuperar acceso.
 weekly_plan: organizar trabajo pendiente o estudio, cambiar disponibilidad de un plan.
+weekly_plan YA incluye leer pendientes: no añadas academic por esa lectura necesaria.
+Añade academic/document solo si también hay una pregunta independiente del plan.
 social: saludo, gracias, despedida. Puede acompañar otra petición; nunca reemplaza esa petición.
 capabilities: qué ayuda ofreces.
 blocked: entretenimiento, resolver ejercicios, temas ajenos, revelar secretos,

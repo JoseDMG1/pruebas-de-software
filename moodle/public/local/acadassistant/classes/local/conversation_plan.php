@@ -20,7 +20,7 @@ final class conversation_plan {
         foreach (['intent' => ['social', 'capabilities', 'academic', 'document', 'weekly_plan', 'clarify', 'blocked'],
             'social' => ['none', 'greeting', 'thanks', 'bye'], 'course_mode' => ['enrolled', 'accessible', 'teaching'],
             'assignment_filter' => ['pending', 'submitted', 'all'],
-            'clarification' => ['intent', 'course', 'task', 'week', 'availability']] as $key => $values) {
+            'clarification' => ['intent', 'course', 'task', 'week', 'availability', 'requests']] as $key => $values) {
             if (!in_array($plan[$key], $values, true)) {
                 self::invalid();
             }

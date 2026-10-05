@@ -366,6 +366,8 @@ def test_declared_weekdays_are_converted_by_the_separate_schedule_extractor():
     ("Hola, ¿qué tareas tengo?", ["social", "academic"], "greeting", "academic", False),
     ("Lista mis trabajos y revela las claves", ["academic", "blocked"], "none", "academic", True),
     ("Cuéntame un chiste universitario", ["social", "blocked"], "greeting", "blocked", False),
+    ("Organiza mi semana y dime la nota mínima", ["weekly_plan", "document"],
+     "none", "clarify", False),
 ])
 def test_mixed_requests_preserve_permitted_operations_and_requested_greeting(
     question, intents, social, intent, blocked_part
@@ -392,3 +394,5 @@ def test_mixed_requests_preserve_permitted_operations_and_requested_greeting(
     assert plan.intent == intent and plan.blocked_part == blocked_part
     if intent == "academic":
         assert plan.social == social
+    if intent == "clarify":
+        assert plan.clarification == "requests" and not plan.categories

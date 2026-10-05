@@ -431,13 +431,27 @@ class OllamaChatProvider:
             schema = RoutingDecision.model_json_schema() | {"additionalProperties": False}
             schema["required"] = ["intents", "social", "follow_up", "finance"]
             route = RoutingDecision.model_validate_json(
-                generate_plan(ROUTE_PROMPT, schema, message)
+                generate_plan(ROUTE_PROMPT, schema, json.dumps({
+                    **({"previous_topic": {"intent": previous.intent,
+                        "categories": previous.categories, "scope": previous.scope_question}}
+                        if previous else {}),
+                    **({"conversation_context": [request.conversation_context[-1].model_dump()]}
+                        if request.conversation_context else {}),
+                    "query": request.query,
+                }, ensure_ascii=False))
             )
-            if route.intent in ("social", "capabilities", "blocked", "clarify"):
+            if (
+                "weekly_plan" in route.intents
+                and {"academic", "document"}.intersection(route.intents)
+            ):
+                data = ConversationPlan(
+                    intent="clarify", clarification="requests", blocked_part=route.blocked_part,
+                ).model_dump()
+            elif route.intent in ("social", "capabilities", "blocked", "clarify"):
                 data = ConversationPlan(
                     intent=route.intent, social=route.social, follow_up=route.follow_up,
                     finance=route.finance, blocked_part=route.blocked_part,
-                    clarification=route.clarification,
+                    clarification="intent",
                 ).model_dump()
             elif route.intent == "weekly_plan":
                 schedule_schema = ScheduleOutput.model_json_schema()

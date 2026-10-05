@@ -30,6 +30,10 @@ def respond(service, question, proposal, runtime, context, history, course_ids, 
     elif proposal.intent == "clarify":
         answer = {
             "intent": "¿Qué información o ayuda universitaria necesitas?",
+            "requests": (
+                "Puedo ayudarte con el plan de estudio y con la otra consulta por separado. "
+                "¿Cuál quieres que atendamos primero?"
+            ),
             "course": "¿De qué curso necesitas esa información?",
             "task": "¿A qué tarea y curso te refieres?",
             "week": "¿Qué semana quieres organizar? Indica las fechas.",
