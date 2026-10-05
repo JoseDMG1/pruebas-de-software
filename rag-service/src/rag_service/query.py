@@ -485,8 +485,13 @@ class OllamaChatProvider:
             elif route.intent == "weekly_plan":
                 schedule_schema = ScheduleOutput.model_json_schema()
                 schedule_schema["required"] = ["scope_question", "independent_question"]
+                pending_request = (previous.scope_question if previous
+                    and previous.intent == "clarify"
+                    and previous.clarification == "requests" else "")
                 explicit_dates = set()
-                for candidate in re.findall(r"\b\d{4}-\d{2}-\d{2}\b", request.query):
+                for candidate in re.findall(
+                    r"\b\d{4}-\d{2}-\d{2}\b", request.query + " " + pending_request
+                ):
                     try:
                         explicit_dates.add(date.fromisoformat(candidate).isoformat())
                     except ValueError:
@@ -528,7 +533,7 @@ class OllamaChatProvider:
                     ).model_dump()
                 elif schedule.week_ambiguous or (
                     schedule.week_start and schedule.week_start not in explicit_dates
-                ):
+                ) or (pending_request and explicit_dates and not schedule.week_start):
                     data = ConversationPlan(intent="clarify", clarification="week").model_dump()
                 elif (previous and previous.intent == "clarify"
                       and previous.clarification == "requests" and not schedule.scope_question):
