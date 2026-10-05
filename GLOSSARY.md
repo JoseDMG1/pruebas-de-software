@@ -42,3 +42,9 @@ Personas con responsabilidad docente en un curso cuya identidad la persona consu
 
 **Tarea pendiente de entrega**:
 Tarea visible para la persona que todavía no tiene una entrega presentada. Una entrega guardada como borrador sigue pendiente de presentación.
+
+**Asistente de vida universitaria**:
+Interlocutor que ayuda con asuntos de la vida universitaria y responde a saludos o cortesía cuando esa es la intención del usuario. Su orientación personalizada se apoya en información académica que la persona está autorizada a consultar.
+
+**Plan semanal académico**:
+Propuesta de organización de la semana basada en las tareas pendientes de entrega de la persona, sus vencimientos y su disponibilidad; cuando esta no se conoce, el plan es un borrador con supuestos explícitos. Es una sugerencia para el usuario, no un cambio en sus entregas o en los plazos de Moodle.
