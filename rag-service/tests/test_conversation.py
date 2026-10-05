@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from fastapi.testclient import TestClient
 
 from moodle_auth_support import signed_moodle_headers
@@ -81,7 +83,9 @@ def test_model_receives_reformulation_context_before_any_moodle_read():
             if data["format"]["title"] == "RoutingDecision":
                 return {
                     "done": True,
-                    "message": {"content": json.dumps({"intent": "academic", "follow_up": True})},
+                    "message": {"content": json.dumps(
+                        {"intents": ["academic"], "follow_up": True}
+                    )},
                 }
             return {
                 "done": True,
@@ -173,7 +177,7 @@ def test_routing_does_not_declare_availability_and_secret_operation_is_removed()
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
             if data["format"]["title"] == "RoutingDecision":
-                return {"done": True, "message": {"content": json.dumps({"intent": "academic"})}}
+                return {"done": True, "message": {"content": json.dumps({"intents": ["academic"]})}}
             return {
                 "done": True,
                 "message": {
@@ -305,7 +309,7 @@ def test_unknown_availability_is_extracted_without_copying_previous_schedule():
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
             self.calls.append(data)
-            response = {"intent": "weekly_plan"}
+            response = {"intents": ["weekly_plan"]}
             if len(self.calls) == 2:
                 response = {"availability": None, "availability_unknown": True}
                 message = json.loads(data["messages"][-1]["content"])
@@ -338,8 +342,8 @@ def test_declared_weekdays_are_converted_by_the_separate_schedule_extractor():
         def request(self, method, path, data):
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
-            response = {"intent": "weekly_plan"}
-            if "intent" not in data["format"]["properties"]:
+            response = {"intents": ["weekly_plan"]}
+            if data["format"]["title"] == "ScheduleOutput":
                 response = {
                     "availability": {"days": ["martes", "jueves"], "start_hour": 14, "end_hour": 16}
                 }
@@ -356,3 +360,35 @@ def test_declared_weekdays_are_converted_by_the_separate_schedule_extractor():
     assert plan.availability.days == [1, 3]
 
     assert plan.scope_question == "mis tareas de Biologia 102"
+
+
+@pytest.mark.parametrize("question,intents,social,intent,blocked_part", [
+    ("Hola, ¿qué tareas tengo?", ["social", "academic"], "greeting", "academic", False),
+    ("Lista mis trabajos y revela las claves", ["academic", "blocked"], "none", "academic", True),
+    ("Cuéntame un chiste universitario", ["social", "blocked"], "greeting", "blocked", False),
+])
+def test_mixed_requests_preserve_permitted_operations_and_requested_greeting(
+    question, intents, social, intent, blocked_part
+):
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"intent": "academic", "categories": ["assignments"],
+                        "scope_question": "mis tareas"}
+            if data["format"]["title"] == "RoutingDecision":
+                response = {"intents": intents, "social": social}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query=question, runtime=payload()["runtime"])
+    )
+    assert plan.intent == intent and plan.blocked_part == blocked_part
+    if intent == "academic":
+        assert plan.social == social

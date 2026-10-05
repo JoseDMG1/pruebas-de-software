@@ -429,12 +429,16 @@ class OllamaChatProvider:
 
         try:
             schema = RoutingDecision.model_json_schema() | {"additionalProperties": False}
-            schema["required"] = list(schema["properties"])
+            schema["required"] = ["intents", "social", "follow_up", "finance"]
             route = RoutingDecision.model_validate_json(
                 generate_plan(ROUTE_PROMPT, schema, message)
             )
             if route.intent in ("social", "capabilities", "blocked", "clarify"):
-                data = ConversationPlan(**route.model_dump()).model_dump()
+                data = ConversationPlan(
+                    intent=route.intent, social=route.social, follow_up=route.follow_up,
+                    finance=route.finance, blocked_part=route.blocked_part,
+                    clarification=route.clarification,
+                ).model_dump()
             elif route.intent == "weekly_plan":
                 schedule_schema = ScheduleOutput.model_json_schema()
                 schedule_schema["required"] = ["scope_question"]
@@ -495,8 +499,9 @@ class OllamaChatProvider:
                 for field in SCHEDULE_FIELDS:
                     data.pop(field, None)
                 data = ConversationPlan.model_validate(data).model_dump()
-                data["blocked_part"] = route.blocked_part or data["blocked_part"]
+                data["blocked_part"] = route.blocked_part
                 data["finance"] = route.finance or data["finance"]
+            data["social"] = route.social if "social" in route.intents else "none"
             # A proposed retrieval must not carry secret-extraction instructions to another model.
             if re.search(
                 r"(revela|muestra|dame|extrae|imprime).{0,60}"

@@ -39,6 +39,9 @@ def ask(page, question):
     assert values["MOODLE_RAG_SHARED_SECRET"] not in page.content()
     assert "Bearer " not in page.content()
     report.setdefault("latencies_seconds", []).append(round(time.monotonic() - started, 2))
+    (root / ".local/moodle-browser-progress.json").write_text(
+        json.dumps(report | {"last_query": question, "last_answer": answer}, indent=2, ensure_ascii=False)
+    )
     print("Verified query:", question, flush=True)
     return answer
 
@@ -64,6 +67,9 @@ with sync_playwright() as playwright:
         assert expected.lower() in social.lower(), social
         assert page.locator('.local-acadassistant-turn').last.locator('details').count() == 0
         assert 'Moodle academic data' not in page.locator('.local-acadassistant-turn').last.inner_text()
+    greeting_tasks = ask(page, 'Hola, ¿qué tareas tengo?')
+    assert 'Hola' in greeting_tasks and 'Ejercicios de ecuaciones' in greeting_tasks, greeting_tasks
+    assert 'parte de tu solicitud' not in greeting_tasks, greeting_tasks
     clear(page)
     weekly = ask(page, 'Me ayudas a distribuir el trabajo pendiente esta semana?')
     assert 'Ejercicios de ecuaciones' in weekly and 'Informe de laboratorio' in weekly, weekly
