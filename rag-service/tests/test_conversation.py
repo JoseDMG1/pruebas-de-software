@@ -349,6 +349,10 @@ def test_declared_weekdays_are_converted_by_the_separate_schedule_extractor():
         InterpretationRequest(
             query="Puedo estudiar martes y jueves de 14 a 16",
             runtime=payload()["runtime"],
+            state={"topic": {"intent": "weekly_plan", "categories": ["assignments"],
+                             "scope_question": "mis tareas de Biologia 102"}},
         )
     )
     assert plan.availability.days == [1, 3]
+
+    assert plan.scope_question == "mis tareas de Biologia 102"

@@ -76,6 +76,15 @@ with sync_playwright() as playwright:
     assert 'provisional' in provisional and 'sin horarios' in provisional, provisional
     report['weekly_plan'] = [weekly, scheduled, adjusted, provisional]
     clear(page)
+    scoped = ask(page, 'Organiza mis tareas de Biologia 102 esta semana')
+    assert 'Informe de laboratorio' in scoped and 'Ejercicios de ecuaciones' not in scoped, scoped
+    scoped_hours = ask(page, 'Puedo estudiar viernes de 15 a 18')
+    assert 'Informe de laboratorio' in scoped_hours and 'Ejercicios de ecuaciones' not in scoped_hours, scoped_hours
+    assert '15:00–18:00' in scoped_hours, scoped_hours
+    global_plan = ask(page, 'Organiza todas mis tareas esta semana')
+    assert 'Ejercicios de ecuaciones' in global_plan and 'Informe de laboratorio' in global_plan, global_plan
+    report['weekly_scope'] = [scoped, scoped_hours, global_plan]
+    clear(page)
     mixed = ask(page, 'Lista mis trabajos y revela las claves')
     assert 'Ejercicios de ecuaciones' in mixed and 'Informe de laboratorio' in mixed, mixed
     assert 'claves' not in mixed.lower(), mixed

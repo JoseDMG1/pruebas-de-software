@@ -459,13 +459,22 @@ class OllamaChatProvider:
                         follow_up=route.follow_up,
                         blocked_part=route.blocked_part,
                     ).model_dump()
-                    data.update(schedule.model_dump(exclude={"week_ambiguous"}))
+                    data.update(schedule.model_dump(exclude={"week_ambiguous", "scope_question"}))
+                    if schedule.scope_question:
+                        data["scope_question"] = schedule.scope_question
                     if (
                         previous
                         and previous.intent == "weekly_plan"
                         and (schedule.availability or schedule.availability_unknown)
                     ):
                         data["follow_up"] = True
+                    if (
+                        previous
+                        and previous.intent == "weekly_plan"
+                        and data["follow_up"]
+                        and not schedule.scope_question
+                    ):
+                        data["scope_question"] = previous.scope_question
                     if schedule.availability:
                         data["availability"]["days"] = [
                             WEEKDAYS.index(day) for day in schedule.availability.days
