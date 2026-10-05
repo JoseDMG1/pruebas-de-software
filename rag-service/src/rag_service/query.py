@@ -387,12 +387,17 @@ class OllamaChatProvider:
         return {"provider": "ollama", "model": model["name"], "revision": model["digest"]}
 
     def interpret(self, request):
+        from rag_service.conversation import resolve_task_choice
+
+        choice = resolve_task_choice(request)
+        if choice is not None:
+            return choice
         model = self.resolve()
         options = {"temperature": 0, "num_ctx": 8192, "num_predict": 900}
         if self.settings.ollama_chat_num_gpu >= 0:
             options["num_gpu"] = self.settings.ollama_chat_num_gpu
         previous = request.state.topic
-        state = request.state.model_dump(exclude_defaults=True, exclude={"topic"})
+        state = request.state.model_dump(exclude_defaults=True, exclude={"topic", "task_choices"})
         if request.state.availability:
             state["availability"]["days"] = [
                 WEEKDAYS[day] for day in request.state.availability.days
@@ -461,7 +466,8 @@ class OllamaChatProvider:
                 generate_plan(ROUTE_PROMPT, schema, json.dumps({
                     **({"previous_topic": {"intent": previous.intent,
                         "categories": previous.categories, "scope": previous.scope_question,
-                        "clarification": previous.clarification}}
+                        "clarification": previous.clarification,
+                        "ambiguous_task": previous.ambiguous_task}}
                         if previous else {}),
                     **({"conversation_context": [request.conversation_context[-1].model_dump()]}
                         if request.conversation_context and not previous else {}),
@@ -577,6 +583,8 @@ class OllamaChatProvider:
                         ]
             else:
                 schema = routing_schema()
+                schema["properties"]["selected_assignment_id"]["enum"] = [0]
+                schema["properties"]["selected_participant_name"]["enum"] = [""]
                 schema["properties"]["intent"] = {"type": "string", "enum": [route.intent]}
                 if route.intent == "document":
                     schema["properties"]["categories"]["maxItems"] = 0
@@ -606,7 +614,15 @@ class OllamaChatProvider:
                 if "document" not in route.intents:
                     data["document_question"] = ""
                 data["ambiguous_task"] = route.task_reference or data.get("ambiguous_task", False)
+                data["selected_assignment_id"] = 0
+                data["selected_participant_name"] = ""
                 data["follow_up"] = route.follow_up and not route.scope_explicit
+                if (data["follow_up"] and previous and previous.selected_assignment_id
+                        and data["categories"] == ["assignments"]):
+                    data["selected_assignment_id"] = previous.selected_assignment_id
+                    data["selected_participant_name"] = previous.selected_participant_name
+                    data["scope_question"] = previous.scope_question
+                    data["assignment_filter"] = "all"
                 data["teacher_confirmation"] = route.confirmation
                 if not route.confirmation:
                     data["teacher_reference"] = ""

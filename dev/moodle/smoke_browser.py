@@ -181,6 +181,9 @@ with sync_playwright() as playwright:
     ask(page, "¿Qué tareas tengo?")
     report["ambiguous_followup"] = ask(page, "¿Cuándo vence esa tarea?")
     assert "¿De cuál tarea" in report["ambiguous_followup"]
+    rejected = ask(page, "Resuelve una ecuación de mi curso")
+    assert "vida universitaria" in rejected and "Ejercicios de ecuaciones" not in rejected, rejected
+    report["task_context_does_not_enable_tutoring"] = rejected
     report["resolved_followup"] = ask(page, "Ejercicios de ecuaciones")
     assert "Ejercicios de ecuaciones" in report["resolved_followup"]
     assert "Informe de laboratorio" not in report["resolved_followup"]

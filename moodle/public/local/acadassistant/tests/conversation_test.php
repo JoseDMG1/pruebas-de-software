@@ -72,6 +72,38 @@ final class conversation_test extends \advanced_testcase {
         $this->assertSame(['academic'], $weekly['academic_provenance']);
     }
 
+    public function test_pending_task_choices_bind_ids_and_revalidate_native_access(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course(['fullname' => 'Seminario']);
+        $user = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($user->id, $course->id, 'student');
+        $generator = $this->getDataGenerator()->get_plugin_generator('mod_assign');
+        $first = $generator->create_instance(['course' => $course->id, 'name' => 'Ensayo personal']);
+        $generator->create_instance(['course' => $course->id, 'name' => 'Informe práctico']);
+        $this->setUser($user);
+        $provider = new \local_acadassistant\local\academic_context_provider();
+        $ambiguous = $provider->collect_for_plan(['intent' => 'academic', 'categories' => ['assignments'],
+            'scope_question' => 'mis tareas', 'ambiguous_task' => true]);
+        $this->assertCount(2, $ambiguous['task_choices']);
+        $this->assertContains((int)$first->id, array_column($ambiguous['task_choices'], 'assignment_id'));
+        $selectedplan = ['intent' => 'academic', 'categories' => ['assignments'],
+            'scope_question' => 'mis tareas', 'assignment_filter' => 'all',
+            'selected_assignment_id' => (int)$first->id];
+        $selected = $provider->collect_for_plan($selectedplan);
+        $this->assertSame([(int)$first->id], array_column($selected['academic_context']['assignments'], 'assignment_id'));
+        $wrongperson = $provider->collect_for_plan(array_replace($selectedplan,
+            ['selected_participant_name' => 'Otra persona']));
+        $this->assertArrayNotHasKey('assignments', $wrongperson['academic_context']);
+        $this->assertNotEmpty($wrongperson['academic_context']['query']['notices']);
+        $gone = $provider->collect_for_plan(array_replace($selectedplan, ['selected_assignment_id' => 2147483647]));
+        $this->assertArrayNotHasKey('assignments', $gone['academic_context']);
+        $this->assertNotEmpty($gone['academic_context']['query']['notices']);
+        $this->setUser($this->getDataGenerator()->create_user());
+        $denied = $provider->collect_for_plan($selectedplan);
+        $this->assertArrayNotHasKey('assignments', $denied['academic_context']);
+        $this->assertNotEmpty($denied['academic_context']['query']['notices']);
+    }
+
     public function test_current_named_task_overrides_a_broad_proposed_scope(): void {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();

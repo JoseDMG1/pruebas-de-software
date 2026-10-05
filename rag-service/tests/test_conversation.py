@@ -635,3 +635,88 @@ def test_general_academic_request_cannot_keep_a_previous_record_filter(
     )
     assert plan.categories == [category] and plan.scope_question == query
     assert not plan.follow_up
+
+
+def test_activity_title_selection_receives_the_pending_task_context_before_routing():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            message = json.loads(data["messages"][-1]["content"])
+            if data["format"]["title"] == "RoutingDecision":
+                if message["previous_topic"].get("ambiguous_task"):
+                    response = {"intents": ["assignments"], "scope_explicit": True}
+                else:
+                    response = {"intents": ["blocked"]}
+            else:
+                response = {"intent": "academic", "categories": ["assignments"],
+                            "scope_question": message["query"]}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query="Problemas de mecánica", runtime=payload()["runtime"],
+            state={"topic": {"intent": "academic", "categories": ["assignments"],
+                             "ambiguous_task": True}})
+    )
+    assert plan.intent == "academic" and plan.categories == ["assignments"]
+    assert plan.scope_question == "Problemas de mecánica"
+
+
+@pytest.mark.parametrize("duplicate", [False, True])
+def test_signed_task_selection_uses_session_identities_without_guessing_from_a_title(duplicate):
+    from rag_service.query import OllamaChatProvider
+
+    class NoModel:
+        def _models(self):
+            raise AssertionError("A literal session choice must not require a model")
+
+    choices = [{"assignment_id": 11, "course_id": 2, "name": "Ejercicios de ecuaciones",
+                "course_name": "Algebra 101"}]
+    if duplicate:
+        choices.append({"assignment_id": 12, "course_id": 3,
+                        "name": "Ejercicios de ecuaciones", "course_name": "Seminario 201"})
+    request = payload() | {"query": "Ejercicios de ecuaciones", "state": {
+        "topic": {"intent": "academic", "categories": ["assignments"], "ambiguous_task": True},
+        "task_choices": choices,
+    }}
+    response = post(client(OllamaChatProvider(Settings(_env_file=None), NoModel())), request)
+    assert response.status_code == 200, response.text
+    plan = response.json()
+    if duplicate:
+        assert plan["intent"] == "clarify" and not plan["categories"]
+    else:
+        assert plan["intent"] == "academic" and plan["categories"] == ["assignments"]
+        assert plan["selected_assignment_id"] == 11 and plan["assignment_filter"] == "all"
+        assert "Algebra 101" in plan["scope_question"]
+
+
+def test_task_followup_keeps_the_selected_native_identity_and_reads_changed_status():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"intents": ["assignments"], "follow_up": True, "task_reference": True}
+            if data["format"]["title"] == "ConversationPlan":
+                response = {"intent": "academic", "categories": ["assignments"],
+                            "scope_question": "¿Y a qué hora?"}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query="¿Y a qué hora?", runtime=payload()["runtime"],
+            state={"topic": {"intent": "academic", "categories": ["assignments"],
+                "selected_assignment_id": 11, "scope_question": "Ensayo en Seminario"}})
+    )
+    assert plan.follow_up and plan.selected_assignment_id == 11
+    assert plan.assignment_filter == "all"

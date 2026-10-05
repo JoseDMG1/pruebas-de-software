@@ -101,7 +101,7 @@ final class academic_context_provider {
         if (array_intersect($requested, ['assignments', 'grades'])) {
             $tasknames = $this->selected_task_names($courses, array_merge([$currentquestion, $question], array_reverse($previousquestions)));
             [$assignments, $grades] = $this->assignment_and_grade_context($courses,
-                ($plan['intent'] ?? '') === 'weekly_plan' ? 'mis tareas' : $question, $requested, $plan['assignment_filter'], $tasknames);
+                ($plan['intent'] ?? '') === 'weekly_plan' ? 'mis tareas' : $question, $requested, $plan['assignment_filter'], $tasknames, $plan['selected_assignment_id'] ?? 0, $plan['selected_participant_name'] ?? '');
             if (in_array('assignments', $requested, true)) {
                 $context['assignments'] = $assignments;
             }
@@ -126,7 +126,18 @@ final class academic_context_provider {
             $notices[] = 'No puedo consultar datos de ese curso con el acceso disponible. Precisa el curso que necesitas.';
             $context = [];
         }
+        $taskchoices = [];
+        if (($plan['selected_assignment_id'] ?? 0) && empty($context['assignments'])) {
+            unset($context['assignments']);
+            $this->scopecomplete = false;
+            $notices[] = 'No puedo consultar la actividad elegida con el acceso actual. Selecciona una tarea visible.';
+        }
         if ($plan['ambiguous_task'] && count($context['assignments'] ?? []) > 1) {
+            $taskchoices = array_map(static fn($row) => [
+                'assignment_id' => $row['assignment_id'], 'course_id' => $row['course_id'],
+                'name' => $row['name'], 'course_name' => $row['course_name'],
+                'participant' => $row['participant'],
+            ], array_slice($context['assignments'], 0, 20));
             $notices[] = '¿De cuál tarea necesitas la fecha? Indica su nombre y curso.';
             unset($context['assignments']);
         }
@@ -155,6 +166,7 @@ final class academic_context_provider {
         ];
         return [
             'course_ids' => $courseids,
+            'task_choices' => $taskchoices,
             'academic_context' => $context,
             'requested_categories' => $requested,
             'continuation_seen' => array_values(array_unique($newseen)),
@@ -379,7 +391,7 @@ final class academic_context_provider {
     }
 
     /** Read visible assignments and grades without creating or updating Moodle records. */
-    private function assignment_and_grade_context(array $courses, string $question, array $requested, string $assignmentfilter, array $tasknames): array {
+    private function assignment_and_grade_context(array $courses, string $question, array $requested, string $assignmentfilter, array $tasknames, int $selectedassignmentid = 0, string $selectedparticipantname = ''): array {
         global $USER;
 
         $assignments = [];
@@ -397,6 +409,13 @@ final class academic_context_provider {
                 $modinfo->get_instances_of('assign')
             );
 
+            if ($selectedassignmentid && (
+                    ($selectedparticipantname !== '' && $target['name'] !== $selectedparticipantname) ||
+                    ($selectedparticipantname === '' && $target['id'] !== (int)$USER->id))) {
+                $this->scopecomplete = false;
+                continue;
+            }
+
             foreach ($modinfo->get_instances_of('assign') as $cm) {
                 if (!$cm->uservisible || !has_capability('mod/assign:view', \context_module::instance($cm->id))) {
                     continue;
@@ -413,6 +432,7 @@ final class academic_context_provider {
                 }
 
                 if ($wantsassignments && count($assignments) < $this->recordlimit &&
+                        (!$selectedassignmentid || (int)$cm->instance === $selectedassignmentid) &&
                         (!$tasknames || in_array((string)$cm->name, $tasknames, true))) {
                     $submission = $instance->teamsubmission
                         ? $assign->get_group_submission($target['id'], 0, false)

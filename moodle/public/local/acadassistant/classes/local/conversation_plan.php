@@ -10,7 +10,7 @@ final class conversation_plan {
         $defaults = ['intent' => '', 'social' => 'none', 'categories' => [], 'course_mode' => 'enrolled',
             'assignment_filter' => 'pending', 'scope_question' => '', 'document_question' => '',
             'follow_up' => false, 'teacher_confirmation' => false, 'teacher_reference' => '', 'ambiguous_task' => false,
-            'finance' => false, 'blocked_part' => false, 'availability' => null,
+            'finance' => false, 'blocked_part' => false, 'availability' => null, 'selected_assignment_id' => 0, 'selected_participant_name' => '',
             'availability_unknown' => false, 'week_offset' => 0, 'week_explicit' => false, 'week_start' => '',
             'priority' => [], 'clarification' => 'intent'];
         if (array_diff(array_keys($input), array_keys($defaults))) {
@@ -31,8 +31,8 @@ final class conversation_plan {
                 self::invalid();
             }
         }
-        foreach (['scope_question', 'document_question', 'week_start', 'teacher_reference'] as $key) {
-            if (!is_string($plan[$key]) || \core_text::strlen($plan[$key]) > ($key === 'week_start' ? 10 : ($key === 'teacher_reference' ? 200 : 1000))) {
+        foreach (['scope_question', 'document_question', 'week_start', 'teacher_reference', 'selected_participant_name'] as $key) {
+            if (!is_string($plan[$key]) || \core_text::strlen($plan[$key]) > ($key === 'week_start' ? 10 : ($key === 'teacher_reference' ? 200 : ($key === 'selected_participant_name' ? 255 : 1000)))) {
                 self::invalid();
             }
         }
@@ -45,6 +45,15 @@ final class conversation_plan {
         if (!is_array($plan['categories']) || count($plan['categories']) > 5 ||
                 array_diff($plan['categories'], ['courses', 'teachers', 'assignments', 'grades', 'calendar']) ||
                 count(array_unique($plan['categories'])) !== count($plan['categories'])) {
+            self::invalid();
+        }
+        if ($plan['selected_participant_name'] !== '' && !$plan['selected_assignment_id']) {
+            self::invalid();
+        }
+        if (!is_int($plan['selected_assignment_id']) || $plan['selected_assignment_id'] < 0 ||
+                $plan['selected_assignment_id'] > 2147483647 ||
+                ($plan['selected_assignment_id'] && ($plan['intent'] !== 'academic' ||
+                    $plan['categories'] !== ['assignments']))) {
             self::invalid();
         }
         if (!is_array($plan['priority']) || count($plan['priority']) > 20) {
