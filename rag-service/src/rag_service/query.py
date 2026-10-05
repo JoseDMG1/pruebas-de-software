@@ -484,7 +484,9 @@ class OllamaChatProvider:
                 ).model_dump()
             elif route.intent == "weekly_plan":
                 schedule_schema = ScheduleOutput.model_json_schema()
-                schedule_schema["required"] = ["scope_question", "independent_question"]
+                schedule_schema["required"] = [
+                    "scope_question", "scope_explicit", "independent_question",
+                ]
                 pending_request = (previous.scope_question if previous
                     and previous.intent == "clarify"
                     and previous.clarification == "requests" else "")
@@ -553,7 +555,8 @@ class OllamaChatProvider:
                         blocked_part=route.blocked_part,
                     ).model_dump()
                     data.update(schedule.model_dump(
-                        exclude={"week_ambiguous", "scope_question", "independent_question"}
+                        exclude={"week_ambiguous", "scope_question", "scope_explicit",
+                                 "independent_question"}
                     ))
                     if schedule.scope_question:
                         data["scope_question"] = schedule.scope_question
@@ -567,7 +570,7 @@ class OllamaChatProvider:
                         previous
                         and previous.intent == "weekly_plan"
                         and data["follow_up"]
-                        and not schedule.scope_question
+                        and not schedule.scope_explicit
                     ):
                         data["scope_question"] = previous.scope_question
                     if schedule.availability:

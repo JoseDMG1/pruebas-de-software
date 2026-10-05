@@ -347,7 +347,10 @@ def test_declared_weekdays_are_converted_by_the_separate_schedule_extractor():
             response = {"planning": True, "intents": []}
             if data["format"]["title"] == "ScheduleOutput":
                 response = {
-                    "availability": {"days": ["martes", "jueves"], "start_hour": 14, "end_hour": 16}
+                    "availability": {
+                        "days": ["martes", "jueves"], "start_hour": 14, "end_hour": 16
+                    },
+                    "scope_question": "Puedo estudiar martes y jueves de 14 a 16",
                 }
             return {"done": True, "message": {"content": json.dumps(response)}}
 
