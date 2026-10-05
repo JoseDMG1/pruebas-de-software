@@ -22,6 +22,7 @@ from rag_service.academic_answers import AcademicPlan, calendar_discrepancies, c
 from rag_service.errors import AppError
 from rag_service.conversation import (
     ConversationPlan,
+    ACADEMIC_CATEGORIES,
     INTERPRET_PROMPT,
     Runtime,
     ScheduleOutput,
@@ -452,7 +453,9 @@ class OllamaChatProvider:
             )
             if (
                 "weekly_plan" in route.intents
-                and {"academic", "document"}.intersection(route.intents)
+                and (ACADEMIC_CATEGORIES - {"assignments"} | {"document"}).intersection(
+                    route.intents
+                )
             ):
                 data = ConversationPlan(
                     intent="clarify", clarification="requests", scope_question=request.query,
@@ -534,6 +537,9 @@ class OllamaChatProvider:
                     schema["required"].append("document_question")
                 else:
                     schema["properties"]["categories"]["minItems"] = 1
+                    schema["properties"]["categories"]["items"]["enum"] = sorted(
+                        ACADEMIC_CATEGORIES.intersection(route.intents)
+                    )
                     schema["required"].append("categories")
                 data = json.loads(generate_plan(INTERPRET_PROMPT, schema, message))
                 for field in SCHEDULE_FIELDS:

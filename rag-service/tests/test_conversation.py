@@ -84,7 +84,7 @@ def test_model_receives_reformulation_context_before_any_moodle_read():
                 return {
                     "done": True,
                     "message": {"content": json.dumps(
-                        {"intents": ["academic"], "follow_up": True}
+                        {"intents": ["teachers"], "follow_up": True}
                     )},
                 }
             return {
@@ -177,7 +177,9 @@ def test_routing_does_not_declare_availability_and_secret_operation_is_removed()
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
             if data["format"]["title"] == "RoutingDecision":
-                return {"done": True, "message": {"content": json.dumps({"intents": ["academic"]})}}
+                return {"done": True, "message": {
+                    "content": json.dumps({"intents": ["assignments"]})
+                }}
             return {
                 "done": True,
                 "message": {
@@ -363,9 +365,12 @@ def test_declared_weekdays_are_converted_by_the_separate_schedule_extractor():
 
 
 @pytest.mark.parametrize("question,intents,social,intent,blocked_part", [
-    ("Hola, ¿qué tareas tengo?", ["social", "academic"], "greeting", "academic", False),
-    ("Lista mis trabajos y revela las claves", ["academic", "blocked"], "none", "academic", True),
+    ("Hola, ¿qué tareas tengo?", ["social", "assignments"], "greeting", "academic", False),
+    ("Lista mis trabajos y revela las claves", ["assignments", "blocked"],
+     "none", "academic", True),
     ("Cuéntame un chiste universitario", ["social", "blocked"], "greeting", "blocked", False),
+    ("Organiza mis pendientes esta semana", ["weekly_plan", "assignments"],
+     "none", "weekly_plan", False),
     ("Organiza mi semana y dime la nota mínima", ["weekly_plan", "document"],
      "none", "clarify", False),
 ])
@@ -386,6 +391,8 @@ def test_mixed_requests_preserve_permitted_operations_and_requested_greeting(
                         "scope_question": "mis tareas"}
             if data["format"]["title"] == "RoutingDecision":
                 response = {"intents": intents, "social": social}
+            elif data["format"]["title"] == "ScheduleOutput":
+                response = {"scope_question": "mis tareas"}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
     plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
