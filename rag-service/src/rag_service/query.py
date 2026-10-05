@@ -436,10 +436,12 @@ class OllamaChatProvider:
             if route.intent in ("social", "capabilities", "blocked", "clarify"):
                 data = ConversationPlan(**route.model_dump()).model_dump()
             elif route.intent == "weekly_plan":
+                schedule_schema = ScheduleOutput.model_json_schema()
+                schedule_schema["required"] = ["scope_question"]
                 schedule = ScheduleOutput.model_validate_json(
                     generate_plan(
                         SCHEDULE_PROMPT,
-                        ScheduleOutput.model_json_schema(),
+                        schedule_schema,
                         json.dumps(
                             {
                                 "runtime": request.runtime.model_dump(),
