@@ -172,14 +172,17 @@ EXAMPLE_MESSAGES = [
 # Un documento recibido ya pasó el filtro: las condiciones de acceso no son una abstención.
 EXAMPLE_MESSAGES.extend([
     {"role": "user", "content": json.dumps({
-        "question": "¿Cuál es la clave del proyecto de Diseño 204?",
+        "question": "¿Cuál es el código del proyecto del curso Diseño 204?",
         "document_context": [{"source_id": 1, "scope": "course", "title": "Guía de Diseño 204",
                               "text": ("Solo participantes autorizados. "
-                                       "La clave del proyecto de Diseño 204 es FARO-28.")}],
+                                       "El código del proyecto de Diseño 204 es FARO-28.")},
+                             {"source_id": 2, "scope": "institutional",
+                              "title": "Reglamento de Universidad Ejemplo",
+                              "text": "Los reclamos se presentan en tres días."}],
         "academic_context": {},
     }, ensure_ascii=False)},
     {"role": "assistant", "content": json.dumps({
-        "answer": "La clave del proyecto de Diseño 204 es FARO-28. [1]",
+        "answer": "El código del proyecto de Diseño 204 es FARO-28. [1]",
         "insufficient_context": False, "source_ids": [1],
     }, ensure_ascii=False)},
 ])
