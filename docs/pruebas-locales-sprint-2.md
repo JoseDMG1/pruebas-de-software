@@ -117,3 +117,16 @@ La suite RAG completa utiliza `rag_sprint2_tests`, una base separada del corpus 
 TEST_DATABASE_URL=postgresql://rag:rag_local_dev@127.0.0.1:55432/rag_sprint2_tests \
   rag-service/.venv/bin/python -m pytest rag-service/tests -q --require-complete
 ```
+
+
+## Resultado de la corrección de respuestas
+
+Los cuatro tickets de `.scratch/respuestas-academicas-confiables/` están implementados.
+Pasaron 30 pruebas Moodle (112 assertions), 156 pruebas RAG y el recorrido real
+completo del navegador con el modelo local. La evidencia detallada está en
+[verification.md](../.scratch/respuestas-academicas-confiables/verification.md).
+
+Para empezar a probar las respuestas actualizadas, abre el chat y pulsa
+**New conversation**. Pregunta por tus cursos, profesores o tareas; después puedes
+seleccionar una tarea por nombre y seguir con **¿Y a qué hora?**. Los vencimientos
+respetan también las prórrogas individuales vigentes en Moodle.

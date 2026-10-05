@@ -1,6 +1,6 @@
 # Verificar corrección de respuestas con Moodle y modelo local
 
-Status: in-progress
+Status: done
 
 ## Objetivo
 
@@ -16,4 +16,9 @@ Secuencia exacta reportada y variantes; usuarios con permisos distintos; pregunt
 
 ## Estado
 
-Alcance aprobado por el usuario. Implementar respetando la spec y las dependencias.
+Implementado y verificado. Evidencia: [verification.md](../verification.md).
+
+## Comments
+
+Cerrado tras 30 pruebas Moodle (112 assertions), 156 pruebas RAG y recorrido real
+completo en navegador. Revisión de Standards y Spec sin hallazgos pendientes.
