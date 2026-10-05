@@ -15,10 +15,18 @@ from pydantic import (
     StrictInt,
     ValidationError,
     field_validator,
+    model_validator,
 )
 
 from rag_service.academic_answers import AcademicPlan, calendar_discrepancies, compose_academic
 from rag_service.errors import AppError
+from rag_service.conversation import (
+    ConversationPlan,
+    INTERPRET_PROMPT,
+    Runtime,
+    InterpretationOutput,
+    WEEKDAYS,
+)
 from rag_service.local_embeddings import OllamaEmbeddingProvider
 
 INSUFFICIENT_ANSWER = "No hay información suficiente en los documentos disponibles para responder."
@@ -35,6 +43,15 @@ class QueryRequest(BaseModel):
     query: str = Field(min_length=1, max_length=1000)
     academic_context: dict[str, JsonValue] = Field(default_factory=dict)
     conversation_context: list[ConversationTurn] = Field(default_factory=list, max_length=4)
+
+    conversation_plan: ConversationPlan | None = None
+    runtime: Runtime | None = None
+
+    @model_validator(mode="after")
+    def require_trusted_clock(self):
+        if self.conversation_plan is not None and self.runtime is None:
+            raise ValueError("El plan necesita el reloj de Moodle.")
+        return self
 
     @field_validator("academic_context")
     @classmethod
@@ -170,85 +187,139 @@ EXAMPLE_MESSAGES = [
     },
 ]
 # Un documento recibido ya pasó el filtro: las condiciones de acceso no son una abstención.
-EXAMPLE_MESSAGES.extend([
-    {"role": "user", "content": json.dumps({
-        "question": "¿Cuál es el código del proyecto del curso Diseño 204?",
-        "document_context": [{"source_id": 1, "scope": "course", "title": "Guía de Diseño 204",
-                              "text": ("Solo participantes autorizados. "
-                                       "El código del proyecto de Diseño 204 es FARO-28.")},
-                             {"source_id": 2, "scope": "institutional",
-                              "title": "Reglamento de Universidad Ejemplo",
-                              "text": "Los reclamos se presentan en tres días."}],
-        "academic_context": {},
-    }, ensure_ascii=False)},
-    {"role": "assistant", "content": json.dumps({
-        "answer": "El código del proyecto de Diseño 204 es FARO-28. [1]",
-        "insufficient_context": False, "source_ids": [1],
-    }, ensure_ascii=False)},
-])
+EXAMPLE_MESSAGES.extend(
+    [
+        {
+            "role": "user",
+            "content": json.dumps(
+                {
+                    "question": "¿Cuál es el código del proyecto del curso Diseño 204?",
+                    "document_context": [
+                        {
+                            "source_id": 1,
+                            "scope": "course",
+                            "title": "Guía de Diseño 204",
+                            "text": (
+                                "Solo participantes autorizados. "
+                                "El código del proyecto de Diseño 204 es FARO-28."
+                            ),
+                        },
+                        {
+                            "source_id": 2,
+                            "scope": "institutional",
+                            "title": "Reglamento de Universidad Ejemplo",
+                            "text": "Los reclamos se presentan en tres días.",
+                        },
+                    ],
+                    "academic_context": {},
+                },
+                ensure_ascii=False,
+            ),
+        },
+        {
+            "role": "assistant",
+            "content": json.dumps(
+                {
+                    "answer": "El código del proyecto de Diseño 204 es FARO-28. [1]",
+                    "insufficient_context": False,
+                    "source_ids": [1],
+                },
+                ensure_ascii=False,
+            ),
+        },
+    ]
+)
 # Terminar con ejemplos respondibles evita que un modelo pequeño copie la abstención anterior.
-EXAMPLE_MESSAGES = EXAMPLE_MESSAGES[2:] + EXAMPLE_MESSAGES[:2] + [
-    {
-        "role": "user",
-        "content": json.dumps(
-            {
-                "question": (
-                    "¿Cuánto cuesta el duplicado de carné de biblioteca y cuándo lo entregan?"
-                ),
-                "document_context": [
-                    {
-                        "source_id": 1,
-                        "text": "El duplicado de carné cuesta 8 soles y se entrega en dos horas.",
-                    },
-                    {"source_id": 2, "text": "El gimnasio abre a las 6:00."},
-                ],
-                "academic_context": {},
-            },
-            ensure_ascii=False,
-        ),
-    },
-    {
-        "role": "assistant",
-        "content": json.dumps(
-            {
-                "answer": "El duplicado de carné cuesta 8 soles y se entrega en dos horas. [1]",
-                "insufficient_context": False,
-                "source_ids": [1],
-            },
-            ensure_ascii=False,
-        ),
-    },
-]
+EXAMPLE_MESSAGES = (
+    EXAMPLE_MESSAGES[2:]
+    + EXAMPLE_MESSAGES[:2]
+    + [
+        {
+            "role": "user",
+            "content": json.dumps(
+                {
+                    "question": (
+                        "¿Cuánto cuesta el duplicado de carné de biblioteca y cuándo lo entregan?"
+                    ),
+                    "document_context": [
+                        {
+                            "source_id": 1,
+                            "text": ("El duplicado de carné cuesta 8 soles "
+                                     "y se entrega en dos horas."),
+                        },
+                        {"source_id": 2, "text": "El gimnasio abre a las 6:00."},
+                    ],
+                    "academic_context": {},
+                },
+                ensure_ascii=False,
+            ),
+        },
+        {
+            "role": "assistant",
+            "content": json.dumps(
+                {
+                    "answer": "El duplicado de carné cuesta 8 soles y se entrega en dos horas. [1]",
+                    "insufficient_context": False,
+                    "source_ids": [1],
+                },
+                ensure_ascii=False,
+            ),
+        },
+    ]
+)
 
 
 ACADEMIC_EXAMPLE_MESSAGES = [
     {
         "role": "user",
-        "content": json.dumps({
-            "question": "¿Qué tareas tengo pendientes?",
-            "document_context": [{"source_id": 1, "text": "La biblioteca abre a las 8:00."}],
-            "academic_context": {"assignments": [
-                {"course_name": "Literatura", "name": "Reseña", "status": "not_submitted",
-                 "due_date": "2026-11-10 18:00", "source": "Moodle"},
-                {"course_name": "Fisica", "name": "Laboratorio", "status": "not_submitted",
-                 "due_date": "2026-11-11 16:00", "source": "Moodle"},
-                {"course_name": "Historia", "name": "Ensayo", "status": "submitted",
-                 "due_date": "2026-11-12 18:00", "source": "Moodle"},
-            ]},
-            "conversation_context": [],
-        }, ensure_ascii=False),
+        "content": json.dumps(
+            {
+                "question": "¿Qué tareas tengo pendientes?",
+                "document_context": [{"source_id": 1, "text": "La biblioteca abre a las 8:00."}],
+                "academic_context": {
+                    "assignments": [
+                        {
+                            "course_name": "Literatura",
+                            "name": "Reseña",
+                            "status": "not_submitted",
+                            "due_date": "2026-11-10 18:00",
+                            "source": "Moodle",
+                        },
+                        {
+                            "course_name": "Fisica",
+                            "name": "Laboratorio",
+                            "status": "not_submitted",
+                            "due_date": "2026-11-11 16:00",
+                            "source": "Moodle",
+                        },
+                        {
+                            "course_name": "Historia",
+                            "name": "Ensayo",
+                            "status": "submitted",
+                            "due_date": "2026-11-12 18:00",
+                            "source": "Moodle",
+                        },
+                    ]
+                },
+                "conversation_context": [],
+            },
+            ensure_ascii=False,
+        ),
     },
     {
         "role": "assistant",
-        "content": json.dumps({
-            "answer": (
-                "Según Moodle, tienes pendientes la Reseña de Literatura "
-                "(10 de noviembre de 2026 a las 18:00) y el Laboratorio de Fisica "
-                "(11 de noviembre de 2026 a las 16:00)."
-            ),
-            "insufficient_context": False,
-            "source_ids": [],
-        }, ensure_ascii=False),
+        "content": json.dumps(
+            {
+                "answer": (
+                    "Según Moodle, tienes pendientes la Reseña de Literatura "
+                    "(10 de noviembre de 2026 a las 18:00) y el Laboratorio de Fisica "
+                    "(11 de noviembre de 2026 a las 16:00)."
+                ),
+                "insufficient_context": False,
+                "source_ids": [],
+            },
+            ensure_ascii=False,
+        ),
     },
 ]
 
@@ -291,16 +362,95 @@ class OllamaChatProvider:
                     "ollama_pull_failed", "No se pudo preparar el modelo de respuestas."
                 ) from None
             model = self.resolve()
-        self.generate("¿Qué es este documento?", [{
-            "contenido": "Es una prueba ficticia.",
-            "alcance": "institutional",
-            "tipo_documento": "OTRO",
-            "titulo": "Documento de prueba",
-        }])
+        self.generate(
+            "¿Qué es este documento?",
+            [
+                {
+                    "contenido": "Es una prueba ficticia.",
+                    "alcance": "institutional",
+                    "tipo_documento": "OTRO",
+                    "titulo": "Documento de prueba",
+                }
+            ],
+        )
         return {"provider": "ollama", "model": model["name"], "revision": model["digest"]}
 
+    def interpret(self, request):
+        model = self.resolve()
+        options = {"temperature": 0, "num_ctx": 8192, "num_predict": 900}
+        if self.settings.ollama_chat_num_gpu >= 0:
+            options["num_gpu"] = self.settings.ollama_chat_num_gpu
+        previous = request.state.topic
+        state = request.state.model_dump(exclude_defaults=True, exclude={"topic"})
+        if request.state.availability:
+            state["availability"]["days"] = [
+                WEEKDAYS[day] for day in request.state.availability.days
+            ]
+        if previous:
+            state["previous_intent"] = previous.intent
+            state["previous_categories"] = previous.categories
+            state["previous_scope"] = previous.scope_question
+        message = json.dumps(
+            {
+                "runtime": request.runtime.model_dump(),
+                "state": state,
+                "conversation_context": [
+                    turn.model_dump() for turn in request.conversation_context
+                ],
+                "query": request.query,
+            },
+            ensure_ascii=False,
+        )
+        result = self.client.request(
+            "POST",
+            "/api/chat",
+            {
+                "model": model["name"],
+                "stream": False,
+                "messages": [
+                    {"role": "system", "content": INTERPRET_PROMPT},
+                    {"role": "user", "content": message},
+                ],
+                "format": InterpretationOutput.model_json_schema(),
+                "options": options,
+            },
+        )
+        try:
+            if result.get("done") is not True or result.get("done_reason") == "length":
+                raise ValueError("Incomplete interpretation")
+            output = InterpretationOutput.model_validate_json(result["message"]["content"])
+            data = output.model_dump()
+            if output.availability:
+                data["availability"]["days"] = [
+                    WEEKDAYS.index(day) for day in output.availability.days
+                ]
+            # A proposed retrieval must not carry secret-extraction instructions to another model.
+            if re.search(
+                r"(revela|muestra|dame|extrae|imprime).{0,60}"
+                r"(secret|token|credencial|contraseñ|claves)|system.?prompt|"
+                r"ignora.{0,40}(reglas|instrucciones)",
+                data["document_question"],
+                re.I,
+            ):
+                data["document_question"] = ""
+                data["blocked_part"] = True
+                if not data["categories"]:
+                    data["intent"] = "blocked"
+            plan = ConversationPlan.model_validate(data)
+        except (KeyError, TypeError, ValueError, ValidationError) as exc:
+            raise AppError("invalid_interpretation", "No pude interpretar la consulta.") from exc
+        current = next((m for m in self.client._models() if m["name"] == model["name"]), None)
+        if current is None or current["digest"] != model["digest"]:
+            raise AppError("ollama_model_changed", "El modelo cambió; repita la consulta.")
+        return plan
+
     def generate(
-        self, question, fragments, *, academic_context=None, conversation_context=None,
+        self,
+        question,
+        fragments,
+        *,
+        academic_context=None,
+        conversation_context=None,
     ):
         model = self.resolve()
         context = [
@@ -325,10 +475,14 @@ class OllamaChatProvider:
                 "messages": [
                     {"role": "system", "content": SYSTEM_PROMPT},
                     *EXAMPLE_MESSAGES,
-                    *(ACADEMIC_EXAMPLE_MESSAGES if any(
-                        (academic_context or {}).get(category)
-                        for category in ("assignments", "grades")
-                    ) else []),
+                    *(
+                        ACADEMIC_EXAMPLE_MESSAGES
+                        if any(
+                            (academic_context or {}).get(category)
+                            for category in ("assignments", "grades")
+                        )
+                        else []
+                    ),
                     {
                         "role": "user",
                         "content": json.dumps(
@@ -366,10 +520,80 @@ class QueryService:
         self.embeddings = embeddings or OllamaEmbeddingProvider(settings)
         self.chat = chat or OllamaChatProvider(settings)
 
+    def interpret(self, request):
+        return self.chat.interpret(request)
+
+    def documentary_evidence(self, question, course_ids, request_id):
+        from rag_service.document_evidence import extract
+
+        batch = self.embeddings.embed_query(question)
+        fragments = self.repository.retrieve(
+            batch.space, batch.vectors[0], course_ids=tuple(course_ids), limit=4
+        )
+        if not fragments:
+            return QueryResponse(
+                answer=INSUFFICIENT_ANSWER,
+                sources=[],
+                insufficient_context=True,
+                request_id=request_id,
+            )
+        evidence = extract(self.chat, question, fragments)
+        if not self.repository.sources_current(fragments):
+            raise AppError("corpus_changed", "Los documentos cambiaron; repite la consulta.")
+        sources = []
+        parts = []
+        for passage in evidence.passages:
+            row = fragments[passage.source_id - 1]
+            parts.append(f"La fuente indica: «{passage.quote}». [{passage.source_id}]")
+            if any(source.source_id == passage.source_id for source in sources):
+                continue
+            sources.append(
+                Source(
+                    source_id=passage.source_id,
+                    fragment_id=row["id_fragmento"],
+                    document_id=row["id_documento"],
+                    key=row["clave"],
+                    title=row["titulo"],
+                    filename=row["nombre_archivo"],
+                    version=row["version"],
+                    scope=row["alcance"],
+                    document_type=row["tipo_documento"],
+                    page_start=row["pagina_inicio"],
+                    page_end=row["pagina_fin"],
+                    excerpt=row["contenido"],
+                )
+            )
+        return QueryResponse(
+            answer="\n".join(parts) or INSUFFICIENT_ANSWER,
+            sources=sources,
+            insufficient_context=not bool(parts),
+            request_id=request_id,
+        )
+
     def ask(
-        self, question, request_id=None, *, course_ids=(), academic_context=None,
+        self,
+        question,
+        request_id=None,
+        *,
+        course_ids=(),
+        academic_context=None,
         conversation_context=None,
+        conversation_plan=None,
+        runtime=None,
     ):
+        if conversation_plan is not None:
+            from rag_service.conversation_responses import respond
+
+            return respond(
+                self,
+                question,
+                ConversationPlan.model_validate(conversation_plan),
+                Runtime.model_validate(runtime),
+                academic_context or {},
+                conversation_context or [],
+                course_ids,
+                request_id or str(uuid.uuid4()),
+            )
         question = QueryRequest(query=question).query
         if academic_context and "query" in academic_context:
             plan = AcademicPlan.model_validate(academic_context["query"])
@@ -383,36 +607,45 @@ class QueryService:
             if not plan.document_question:
                 return QueryResponse(
                     answer=academic_answer or "¿Qué información académica necesitas consultar?",
-                    sources=[], insufficient_context=False, request_id=request_id
+                    sources=[],
+                    insufficient_context=False,
+                    request_id=request_id,
                 )
             # Documentary generation never determines whether authorized academic facts exist.
             try:
                 documentary = self.ask(
-                    plan.document_question, request_id,
+                    plan.document_question,
+                    request_id,
                     course_ids=tuple(plan.document_course_ids)
-                    if plan.document_course_ids is not None else course_ids,
+                    if plan.document_course_ids is not None
+                    else course_ids,
                     conversation_context=conversation_context,
                 )
             except (AppError, psycopg.Error):
                 if not academic_answer:
                     raise
                 return QueryResponse(
-                    answer=academic_answer + ("\nNo pude consultar la parte documental. "
-                                             "Inténtalo de nuevo."),
-                    sources=[], insufficient_context=False, request_id=request_id,
+                    answer=academic_answer
+                    + ("\nNo pude consultar la parte documental. Inténtalo de nuevo."),
+                    sources=[],
+                    insufficient_context=False,
+                    request_id=request_id,
                 )
             if academic_answer:
-                document_answer = ("No encontré evidencia documental suficiente "
-                                   "para esa parte de la pregunta."
-                                   if documentary.insufficient_context else documentary.answer)
+                document_answer = (
+                    "No encontré evidencia documental suficiente para esa parte de la pregunta."
+                    if documentary.insufficient_context
+                    else documentary.answer
+                )
                 documentary.answer = academic_answer + "\nDocumentos: " + document_answer
                 documentary.insufficient_context = False
                 discrepancies = calendar_discrepancies(academic_context, documentary.sources)
                 if discrepancies:
-                    documentary.answer += '\n' + '\n'.join(discrepancies)
+                    documentary.answer += "\n" + "\n".join(discrepancies)
             elif documentary.insufficient_context:
-                documentary.answer = ("No encontré evidencia para esa consulta. "
-                                      "¿Puedes precisar qué necesitas?")
+                documentary.answer = (
+                    "No encontré evidencia para esa consulta. ¿Puedes precisar qué necesitas?"
+                )
             return documentary
         conversation_context = [
             ConversationTurn.model_validate(turn).model_dump()
@@ -427,7 +660,10 @@ class QueryService:
         if not any(vector):
             raise AppError("invalid_embedding", "El vector de la pregunta es inválido.")
         fragments = self.repository.retrieve(
-            batch.space, vector, course_ids=tuple(course_ids), limit=4,
+            batch.space,
+            vector,
+            course_ids=tuple(course_ids),
+            limit=4,
         )
         empty = QueryResponse(
             answer=INSUFFICIENT_ANSWER, sources=[], insufficient_context=True, request_id=request_id
@@ -436,7 +672,9 @@ class QueryService:
         if not fragments and not academic_context:
             return empty
         generated = self.chat.generate(
-            question, fragments, academic_context=academic_context,
+            question,
+            fragments,
+            academic_context=academic_context,
             conversation_context=conversation_context,
         )
         ids = list(dict.fromkeys(generated.source_ids))

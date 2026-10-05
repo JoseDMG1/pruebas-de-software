@@ -67,7 +67,9 @@ final class rag_client {
         string $query,
         array $authorizedcourseids = [],
         array $academiccontext = [],
-        array $conversationcontext = []
+        array $conversationcontext = [],
+        ?array $plan = null,
+        ?array $runtime = null
     ): array {
         $query = trim($query);
         if ($query === '' || strlen($query) > 1000) {
@@ -99,13 +101,18 @@ final class rag_client {
             }
         }
 
-        try {
-            $body = json_encode(
-                [
+        $payload = [
                     'query' => $query,
                     'academic_context' => (object)$academiccontext,
                     'conversation_context' => array_values($conversationcontext),
-                ],
+        ];
+        if ($plan !== null) {
+            $payload['conversation_plan'] = conversation_plan::validate($plan);
+            $payload['runtime'] = $runtime ?? self::runtime();
+        }
+        try {
+            $body = json_encode(
+                $payload,
                 JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
             );
         } catch (\JsonException) {
@@ -228,6 +235,8 @@ final class rag_client {
 
     /** Send the request using Moodle's server-side cURL wrapper. */
     private function post(string $url, string $body, string $assertion): array {
+        global $CFG;
+        require_once($CFG->libdir . "/filelib.php");
         $curl = new \curl();
         $responsebody = $curl->post($url, $body, [
             'CURLOPT_HTTPHEADER' => [

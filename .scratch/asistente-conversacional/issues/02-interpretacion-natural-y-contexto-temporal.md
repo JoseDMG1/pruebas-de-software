@@ -18,3 +18,9 @@ Variantes nuevas, reformulaciones, cambios de tema y ambigüedad; disponibilidad
 
 Alcance conjunto aprobado explícitamente por el usuario. Listo para implementar
 cuando se cumplan las dependencias, respetando la spec y los límites acordados.
+
+## Comments
+
+Implementación y verificación en curso. El flujo firmado, las lecturas nativas,
+las respuestas verificadas y el plan semanal ya están conectados; falta cerrar
+la revisión final y registrar los recorridos reales de aceptación.

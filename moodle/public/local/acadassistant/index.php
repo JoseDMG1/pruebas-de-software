@@ -36,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $store->set_error(get_string('questiontoolong', 'local_acadassistant'));
         } else {
             try {
-                $isfollowup = $store->is_follow_up($question);
                 $cursor = $store->continuation();
                 $continuing = \local_acadassistant\local\academic_question::is_continuation($question);
                 if ($continuing && !$cursor) {
@@ -44,8 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $response = (new \local_acadassistant\local\academic_assistant())
                         ->ask($continuing ? $cursor['question'] : $question,
-                            $continuing ? [] : $store->context_for_question($question),
-                            0, $continuing ? $cursor['seen'] : []);
+                            $continuing ? [] : $store->context(),
+                            0, $continuing ? $cursor['seen'] : [], $store->semantic_state());
                 }
                 $answer = $response['answer'] ?? null;
                 if (!is_string($answer) || trim($answer) === '') {
@@ -56,9 +55,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $answer,
                     $response['sources'] ?? [],
                     $response['academic_provenance'] ?? [],
-                    !$isfollowup,
+                    !($response['follow_up'] ?? false),
                     $response['continuation'] ?? null,
-                    $response['context_question'] ?? null
+                    $response['context_question'] ?? null,
+                    $response['semantic_state'] ?? null
                 );
             } catch (\Throwable) {
                 $store->set_error(get_string('assistantunavailable', 'local_acadassistant'));

@@ -12,6 +12,20 @@ defined('MOODLE_INTERNAL') || die();
 
 /** Tests session-only conversation state through its public operations. */
 final class conversation_store_test extends \advanced_testcase {
+    public function test_semantic_availability_is_session_scoped_and_cleared(): void {
+        $this->resetAfterTest();
+        $this->setUser($this->getDataGenerator()->create_user());
+        $store = new \local_acadassistant\local\conversation_store();
+        $semantic = ['availability' => ['days' => [0, 2], 'start_hour' => 18, 'end_hour' => 20]];
+        $store->append('Puedo lunes y miércoles', 'Lo tendré en cuenta.', [], [], false, null, null, $semantic);
+        $this->assertSame($semantic, $store->semantic_state());
+        $store->clear();
+        $this->assertSame([], $store->semantic_state());
+        $store->append('Disponibilidad', 'Recibido.', [], [], false, null, null, $semantic);
+        $this->setUser($this->getDataGenerator()->create_user());
+        $this->assertSame([], $store->semantic_state());
+    }
+
     public function test_follow_up_does_not_reuse_document_reference_numbers_from_an_earlier_answer(): void {
         $this->resetAfterTest();
         $this->setUser($this->getDataGenerator()->create_user());

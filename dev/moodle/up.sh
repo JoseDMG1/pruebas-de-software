@@ -15,5 +15,6 @@ docker compose -f compose.moodle.yaml exec -T -u www-data moodle php /opt/moodle
 docker compose -f compose.moodle.yaml exec -T -u www-data moodle php public/local/acadassistant/cli/export_course_catalog.php > .local/course-catalog.json
 (cd rag-service && docker compose up -d db && .venv/bin/rag prepare-demo && docker compose up --build -d api)
 rag-service/.venv/bin/python dev/moodle/documents.py
+rag-service/.venv/bin/python dev/moodle/guides.py
 echo 'Moodle: http://127.0.0.1:8088/local/acadassistant/index.php'
 echo 'Credentials: .local/sprint2-credentials.md'

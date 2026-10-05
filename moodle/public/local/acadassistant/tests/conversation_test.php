@@ -1,9 +1,77 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+// Licensed under the GNU General Public License version 3 or later.
+
 namespace local_acadassistant;
 defined('MOODLE_INTERNAL') || die();
 
 /** Public signed conversation contract tests. */
 final class conversation_test extends \advanced_testcase {
+    public function test_proposed_operation_reads_only_enrolled_visible_assignments(): void {
+        global $CFG;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course(['fullname' => 'Seminario']);
+        $private = $this->getDataGenerator()->create_course(['fullname' => 'Reservado']);
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
+        $generator = $this->getDataGenerator()->get_plugin_generator('mod_assign');
+        $assignment = $generator->create_instance(['course' => $course->id, 'name' => 'Ensayo']);
+        require_once($CFG->dirroot . '/mod/assign/locallib.php');
+        $cm = get_coursemodule_from_instance('assign', $assignment->id);
+        $assign = new \assign(\context_module::instance($cm->id), $cm, $course);
+        $assign->get_user_submission($student->id, true);
+        $generator->create_instance(['course' => $private->id, 'name' => 'Secreto']);
+        $this->setUser($student);
+        $provider = new \local_acadassistant\local\academic_context_provider();
+        $result = $provider->collect_for_plan(['intent' => 'weekly_plan', 'categories' => ['assignments'],
+            'scope_question' => 'mis tareas pendientes']);
+        $this->assertSame(['Ensayo'], array_column($result['academic_context']['assignments'], 'name'));
+        $this->assertSame('not_submitted', $result['academic_context']['assignments'][0]['status']);
+        $denied = $provider->collect_for_plan(['intent' => 'academic', 'categories' => ['assignments'],
+            'scope_question' => 'tareas en Reservado']);
+        $this->assertArrayNotHasKey('assignments', $denied['academic_context']);
+        $this->assertNotEmpty($denied['academic_context']['query']['notices']);
+    }
+
+    public function test_social_skips_readers_and_weekly_reads_all_pages_before_asking_availability(): void {
+        global $CFG;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
+        $generator = $this->getDataGenerator()->get_plugin_generator('mod_assign');
+        for ($i = 0; $i < 25; $i++) {
+            $generator->create_instance(['course' => $course->id, 'name' => 'Trabajo ' . $i]);
+        }
+        $this->setUser($student);
+        $CFG->local_acadassistant_rag_url = 'https://rag.example.test';
+        $CFG->local_acadassistant_rag_shared_secret = str_repeat('a', 40);
+        $social = true;
+        $transport = function($url, $body) use (&$social): array {
+            $payload = json_decode($body, true);
+            if (str_ends_with($url, '/interpret')) {
+                $result = $social ? ['intent' => 'social', 'social' => 'greeting'] :
+                    ['intent' => 'weekly_plan', 'categories' => ['assignments'], 'scope_question' => 'mis tareas'];
+            } else {
+                if ($social) {
+                    $this->assertEmpty($payload['academic_context']);
+                } else {
+                    $this->assertCount(25, $payload['academic_context']['assignments']);
+                    $this->assertFalse($payload['academic_context']['query']['has_more']);
+                    $this->assertTrue($payload['academic_context']['query']['complete']);
+                }
+                $result = ['answer' => 'Respuesta válida.', 'sources' => []];
+            }
+            return ['status' => 200, 'body' => json_encode($result)];
+        };
+        $assistant = new \local_acadassistant\local\academic_assistant($transport);
+        $greeting = $assistant->ask('hola');
+        $this->assertEmpty($greeting['academic_provenance']);
+        $social = false;
+        $weekly = $assistant->ask('organiza mi semana');
+        $this->assertSame(['academic'], $weekly['academic_provenance']);
+    }
+
     public function test_interpreter_request_uses_server_clock_and_rejects_unpermitted_plan(): void {
         global $CFG;
         $this->resetAfterTest();

@@ -22,7 +22,10 @@ final class academic_assistant_test extends \advanced_testcase {
         $originalsecret = $CFG->local_acadassistant_rag_shared_secret ?? null;
         $CFG->local_acadassistant_rag_url = 'https://rag.example.test';
         $CFG->local_acadassistant_rag_shared_secret = 'a-test-secret-long-enough-for-hmac-sha256';
-        $transport = static fn(): array => [
+        $transport = static fn($url): array => str_ends_with($url, '/interpret') ? [
+            'status' => 200, 'body' => json_encode(['intent' => 'academic', 'categories' => ['assignments'],
+                'scope_question' => 'mis tareas pendientes']),
+        ] : [
             'status' => 200,
             'body' => json_encode([
                 'answer' => 'No hay tareas visibles.',
@@ -74,6 +77,10 @@ final class academic_assistant_test extends \advanced_testcase {
         $CFG->local_acadassistant_rag_shared_secret = 'a-test-secret-long-enough-for-hmac-sha256';
         $requests = [];
         $transport = static function (string $url, string $body, array $headers) use (&$requests): array {
+            if (str_ends_with($url, '/interpret')) {
+                return ['status' => 200, 'body' => json_encode(['intent' => 'academic',
+                    'categories' => ['assignments'], 'follow_up' => true, 'scope_question' => 'tareas en Geometría 202'])];
+            }
             $requests[] = [$url, $body, $headers];
             return [
                 'status' => 200,

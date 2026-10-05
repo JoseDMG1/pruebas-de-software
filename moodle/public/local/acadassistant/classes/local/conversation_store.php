@@ -56,7 +56,8 @@ final class conversation_store {
         array $academicprovenance = [],
         bool $contextbreak = false,
         ?array $continuation = null,
-        ?string $contextquestion = null
+        ?string $contextquestion = null,
+        ?array $semanticstate = null
     ): void {
         $state = $this->state();
         $safeSources = [];
@@ -86,8 +87,16 @@ final class conversation_store {
             'contextbreak' => $contextbreak,
         ];
         $state['continuation'] = $continuation;
+        if ($semanticstate !== null) {
+            $state['semantic'] = $semanticstate;
+        }
         $state['turns'] = array_slice($state['turns'], -self::MAX_DISPLAY_TURNS);
         $this->save($state);
+    }
+
+    /** Bounded semantic context belongs only to this authenticated session. */
+    public function semantic_state(): array {
+        return $this->state()['semantic'] ?? [];
     }
 
     /** The cursor is never exposed to the browser and belongs to this identity/session. */

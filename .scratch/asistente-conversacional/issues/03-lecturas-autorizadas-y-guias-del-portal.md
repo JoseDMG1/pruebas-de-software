@@ -1,6 +1,6 @@
 # Lecturas autorizadas y guías del portal
 
-Status: ready-for-agent
+Status: in-progress
 
 ## Objetivo
 
@@ -18,3 +18,9 @@ Permisos nativos por cada lectura; roles declarados sin efecto; paginación sin 
 
 Alcance conjunto aprobado explícitamente por el usuario. Listo para implementar
 cuando se cumplan las dependencias, respetando la spec y los límites acordados.
+
+## Comments
+
+Implementación y verificación en curso. El flujo firmado, las lecturas nativas,
+las respuestas verificadas y el plan semanal ya están conectados; falta cerrar
+la revisión final y registrar los recorridos reales de aceptación.

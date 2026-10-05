@@ -11,7 +11,7 @@ final class conversation_plan {
             'assignment_filter' => 'pending', 'scope_question' => '', 'document_question' => '',
             'follow_up' => false, 'teacher_confirmation' => false, 'ambiguous_task' => false,
             'finance' => false, 'blocked_part' => false, 'availability' => null,
-            'availability_unknown' => false, 'week_offset' => 0, 'week_start' => '',
+            'availability_unknown' => false, 'week_offset' => 0, 'week_explicit' => false, 'week_start' => '',
             'priority' => [], 'clarification' => 'intent'];
         if (array_diff(array_keys($input), array_keys($defaults))) {
             self::invalid();
@@ -26,7 +26,7 @@ final class conversation_plan {
             }
         }
         foreach (['follow_up', 'teacher_confirmation', 'ambiguous_task', 'finance', 'blocked_part',
-            'availability_unknown'] as $key) {
+            'availability_unknown', 'week_explicit'] as $key) {
             if (!is_bool($plan[$key])) {
                 self::invalid();
             }

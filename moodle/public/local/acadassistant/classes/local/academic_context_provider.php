@@ -26,6 +26,20 @@ final class academic_context_provider {
      * @return array{course_ids:int[], academic_context:array<string, array>, requested_categories:string[]}
      */
     public function collect_for_question(string $question, array $conversationcontext = [], int $offset = 0, array $seen = []): array {
+        return $this->collect($question, $conversationcontext, $offset, $seen,
+            academic_question::interpret($question, $conversationcontext));
+    }
+
+    /** Execute only validated operations; every record still requires native capabilities. */
+    public function collect_for_plan(array $proposal, array $history = [], int $offset = 0, array $seen = []): array {
+        $plan = conversation_plan::validate($proposal);
+        if (!in_array($plan['intent'], ['academic', 'document', 'weekly_plan'], true)) {
+            throw new \moodle_exception('ragrequestfailed', 'local_acadassistant');
+        }
+        return $this->collect($plan['scope_question'] ?: 'mis datos académicos', $history, $offset, $seen, $plan);
+    }
+
+    private function collect(string $question, array $conversationcontext, int $offset, array $seen, array $plan): array {
         global $CFG, $USER;
 
         if (!isloggedin() || isguestuser() || empty($USER->id)) {
@@ -40,9 +54,11 @@ final class academic_context_provider {
         $this->recordlimit = $offset + count($seen) + self::MAX_RECORDS_PER_CATEGORY + 1;
         $this->scopecomplete = true;
         $this->scopeavailable = true;
-        $plan = academic_question::interpret($question, $conversationcontext);
         $previousquestions = $plan['follow_up'] ? array_column(array_slice($conversationcontext, -2), 'question') : [];
         $courses = $this->accessible_courses($plan['scope_question'], $previousquestions);
+        if (($plan['intent'] ?? '') === 'weekly_plan') {
+            $courses = $this->courses_for_mode($courses, 'enrolled');
+        }
         $academicavailable = $this->scopeavailable;
         $courseids = array_values(array_map(static fn($course): int => (int)$course->id, $courses));
         $documentcourseids = [];
@@ -384,6 +400,9 @@ final class academic_context_provider {
                     $flags = $assign->get_user_flags($target['id'], false);
                     $duedate = max((int)$instance->duedate, (int)($flags->extensionduedate ?? 0));
                     $submissionstatus = $submission ? (string)$submission->status : 'not_submitted';
+                    if ($submissionstatus === ASSIGN_SUBMISSION_STATUS_NEW) {
+                        $submissionstatus = 'not_submitted';
+                    }
                     $matchesfilter = $assignmentfilter;
                     if (($matchesfilter === 'pending' && $submissionstatus === 'submitted') ||
                             ($matchesfilter === 'submitted' && $submissionstatus !== 'submitted')) {
@@ -396,7 +415,7 @@ final class academic_context_provider {
                         'name' => (string)$cm->name,
                         'due_at' => $duedate > 0 ? $duedate : null,
                         'due_date' => $duedate > 0 ? userdate($duedate, '%Y-%m-%d %H:%M') : null,
-                        'status' => $submission ? (string)$submission->status : 'not_submitted',
+                        'status' => $submissionstatus,
                         'participant' => $target['name'],
                         'source' => 'Moodle',
                     ];
