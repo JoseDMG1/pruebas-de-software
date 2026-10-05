@@ -414,11 +414,12 @@ class OllamaChatProvider:
 
         def generate_plan(prompt, schema, message, examples=()):
             messages = [{"role": "system", "content": prompt}]
-            for example, intents, social in examples:
+            for example, intents, social, finance in examples:
                 messages.extend([
                     {"role": "user", "content": json.dumps({"query": example}, ensure_ascii=False)},
                     {"role": "assistant", "content": json.dumps({
-                        "intents": intents, "social": social, "follow_up": False, "finance": False,
+                        "intents": intents, "social": social,
+                        "follow_up": False, "finance": finance,
                     })},
                 ])
             messages.append({"role": "user", "content": message})
