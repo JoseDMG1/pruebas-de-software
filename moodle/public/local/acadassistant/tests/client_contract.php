@@ -59,10 +59,13 @@ check(count($requests) === 1, 'The Moodle client should send one server-side req
 check($url === 'https://rag.example.test/api/v1/chat/query', 'The RAG query URL is incorrect.');
 check(!str_contains($body, $GLOBALS['CFG']->local_acadassistant_rag_shared_secret), 'The secret must not be sent in the JSON body.');
 check($headers['Content-Type'] === 'application/json', 'The request must be JSON.');
-check(!str_contains(json_encode($result), $GLOBALS['CFG']->local_acadassistant_rag_shared_secret), 'The RAG response must not contain the service secret.');
-
 $authorization = $headers['Authorization'] ?? '';
 check(str_starts_with($authorization, 'Bearer '), 'The request must carry a signed bearer assertion.');
+// The client returns only the RAG result to its caller; neither service credential nor assertion
+// belongs in a response that a Moodle page could serialize to the browser.
+$browserresponse = json_encode($result);
+check(!str_contains($browserresponse, $GLOBALS['CFG']->local_acadassistant_rag_shared_secret), 'The response must not contain the service secret.');
+check(!str_contains($browserresponse, $authorization), 'The response must not contain the service assertion.');
 $parts = explode('.', substr($authorization, 7));
 check(count($parts) === 3, 'The bearer assertion must be a three-part signed token.');
 $claims = json_decode(decode_segment($parts[1]), true, flags: JSON_THROW_ON_ERROR);

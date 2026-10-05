@@ -22,7 +22,7 @@ services:
     environment:
       DATABASE_URL: postgresql://rag:rag_local_dev@db:5432/rag
       MOODLE_SERVICE_SECRET: ${MOODLE_SERVICE_SECRET:-}
-      LOCAL_DEMO_QUERY_ENABLED: ${LOCAL_DEMO_QUERY_ENABLED:-true}
+      LOCAL_DEMO_QUERY_ENABLED: ${LOCAL_DEMO_QUERY_ENABLED:-false}
       AWS_REGION: ${AWS_REGION:-us-east-1}
       BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-amazon.titan-embed-text-v2:0}
       EMBEDDING_BACKEND: ${EMBEDDING_BACKEND:-ollama}

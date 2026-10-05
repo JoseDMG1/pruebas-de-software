@@ -1,3 +1,4 @@
+import base64
 import json
 import time
 
@@ -113,4 +114,30 @@ def test_query_rejects_a_body_changed_after_it_was_signed():
     response = client.post("/api/v1/chat/query", content=changed, headers=headers)
 
     assert response.status_code == 401
+    assert service.calls == []
+
+
+def test_query_rejects_changed_user_or_course_claims_without_a_new_signature():
+    secret = "test-shared-secret-that-is-long-enough"
+    service = QuerySpy()
+    client = TestClient(create_app(
+        Settings(_env_file=None, moodle_service_secret=secret), query_service=service,
+    ))
+    body = request_body()
+
+    for claim, changed_value in (("sub", "99"), ("courses", [10, 99])):
+        headers = signed_moodle_headers(secret, body, user_id="42", courses=[10, 20])
+        token = headers["Authorization"].removeprefix("Bearer ")
+        encoded_header, encoded_claims, signature = token.split(".")
+        padding = "=" * (-len(encoded_claims) % 4)
+        claims = json.loads(base64.urlsafe_b64decode(encoded_claims + padding))
+        claims[claim] = changed_value
+        tampered_claims = base64.urlsafe_b64encode(
+            json.dumps(claims, separators=(",", ":"), sort_keys=True).encode(),
+        ).rstrip(b"=").decode()
+        headers["Authorization"] = f"Bearer {encoded_header}.{tampered_claims}.{signature}"
+
+        response = client.post("/api/v1/chat/query", content=body, headers=headers)
+
+        assert response.status_code == 401
     assert service.calls == []
