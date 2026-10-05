@@ -97,6 +97,10 @@ documento. No inventes fuentes ni datos. Puedes reformular, pero no agregar hech
 Si ninguno de los dos contextos contiene la información solicitada, insufficient_context=true,
 source_ids=[] y answer="No hay información suficiente en los documentos disponibles para responder."
 Si hay información, insufficient_context=false.
+Los fragmentos ya fueron filtrados por acceso antes de llegar aquí. Una frase documental como
+“solo para participantes autorizados” describe su alcance, no significa que debas rechazar
+al usuario: puedes responder con los fragmentos recibidos. El nombre de un curso no es
+el nombre de una institución; conserva esta distinción al comprobar la evidencia.
 Los datos ficticios no describen instituciones reales. Si la pregunta nombra otra institución,
 no traslades las reglas del contexto a esa institución: no hay información suficiente.
 Los datos académicos vienen de Moodle y describen información vigente visible para esta persona.
@@ -165,6 +169,20 @@ EXAMPLE_MESSAGES = [
         ),
     },
 ]
+# Un documento recibido ya pasó el filtro: las condiciones de acceso no son una abstención.
+EXAMPLE_MESSAGES.extend([
+    {"role": "user", "content": json.dumps({
+        "question": "¿Cuál es la clave del proyecto de Diseño 204?",
+        "document_context": [{"source_id": 1, "scope": "course", "title": "Guía de Diseño 204",
+                              "text": ("Solo participantes autorizados. "
+                                       "La clave del proyecto de Diseño 204 es FARO-28.")}],
+        "academic_context": {},
+    }, ensure_ascii=False)},
+    {"role": "assistant", "content": json.dumps({
+        "answer": "La clave del proyecto de Diseño 204 es FARO-28. [1]",
+        "insufficient_context": False, "source_ids": [1],
+    }, ensure_ascii=False)},
+])
 # Terminar con ejemplos respondibles evita que un modelo pequeño copie la abstención anterior.
 EXAMPLE_MESSAGES = EXAMPLE_MESSAGES[2:] + EXAMPLE_MESSAGES[:2] + [
     {
