@@ -156,7 +156,7 @@ final class academic_context_provider {
             'assignments' => $record['assignment_id'],
             'calendar' => $record['event_id'],
             'grades' => [$record['course_id'], $record['item_name'], $record['participant']],
-            'teachers' => [$record['course_id'], $record['names']],
+            'teachers' => [$record['course_id'], $record['teacher_id'] ?? null, $record['names']],
         };
         return $category . ':' . hash('sha256', json_encode($identity));
     }
@@ -209,14 +209,15 @@ final class academic_context_provider {
                 $participants = $search->get_participants(sort: 'id ASC');
                 foreach ($participants as $participant) {
                     if (is_enrolled($context, $participant->id, '', true)) {
-                        $names[] = fullname($participant, has_capability('moodle/site:viewfullnames', $context));
+                        $names[(int)$participant->id] = fullname($participant, has_capability('moodle/site:viewfullnames', $context));
                     }
                 }
                 $participants->close();
             }
-            foreach ($names ?: [''] as $name) {
+            foreach ($names ?: [0 => ''] as $teacherid => $name) {
             $result[] = ['course_id' => (int)$course->id, 'course_name' => $course->fullname,
-                'names' => $name === '' ? [] : [$name], 'state' => $allowed ? 'ok' : 'unavailable',
+                'names' => $name === '' ? [] : [$name], 'teacher_id' => $teacherid ? (int)$teacherid : null,
+                'state' => $allowed ? 'ok' : 'unavailable',
                 'source' => 'Moodle'];
             }
         }

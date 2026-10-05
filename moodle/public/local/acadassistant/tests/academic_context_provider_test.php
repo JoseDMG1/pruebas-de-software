@@ -279,6 +279,8 @@ final class academic_context_provider_test extends \advanced_testcase {
         $provider = new \local_acadassistant\local\academic_context_provider();
         $history = [];
         foreach ([
+            '¿Qué profes tengo este ciclo?',
+            '¿Quiénes me enseñan este ciclo?',
             'qué profesores me enseñan en este ciclo?',
             'me refería a los nombres de los docentes con quienes estoy inscrito a este ciclo',
             'entonces la única docente que tengo registrado para este ciclo es Carla Docente y nadie más?',
@@ -287,6 +289,7 @@ final class academic_context_provider_test extends \advanced_testcase {
             $this->assertSame(['teachers'], $result['requested_categories']);
             $this->assertSame('', $result['academic_context']['query']['document_question']);
             $this->assertSame(['Carla Docente'], $result['academic_context']['teachers'][0]['names']);
+            $this->assertSame((int)$teacher->id, $result['academic_context']['teachers'][0]['teacher_id']);
             $this->assertSame(str_starts_with($question, 'entonces'),
                 $result['academic_context']['query']['teacher_confirmation']);
             $history[] = ['question' => $result['context_question'], 'answer' => 'Carla Docente'];

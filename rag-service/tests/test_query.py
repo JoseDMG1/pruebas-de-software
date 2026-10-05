@@ -541,7 +541,7 @@ def test_teacher_confirmation_is_direct_and_bounded_by_visible_data():
             'teachers': [
                 {'course_id': 2, 'course_name': 'Algebra 101', 'names': [], 'state': 'ok'},
                 {'course_id': 3, 'course_name': 'Biologia 102',
-                 'names': ['Carla Docente'], 'state': 'ok'},
+                 'names': ['Carla Docente'], 'teacher_id': 10, 'state': 'ok'},
             ],
             'query': {'categories': ['teachers'], 'teacher_confirmation': True},
         },
@@ -575,4 +575,24 @@ def test_teacher_confirmation_never_confuses_partial_or_empty_results_with_exclu
     }
     result = service().ask('¿Carla Docente es mi única docente?', academic_context=context)
     assert result.answer.startswith(expected)
+    assert not result.sources
+
+
+@pytest.mark.parametrize(
+    "second_id,prefix", [(11, "No,"), (10, "Sí,"), (None, "No puedo confirmar")]
+)
+def test_teacher_confirmation_counts_people_not_matching_display_names(second_id, prefix):
+    context = {
+        'teachers': [
+            {'course_name': 'Biologia 102', 'names': ['Carla Docente'],
+             'teacher_id': 10, 'state': 'ok'},
+            {'course_name': 'Algebra 101', 'names': ['Carla Docente'],
+             'teacher_id': second_id, 'state': 'ok'},
+        ],
+        'query': {'categories': ['teachers'], 'teacher_confirmation': True},
+    }
+    result = service().ask('¿Carla Docente es mi única docente?', academic_context=context)
+    assert result.answer.startswith(prefix)
+    if second_id == 11:
+        assert 'más de una persona' in result.answer
     assert not result.sources

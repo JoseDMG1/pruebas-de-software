@@ -71,6 +71,8 @@ with sync_playwright() as playwright:
     assert "Algebra 101" in ask(page, "¿Y en Algebra 101?")
     assert "Carla Docente" in ask(page, "¿Y en Biologia 102?")
     for question in [
+        "¿Qué profes tengo este ciclo?",
+        "¿Quiénes me enseñan este ciclo?",
         "qué profesores me enseñan en este ciclo?",
         "me refería a los nombres de los docentes con quienes estoy inscrito a este ciclo",
         "entonces la única docente que tengo registrado para este ciclo es Carla Docente y nadie más?",

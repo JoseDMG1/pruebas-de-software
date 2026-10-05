@@ -145,6 +145,11 @@ def confirm_teacher(rows: list, plan: AcademicPlan, question: str) -> str:
 
     names = list(dict.fromkeys(name for row in rows for name in row["names"]))
     matched = [name for name in names if normalise(name) in normalise(question)]
+    populated = [row for row in rows if row["names"]]
+    identities_known = all(isinstance(row.get("teacher_id"), int) and
+                           not isinstance(row.get("teacher_id"), bool) and row["teacher_id"] > 0
+                           for row in populated)
+    identities = {row["teacher_id"] for row in populated} if identities_known else set()
     gaps = list(dict.fromkeys(row["course_name"] for row in rows
                               if not row["names"] or row.get("state") == "unavailable"))
     if not names:
@@ -153,9 +158,13 @@ def confirm_teacher(rows: list, plan: AcademicPlan, question: str) -> str:
     if plan.has_more or not plan.complete:
         return ("No puedo confirmar que sea la única docente: la consulta es parcial. "
                 "Según Moodle, aparecen: " + ", ".join(names) + ".")
-    if len(matched) == 1 and len(names) == 1:
-        answer = f"Sí, {names[0]} es la única docente visible en los cursos consultados de Moodle."
-    elif len(matched) == 1:
+    if len(matched) == 1 and len(names) == 1 and identities_known and len(identities) > 1:
+        answer = (f"No, Moodle muestra más de una persona docente con el nombre {names[0]}. "
+                  "No puedo distinguir a cuál te refieres solo por el nombre.")
+    elif len(matched) == 1 and identities_known and len(identities) == 1:
+        answer = (f"Sí, {matched[0]} es la única docente visible "
+                  "en los cursos consultados de Moodle.")
+    elif len(matched) == 1 and len(names) > 1:
         others = [name for name in names if name != matched[0]]
         answer = (f"No, además de {matched[0]}, Moodle muestra a " + ", ".join(others) + ".")
     else:

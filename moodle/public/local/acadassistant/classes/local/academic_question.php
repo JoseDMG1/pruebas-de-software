@@ -12,6 +12,7 @@ defined('MOODLE_INTERNAL') || die();
 
 /** Interprets supported academic operations without granting access to any record. */
 final class academic_question {
+    private const TEACHER_PATTERN = '/\b(profesores?|profesoras?|docentes?|quienes? (?:me )?ensenan?|quienes? (?:me )?dictan?|profes)\b/';
     public static function normalise(string $text): string {
         $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
         return trim(preg_replace('/\s+/', ' ', \core_text::strtolower($ascii === false ? $text : $ascii)));
@@ -46,7 +47,8 @@ final class academic_question {
         foreach ($clauses as $clause) {
             $normal = self::normalise($clause);
             $asksaboutcycle = str_contains($normal, 'ciclo') &&
-                !preg_match('/profesor|docente|mis cursos|cursos tengo|materias llevo|matriculad|inscrit|tareas|entregas|calificaciones/', $normal);
+                !preg_match(self::TEACHER_PATTERN, $normal) &&
+                !preg_match('/mis cursos|cursos tengo|materias llevo|matriculad|inscrit|tareas|entregas|calificaciones/', $normal);
             $isdocument = $asksaboutcycle ||
                 (bool)preg_match('/reglamento|normativa|nota minima|aprobatori|documento|silabo|codigo|tutoria|biblioteca/', $normal);
             if ($isdocument) {
@@ -64,7 +66,7 @@ final class academic_question {
         if (preg_match('/\b(cursos?|materias?|asignaturas?|llevo|matriculad[oa]s?|inscrit[oa]s?|enseno|imparto)\b/', $text) && (!$documentary || preg_match('/mis cursos|cursos tengo|materias llevo|estoy matriculad/', $text))) {
             $categories[] = 'courses';
         }
-        if (preg_match('/\b(profesores?|profesoras?|docentes?|quienes? (?:me )?ensenan?|quienes? (?:me )?dictan?|profes)\b/', $text)) {
+        if (preg_match(self::TEACHER_PATTERN, $text)) {
             $categories[] = 'teachers';
             if (!preg_match('/mis cursos|cursos tengo|materias llevo/', $text)) {
                 $categories = array_values(array_diff($categories, ['courses']));
