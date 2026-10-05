@@ -398,7 +398,7 @@ def test_mixed_requests_preserve_permitted_operations_and_requested_greeting(
         assert plan.clarification == "requests" and not plan.categories
 
 
-def test_choosing_pending_plan_does_not_expand_its_course_scope():
+def test_unresolved_pending_plan_asks_course_instead_of_expanding_mixed_scope():
     from rag_service.conversation import InterpretationRequest
     from rag_service.query import OllamaChatProvider
 
@@ -419,7 +419,8 @@ def test_choosing_pending_plan_does_not_expand_its_course_scope():
     plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query="El plan primero", runtime=payload()["runtime"],
             state={"topic": {"intent": "clarify", "clarification": "requests",
-                "scope_question": "Organiza mis tareas de Biologia 102 y dime la nota mínima"}})
+                "scope_question": ("Organiza mis tareas de Biologia 102 "
+                                   "y dime el código de Algebra 101")}})
     )
-    assert plan.intent == "weekly_plan" and "Biologia 102" in plan.scope_question
-    assert plan.document_question == ""
+    assert plan.intent == "clarify" and plan.clarification == "course"
+    assert not plan.categories and not plan.document_question

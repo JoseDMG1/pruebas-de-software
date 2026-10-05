@@ -483,6 +483,9 @@ class OllamaChatProvider:
                 )
                 if schedule.week_ambiguous:
                     data = ConversationPlan(intent="clarify", clarification="week").model_dump()
+                elif (previous and previous.intent == "clarify"
+                      and previous.clarification == "requests" and not schedule.scope_question):
+                    data = ConversationPlan(intent="clarify", clarification="course").model_dump()
                 else:
                     data = ConversationPlan(
                         intent="weekly_plan",
@@ -507,10 +510,6 @@ class OllamaChatProvider:
                         and not schedule.scope_question
                     ):
                         data["scope_question"] = previous.scope_question
-                    if (previous and previous.intent == "clarify"
-                        and previous.clarification == "requests" and not schedule.scope_question):
-                        data["scope_question"] = previous.scope_question
-                        data["follow_up"] = True
                     if schedule.availability:
                         data["availability"]["days"] = [
                             WEEKDAYS.index(day) for day in schedule.availability.days
