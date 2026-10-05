@@ -36,10 +36,10 @@ final class academic_context_provider {
         if (!in_array($plan['intent'], ['academic', 'document', 'weekly_plan'], true)) {
             throw new \moodle_exception('ragrequestfailed', 'local_acadassistant');
         }
-        return $this->collect($plan['scope_question'] ?: 'mis datos académicos', $history, $offset, $seen, $plan);
+        return $this->collect($plan['scope_question'] ?: 'mis datos académicos', $history, $offset, $seen, $plan, true);
     }
 
-    private function collect(string $question, array $conversationcontext, int $offset, array $seen, array $plan): array {
+    private function collect(string $question, array $conversationcontext, int $offset, array $seen, array $plan, bool $resolvedscope = false): array {
         global $CFG, $USER;
 
         if (!isloggedin() || isguestuser() || empty($USER->id)) {
@@ -55,7 +55,8 @@ final class academic_context_provider {
         $this->scopecomplete = true;
         $this->scopeavailable = true;
         $previousquestions = $plan['follow_up'] ? array_column(array_slice($conversationcontext, -2), 'question') : [];
-        $courses = $this->accessible_courses($plan['scope_question'], $previousquestions);
+        $scopehistory = $resolvedscope ? [] : $previousquestions;
+        $courses = $this->accessible_courses($plan['scope_question'], $scopehistory);
         if (($plan['intent'] ?? '') === 'weekly_plan') {
             $courses = $this->courses_for_mode($courses, 'enrolled');
         }
@@ -63,7 +64,7 @@ final class academic_context_provider {
         $courseids = array_values(array_map(static fn($course): int => (int)$course->id, $courses));
         $documentcourseids = [];
         if ($plan['document_question'] !== '') {
-            $documentcourses = $this->accessible_courses($plan['document_question'], $previousquestions);
+            $documentcourses = $this->accessible_courses($plan['document_question'], $scopehistory);
             $documentcourseids = array_values(array_map(static fn($course): int => (int)$course->id, $documentcourses));
             $courseids = array_values(array_unique(array_merge($courseids, $documentcourseids)));
         }
@@ -87,7 +88,8 @@ final class academic_context_provider {
         $tasknames = [];
         if (array_intersect($requested, ['assignments', 'grades'])) {
             $tasknames = $this->selected_task_names($courses, array_merge([$question], array_reverse($previousquestions)));
-            [$assignments, $grades] = $this->assignment_and_grade_context($courses, $question, $requested, $plan['assignment_filter'], $tasknames);
+            [$assignments, $grades] = $this->assignment_and_grade_context($courses,
+                ($plan['intent'] ?? '') === 'weekly_plan' ? 'mis tareas' : $question, $requested, $plan['assignment_filter'], $tasknames);
             if (in_array('assignments', $requested, true)) {
                 $context['assignments'] = $assignments;
             }

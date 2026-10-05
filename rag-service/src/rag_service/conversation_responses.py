@@ -45,12 +45,18 @@ def respond(service, question, proposal, runtime, context, history, course_ids, 
 
                 answer = compose_week(context, plan, proposal, runtime)
             else:
+                reference = proposal.teacher_reference
+                if plan.teacher_confirmation and reference:
+                    names = {name for row in context.get("teachers", []) for name in row["names"]}
+                    matching = [
+                        name
+                        for name in names
+                        if set(reference.casefold().split()).issubset(name.casefold().split())
+                    ]
+                    if len(matching) == 1:
+                        reference = matching[0]
                 answer = compose_academic(
-                    context,
-                    plan,
-                    proposal.teacher_reference or question
-                    if plan.teacher_confirmation
-                    else question,
+                    context, plan, question + (" " + reference if reference else "")
                 )
                 if answer.startswith("Según Moodle:\n"):
                     answer = (

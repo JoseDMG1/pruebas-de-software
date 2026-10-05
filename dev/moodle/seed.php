@@ -5,6 +5,7 @@ require('/var/www/moodle/config.php');
 require_once($CFG->libdir . '/testing/generator/lib.php');
 require_once($CFG->libdir . '/gradelib.php');
 require_once($CFG->dirroot . '/calendar/lib.php');
+require_once($CFG->dirroot . '/mod/assign/locallib.php');
 
 if ($CFG->wwwroot !== 'http://127.0.0.1:8088' || !getenv('MOODLE_DEMO_PASSWORD')) {
     throw new RuntimeException('This fixture script is restricted to the local test site.');

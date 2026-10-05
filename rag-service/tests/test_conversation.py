@@ -78,6 +78,11 @@ def test_model_receives_reformulation_context_before_any_moodle_read():
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
             self.calls.append(data)
+            if data["format"]["title"] == "RoutingDecision":
+                return {
+                    "done": True,
+                    "message": {"content": json.dumps({"intent": "academic", "follow_up": True})},
+                }
             return {
                 "done": True,
                 "message": {
@@ -156,7 +161,7 @@ def test_signed_response_uses_trusted_clock_and_rejects_missing_runtime():
     assert "No tienes tareas pendientes" not in result.json()["answer"]
 
 
-def test_model_weekdays_are_converted_without_guessing_and_secret_operation_is_removed():
+def test_routing_does_not_declare_availability_and_secret_operation_is_removed():
     from rag_service.conversation import InterpretationRequest
     from rag_service.query import OllamaChatProvider
 
@@ -167,6 +172,8 @@ def test_model_weekdays_are_converted_without_guessing_and_secret_operation_is_r
         def request(self, method, path, data):
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
+            if data["format"]["title"] == "RoutingDecision":
+                return {"done": True, "message": {"content": json.dumps({"intent": "academic"})}}
             return {
                 "done": True,
                 "message": {
@@ -188,7 +195,7 @@ def test_model_weekdays_are_converted_without_guessing_and_secret_operation_is_r
     plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(**payload())
     )
-    assert plan.availability.days == [1, 3]
+    assert plan.availability is None
     assert plan.document_question == "" and plan.blocked_part
 
 
@@ -282,3 +289,66 @@ def test_conversational_calendar_preserves_official_priority():
         },
     )
     assert "Discrepancia" in result.answer and "oficial tiene prioridad" in result.answer
+
+
+def test_unknown_availability_is_extracted_without_copying_previous_schedule():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        calls = []
+
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            self.calls.append(data)
+            response = {"intent": "weekly_plan"}
+            if len(self.calls) == 2:
+                response = {"availability": None, "availability_unknown": True}
+                message = json.loads(data["messages"][-1]["content"])
+                assert "state" not in message and "conversation_context" not in message
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    model = Model()
+    plan = OllamaChatProvider(Settings(_env_file=None), model).interpret(
+        InterpretationRequest(
+            query="no sé aún qué horarios tendré",
+            runtime=payload()["runtime"],
+            state={
+                "topic": {"intent": "weekly_plan", "categories": ["assignments"]},
+                "availability": {"days": [4], "start_hour": 15, "end_hour": 18},
+            },
+        )
+    )
+    assert len(model.calls) == 2
+    assert plan.availability is None and plan.availability_unknown
+
+
+def test_declared_weekdays_are_converted_by_the_separate_schedule_extractor():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"intent": "weekly_plan"}
+            if "intent" not in data["format"]["properties"]:
+                response = {
+                    "availability": {"days": ["martes", "jueves"], "start_hour": 14, "end_hour": 16}
+                }
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(
+            query="Puedo estudiar martes y jueves de 14 a 16",
+            runtime=payload()["runtime"],
+        )
+    )
+    assert plan.availability.days == [1, 3]

@@ -72,6 +72,21 @@ final class conversation_test extends \advanced_testcase {
         $this->assertSame(['academic'], $weekly['academic_provenance']);
     }
 
+    public function test_model_resolved_global_scope_does_not_inherit_an_old_course(): void {
+        $this->resetAfterTest();
+        $first = $this->getDataGenerator()->create_course(['fullname' => 'Algebra']);
+        $second = $this->getDataGenerator()->create_course(['fullname' => 'Biologia']);
+        $user = $this->getDataGenerator()->create_user();
+        foreach ([$first, $second] as $course) {
+            $this->getDataGenerator()->enrol_user($user->id, $course->id, 'student');
+        }
+        $this->setUser($user);
+        $result = (new \local_acadassistant\local\academic_context_provider())->collect_for_plan(
+            ['intent' => 'academic', 'categories' => ['courses'], 'scope_question' => 'mis cursos', 'follow_up' => true],
+            [['question' => 'mis profesores en Biologia', 'answer' => 'Docentes visibles.']]);
+        $this->assertCount(2, $result['academic_context']['courses']);
+    }
+
     public function test_schedule_followup_keeps_the_explicit_week(): void {
         global $CFG;
         $this->resetAfterTest();

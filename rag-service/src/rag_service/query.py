@@ -24,7 +24,12 @@ from rag_service.conversation import (
     ConversationPlan,
     INTERPRET_PROMPT,
     Runtime,
-    InterpretationOutput,
+    ScheduleOutput,
+    SCHEDULE_FIELDS,
+    SCHEDULE_PROMPT,
+    routing_schema,
+    RoutingDecision,
+    ROUTE_PROMPT,
     WEEKDAYS,
 )
 from rag_service.local_embeddings import OllamaEmbeddingProvider
@@ -244,8 +249,9 @@ EXAMPLE_MESSAGES = (
                     "document_context": [
                         {
                             "source_id": 1,
-                            "text": ("El duplicado de carné cuesta 8 soles "
-                                     "y se entrega en dos horas."),
+                            "text": (
+                                "El duplicado de carné cuesta 8 soles y se entrega en dos horas."
+                            ),
                         },
                         {"source_id": 2, "text": "El gimnasio abre a las 6:00."},
                     ],
@@ -401,29 +407,85 @@ class OllamaChatProvider:
             },
             ensure_ascii=False,
         )
-        result = self.client.request(
-            "POST",
-            "/api/chat",
-            {
-                "model": model["name"],
-                "stream": False,
-                "messages": [
-                    {"role": "system", "content": INTERPRET_PROMPT},
-                    {"role": "user", "content": message},
-                ],
-                "format": InterpretationOutput.model_json_schema(),
-                "options": options,
-            },
-        )
-        try:
+
+        def generate_plan(prompt, schema, message):
+            result = self.client.request(
+                "POST",
+                "/api/chat",
+                {
+                    "model": model["name"],
+                    "stream": False,
+                    "messages": [
+                        {"role": "system", "content": prompt},
+                        {"role": "user", "content": message},
+                    ],
+                    "format": schema,
+                    "options": options,
+                },
+            )
             if result.get("done") is not True or result.get("done_reason") == "length":
                 raise ValueError("Incomplete interpretation")
-            output = InterpretationOutput.model_validate_json(result["message"]["content"])
-            data = output.model_dump()
-            if output.availability:
-                data["availability"]["days"] = [
-                    WEEKDAYS.index(day) for day in output.availability.days
-                ]
+            return result["message"]["content"]
+
+        try:
+            schema = RoutingDecision.model_json_schema() | {"additionalProperties": False}
+            schema["required"] = list(schema["properties"])
+            route = RoutingDecision.model_validate_json(
+                generate_plan(ROUTE_PROMPT, schema, message)
+            )
+            if route.intent in ("social", "capabilities", "blocked", "clarify"):
+                data = ConversationPlan(**route.model_dump()).model_dump()
+            elif route.intent == "weekly_plan":
+                schedule = ScheduleOutput.model_validate_json(
+                    generate_plan(
+                        SCHEDULE_PROMPT,
+                        ScheduleOutput.model_json_schema(),
+                        json.dumps(
+                            {
+                                "runtime": request.runtime.model_dump(),
+                                "query": request.query,
+                            },
+                            ensure_ascii=False,
+                        ),
+                    )
+                )
+                if schedule.week_ambiguous:
+                    data = ConversationPlan(intent="clarify", clarification="week").model_dump()
+                else:
+                    data = ConversationPlan(
+                        intent="weekly_plan",
+                        categories=["assignments"],
+                        scope_question=request.query,
+                        follow_up=route.follow_up,
+                        blocked_part=route.blocked_part,
+                    ).model_dump()
+                    data.update(schedule.model_dump(exclude={"week_ambiguous"}))
+                    if (
+                        previous
+                        and previous.intent == "weekly_plan"
+                        and (schedule.availability or schedule.availability_unknown)
+                    ):
+                        data["follow_up"] = True
+                    if schedule.availability:
+                        data["availability"]["days"] = [
+                            WEEKDAYS.index(day) for day in schedule.availability.days
+                        ]
+            else:
+                schema = routing_schema()
+                schema["properties"]["intent"] = {"type": "string", "enum": [route.intent]}
+                if route.intent == "document":
+                    schema["properties"]["categories"]["maxItems"] = 0
+                    schema["properties"]["document_question"]["minLength"] = 1
+                    schema["required"].append("document_question")
+                else:
+                    schema["properties"]["categories"]["minItems"] = 1
+                    schema["required"].append("categories")
+                data = json.loads(generate_plan(INTERPRET_PROMPT, schema, message))
+                for field in SCHEDULE_FIELDS:
+                    data.pop(field, None)
+                data = ConversationPlan.model_validate(data).model_dump()
+                data["blocked_part"] = route.blocked_part or data["blocked_part"]
+                data["finance"] = route.finance or data["finance"]
             # A proposed retrieval must not carry secret-extraction instructions to another model.
             if re.search(
                 r"(revela|muestra|dame|extrae|imprime).{0,60}"
@@ -537,8 +599,11 @@ class QueryService:
                 insufficient_context=True,
                 request_id=request_id,
             )
-        evidence_question = (f"Consulta actual: {original_question}\nParte documental: {question}"
-                             if original_question else question)
+        evidence_question = (
+            f"Consulta actual: {original_question}\nParte documental: {question}"
+            if original_question
+            else question
+        )
         evidence = extract(self.chat, evidence_question, fragments)
         if not self.repository.sources_current(fragments):
             raise AppError("corpus_changed", "Los documentos cambiaron; repite la consulta.")
