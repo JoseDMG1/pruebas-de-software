@@ -443,7 +443,9 @@ class OllamaChatProvider:
 
         try:
             schema = RoutingDecision.model_json_schema() | {"additionalProperties": False}
-            schema["required"] = ["rationale", "planning", "intents", "social", "follow_up", "finance"]
+            schema["required"] = [
+                "rationale", "planning", "intents", "social", "follow_up", "finance",
+            ]
             route = RoutingDecision.model_validate_json(
                 generate_plan(ROUTE_PROMPT, schema, json.dumps({
                     **({"previous_topic": {"intent": previous.intent,
