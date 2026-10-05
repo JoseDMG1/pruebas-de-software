@@ -16,6 +16,7 @@ final class academic_context_provider {
     private const MAX_RECORDS_PER_CATEGORY = 20;
     private int $recordlimit = 21;
     private bool $scopecomplete = true;
+    private bool $scopeavailable = true;
     private const CALENDAR_DAYS_BACK = 30;
     private const CALENDAR_DAYS_AHEAD = 180;
 
@@ -38,10 +39,18 @@ final class academic_context_provider {
         $offset = max(0, min(10000, $offset));
         $this->recordlimit = $offset + count($seen) + self::MAX_RECORDS_PER_CATEGORY + 1;
         $this->scopecomplete = true;
+        $this->scopeavailable = true;
         $plan = academic_question::interpret($question, $conversationcontext);
         $previousquestions = $plan['follow_up'] ? array_column(array_slice($conversationcontext, -2), 'question') : [];
         $courses = $this->accessible_courses($plan['scope_question'], $previousquestions);
+        $academicavailable = $this->scopeavailable;
         $courseids = array_values(array_map(static fn($course): int => (int)$course->id, $courses));
+        $documentcourseids = [];
+        if ($plan['document_question'] !== '') {
+            $documentcourses = $this->accessible_courses($plan['document_question'], $previousquestions);
+            $documentcourseids = array_values(array_map(static fn($course): int => (int)$course->id, $documentcourses));
+            $courseids = array_values(array_unique(array_merge($courseids, $documentcourseids)));
+        }
         $requested = $plan['categories'];
         $context = [];
 
@@ -81,8 +90,9 @@ final class academic_context_provider {
         if ($plan['finance']) {
             $notices[] = 'El asistente todavía no consulta cuotas, saldos ni pagos personales.';
         }
-        if (!$courses && preg_match('/\b(?:en|del|para)\s+(?:el\s+)?curso\b/u', academic_question::normalise($question))) {
-            $notices[] = 'No puedo consultar datos de ese curso con el acceso disponible.';
+        if ($requested && !$academicavailable) {
+            $notices[] = 'No puedo consultar datos de ese curso con el acceso disponible. Precisa el curso que necesitas.';
+            $context = [];
         }
         if (!empty($context['assignments'])) {
             $matches = array_filter($context['assignments'], static fn($row) =>
@@ -115,6 +125,7 @@ final class academic_context_provider {
             'assignment_filter' => $plan['assignment_filter'], 'has_more' => $hasmore,
             'complete' => $this->scopecomplete, 'continuing' => (bool)$seen, 'notices' => $notices,
             'document_question' => $plan['document_question'],
+            'document_course_ids' => $documentcourseids,
         ];
         return [
             'course_ids' => $courseids,
@@ -244,6 +255,7 @@ final class academic_context_provider {
         }
         $catalog->close();
         if ($namesfound) {
+            $this->scopeavailable = (bool)$named;
             return $named;
         }
 
@@ -304,6 +316,7 @@ final class academic_context_provider {
             $question
         );
         if ($namesunknowncourse) {
+            $this->scopeavailable = false;
             return [];
         }
         foreach (array_reverse($previousquestions) as $previousquestion) {

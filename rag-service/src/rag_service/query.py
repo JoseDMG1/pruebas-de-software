@@ -4,6 +4,8 @@ import json
 import re
 import uuid
 
+import psycopg
+
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -363,8 +365,20 @@ class QueryService:
                     sources=[], insufficient_context=False, request_id=request_id
                 )
             # Documentary generation never determines whether authorized academic facts exist.
-            documentary = self.ask(plan.document_question, request_id, course_ids=course_ids,
-                                   conversation_context=conversation_context)
+            try:
+                documentary = self.ask(
+                    plan.document_question, request_id,
+                    course_ids=tuple(plan.document_course_ids)
+                    if plan.document_course_ids is not None else course_ids,
+                    conversation_context=conversation_context,
+                )
+            except (AppError, psycopg.Error):
+                if not academic_answer:
+                    raise
+                return QueryResponse(
+                    answer=academic_answer + "\nNo pude consultar la parte documental. Inténtalo de nuevo.",
+                    sources=[], insufficient_context=False, request_id=request_id,
+                )
             if academic_answer:
                 document_answer = ("No encontré evidencia documental suficiente "
                                    "para esa parte de la pregunta."

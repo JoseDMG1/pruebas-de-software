@@ -109,7 +109,8 @@ final class academic_context_provider_test extends \advanced_testcase {
             ->collect_for_question('¿Qué tareas tengo en Física 201?');
 
         $this->assertSame([], $context['course_ids']);
-        $this->assertSame([], $context['academic_context']['assignments']);
+        $this->assertArrayNotHasKey('assignments', $context['academic_context']);
+        $this->assertNotEmpty($context['academic_context']['query']['notices']);
     }
 
     /** Permission and course-selection coverage for teacher queries. */
@@ -368,5 +369,24 @@ final class academic_context_provider_test extends \advanced_testcase {
         $this->assertSame([], $result['requested_categories']);
         $this->assertSame([(int)$course->id], $result['course_ids']);
         $this->assertArrayNotHasKey('assignments', $result['academic_context']);
+    }
+    public function test_mixed_courses_preserve_independent_document_authorization(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $biology = $generator->create_course(['fullname' => 'Biologia 102']);
+        $algebra = $generator->create_course(['fullname' => 'Algebra 101']);
+        $student = $generator->create_user();
+        foreach ([$biology, $algebra] as $course) {
+            $generator->enrol_user($student->id, $course->id, 'student');
+            $generator->get_plugin_generator('mod_assign')->create_instance([
+                'course' => $course->id, 'name' => 'Tarea del curso',
+            ]);
+        }
+        $this->setUser($student);
+        $result = (new \local_acadassistant\local\academic_context_provider())->collect_for_question(
+            '¿Qué tareas tengo en Biologia 102 y cuál es el código de tutoría de Algebra 101?');
+        $this->assertSame([(int)$algebra->id], $result['academic_context']['query']['document_course_ids']);
+        $this->assertContains((int)$algebra->id, $result['course_ids']);
+        $this->assertSame([(int)$biology->id], array_column($result['academic_context']['assignments'], 'course_id'));
     }
 }

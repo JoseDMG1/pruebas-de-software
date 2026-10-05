@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt
 
 
 class AcademicPlan(BaseModel):
@@ -14,6 +14,7 @@ class AcademicPlan(BaseModel):
     complete: StrictBool = True
     continuing: StrictBool = False
     notices: list[str] = Field(default_factory=list, max_length=10)
+    document_course_ids: list[StrictInt] | None = Field(default=None, max_length=500)
     document_question: str = Field(default="", max_length=1000)
 
 
@@ -135,6 +136,7 @@ def calendar_discrepancies(context: dict, sources: list) -> list[str]:
     """Compare unambiguous dates for the same event; leave ambiguous documents unclassified."""
     import re
     from datetime import date
+    import unicodedata
 
     months = {
         name: number
@@ -173,12 +175,29 @@ def calendar_discrepancies(context: dict, sources: list) -> list[str]:
             continue
         official = next(iter(dates))
         for event in context.get("calendar", []):
-            topics = set(re.findall(r"ciclo|matrícula|examen", event["name"].lower()))
-            if not topics or not any(topic in text for topic in topics):
-                continue
-            qualifiers = re.findall(r"primero|primer|segundo|tercer[oa]?|cuarto|20\d{2}",
-                                    event["name"].lower())
-            if any(qualifier not in text for qualifier in qualifiers):
+
+            def words(value):
+                ascii_text = (
+                    unicodedata.normalize("NFKD", value.lower()).encode("ascii", "ignore").decode()
+                )
+                ascii_text = re.sub(r"\binici(?:o|a)|\bempieza|\bcomienza", "inicio", ascii_text)
+                return set(re.findall(r"\b[a-z0-9]+\b", ascii_text)) - {
+                    "el",
+                    "la",
+                    "los",
+                    "las",
+                    "de",
+                    "del",
+                    "en",
+                    "un",
+                    "una",
+                    "demo",
+                    "se",
+                    "al",
+                }
+
+            eventwords = words(event["name"])
+            if len(eventwords) < 2 or not eventwords.issubset(words(source.excerpt)):
                 continue
             native = event["starts_date"][:10]
             if native != official:

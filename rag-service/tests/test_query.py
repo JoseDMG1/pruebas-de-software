@@ -490,3 +490,37 @@ def test_mixed_calendar_reports_a_clear_official_date_discrepancy():
     result = service(Repository([official]), chat).ask('fecha del ciclo', academic_context=context)
     assert 'Discrepancia' in result.answer and '2026-09-01' in result.answer
     assert '2026-08-12' in result.answer and 'oficial tiene prioridad' in result.answer
+
+
+def test_calendar_does_not_compare_different_exam_subjects():
+    official = fragment() | {'tipo_documento': 'CALENDARIO',
+                             'contenido': 'Examen de Matemáticas: 2026-12-01.'}
+    chat = Chat(GenerationOutput(answer='Examen de Matemáticas: 2026-12-01. [1]',
+                                insufficient_context=False, source_ids=[1]))
+    context = {'calendar': [{'name': 'Examen de Biología', 'starts_date': '2026-11-01 08:00'}],
+               'query': {'categories': ['calendar'], 'document_question': 'calendario'}}
+    result = service(Repository([official]), chat).ask('calendario', academic_context=context)
+    assert 'Discrepancia' not in result.answer and 'tiene prioridad' not in result.answer
+
+
+def test_document_scope_cannot_exceed_signed_moodle_courses():
+    secret = 'a-local-test-secret-with-at-least-32-chars'
+    app = create_app(Settings(_env_file=None, moodle_service_secret=secret),
+                     repository=Repository(), query_service=service())
+    body = json.dumps({'query': 'documento', 'academic_context': {
+        'query': {'categories': [], 'document_question': 'documento', 'document_course_ids': [99]}
+    }}).encode()
+    response = TestClient(app).post('/api/v1/chat/query', content=body,
+        headers=signed_moodle_headers(secret, body, courses=[2]))
+    assert response.status_code == 403
+
+
+def test_document_failure_keeps_verified_academic_part_and_explains_failure():
+    class UnavailableChat(Chat):
+        def generate(self, *args, **kwargs):
+            raise AppError('ollama_timeout', 'Modelo no disponible.')
+    context = {'courses': [{'name': 'Algebra 101', 'short_name': 'ALG101'}],
+               'query': {'categories': ['courses'], 'document_question': 'reglamento'}}
+    result = service(chat=UnavailableChat()).ask('cursos y reglamento', academic_context=context)
+    assert 'Algebra 101' in result.answer and 'No pude consultar la parte documental' in result.answer
+    assert not result.insufficient_context and not result.sources

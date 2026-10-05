@@ -77,6 +77,9 @@ def create_app(settings: Settings | None = None, repository=None, query_service=
             raw_body,
             settings.moodle_service_secret,
         )
+        document_ids = body.academic_context.get("query", {}).get("document_course_ids")
+        if document_ids is not None and not set(document_ids).issubset(claims["courses"]):
+            raise HTTPException(status_code=403, detail="Alcance documental no autorizado.")
         request.state.moodle_assertion = claims
         return await run_in_threadpool(
             execute_query,

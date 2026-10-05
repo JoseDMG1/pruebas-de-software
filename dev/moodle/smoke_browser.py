@@ -89,6 +89,11 @@ with sync_playwright() as playwright:
     report["mixed_documentary"] = ask(page,
         "¿Qué cursos tengo y cuál es la nota mínima aprobatoria en Universidad Demo del Valle?")
     assert "Algebra 101" in report["mixed_documentary"] and "11" in report["mixed_documentary"], report["mixed_documentary"]
+    report["independent_mixed_course_scopes"] = ask(page,
+        "¿Qué tareas tengo en Biologia 102 y cuál es el código de tutoría de Algebra 101?")
+    assert "Informe de laboratorio" in report["independent_mixed_course_scopes"]
+    assert "ALG-TUTOR-16" in report["independent_mixed_course_scopes"], report["independent_mixed_course_scopes"]
+    assert "Documento de prueba ALG101" in page.locator(".local-acadassistant-turn").last.inner_text()
     clear(page)
     report["new_conversation_cleared"] = True
     report["institutional"] = ask(page, "¿Cuál es la nota mínima aprobatoria en Universidad Demo del Valle?")
