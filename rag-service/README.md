@@ -72,9 +72,24 @@ sin historial persistente. Los documentos describen la **Universidad Demo del Va
 ```bash
 rag ask '¿Cuánto cuesta un certificado de estudios y cuánto tarda su entrega?'
 curl http://127.0.0.1:8000/api/v1/chat/query \
+  -H 'Authorization: Bearer <aserción firmada de Moodle de corta duración>' \
   -H 'Content-Type: application/json' \
   -d '{"query":"¿Cuál es la nota mínima aprobatoria?"}'
 ```
+
+`POST /api/v1/chat/query` requiere una aserción Moodle firmada con el secreto compartido
+`MOODLE_SERVICE_SECRET`; el RAG falla de forma cerrada si no se configura. Moodle conserva el mismo
+secreto en la configuración servidor de `config.php` y nunca lo envía al navegador del chat. Consulta
+el [contrato del plugin](../moodle/public/local/acadassistant/README.md). Las rutas sin autenticación
+`/api/v1/demo/chat/query` y `/demo` solo existen cuando `LOCAL_DEMO_QUERY_ENABLED=true`. Compose
+local activa esa opción y publica el puerto en `127.0.0.1`; desactívala en cualquier entorno
+compartido o desplegado.
+
+La aserción autenticada establece identidad y ámbito, pero esta etapa aún no implementa metadata ni
+filtrado documental por curso. Hasta completar el ticket 02, mantén en el RAG únicamente documentos
+compartidos que todas las cuentas Moodle autenticadas puedan consultar. El campo
+`academic_context` queda autenticado por el hash del cuerpo; el uso de esos datos en respuestas se
+implementa en el ticket 03.
 
 El endpoint acepta `query`, no vacía, de hasta 1000 caracteres. Devuelve `answer`, `sources`,
 `insufficient_context` y `request_id`. Las fuentes contienen `source_id`, `fragment_id`, `document_id`,

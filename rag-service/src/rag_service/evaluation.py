@@ -56,7 +56,7 @@ def main():
     for case in cases:
         start = time.monotonic()
         request = Request(
-            args.base_url.rstrip("/") + "/api/v1/chat/query",
+            args.base_url.rstrip("/") + "/api/v1/demo/chat/query",
             data=json.dumps({"query": case["query"]}).encode(),
             headers={"Content-Type": "application/json"},
         )

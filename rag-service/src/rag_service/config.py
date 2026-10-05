@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_url: str = "postgresql://rag:rag_local_dev@localhost:55432/rag"
+    moodle_service_secret: SecretStr | None = None
+    local_demo_query_enabled: bool = False
     aws_profile: str | None = None
     aws_region: str = "us-east-1"
     bedrock_model_id: str = "amazon.titan-embed-text-v2:0"

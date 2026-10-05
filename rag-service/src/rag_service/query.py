@@ -8,6 +8,7 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    JsonValue,
     StrictBool,
     StrictInt,
     ValidationError,
@@ -23,6 +24,7 @@ INSUFFICIENT_ANSWER = "No hay información suficiente en los documentos disponib
 class QueryRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     query: str = Field(min_length=1, max_length=1000)
+    academic_context: dict[str, JsonValue] = Field(default_factory=dict)
 
     @field_validator("query")
     @classmethod

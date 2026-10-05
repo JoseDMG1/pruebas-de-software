@@ -29,7 +29,7 @@ class DemoBrowser:
 def test_wait_state_blocks_duplicate_requests_and_renders_safe_sources():
     with DemoBrowser() as page:
         requests = []
-        page.route("**/api/v1/chat/query", lambda route: requests.append(route))
+        page.route("**/api/v1/demo/chat/query", lambda route: requests.append(route))
         page.locator("#question").fill("¿Nota mínima?")
         page.locator("#submit").click()
         assert page.locator("#submit").is_disabled() and page.locator("#question").is_disabled()
@@ -67,7 +67,7 @@ def test_wait_state_blocks_duplicate_requests_and_renders_safe_sources():
 def test_error_recovers_and_insufficient_response_has_no_sources():
     with DemoBrowser() as page:
         page.route(
-            "**/api/v1/chat/query",
+            "**/api/v1/demo/chat/query",
             lambda route: route.fulfill(
                 status=503,
                 content_type="application/json",
@@ -78,9 +78,9 @@ def test_error_recovers_and_insufficient_response_has_no_sources():
         page.locator("#submit").click()
         page.locator("#error").wait_for(state="visible")
         assert page.locator("#submit").is_enabled()
-        page.unroute("**/api/v1/chat/query")
+        page.unroute("**/api/v1/demo/chat/query")
         page.route(
-            "**/api/v1/chat/query",
+            "**/api/v1/demo/chat/query",
             lambda route: route.fulfill(
                 status=200,
                 content_type="application/json",

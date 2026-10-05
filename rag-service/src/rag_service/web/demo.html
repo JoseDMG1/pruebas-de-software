@@ -47,7 +47,7 @@ form.addEventListener('submit',async event=>{
  status.textContent='Buscando documentos y preparando la respuesta…';error.hidden=true;result.hidden=true;
  const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),150000);
  try{
-  const response=await fetch('/api/v1/chat/query',{method:'POST',headers:{'Content-Type':'application/json'},
+  const response=await fetch('/api/v1/demo/chat/query',{method:'POST',headers:{'Content-Type':'application/json'},
    body:JSON.stringify({query}),signal:controller.signal});
   const data=await response.json();
   if(!response.ok)throw new Error(data.message||'No se pudo procesar la consulta.');

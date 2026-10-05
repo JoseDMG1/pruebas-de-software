@@ -15,6 +15,7 @@ from rag_service.query import (
     QueryRequest,
     QueryService,
 )
+from moodle_auth_support import signed_moodle_headers
 
 
 def fragment():
@@ -144,22 +145,36 @@ def test_api_error_mapping_and_safe_logging(code, status, caplog):
         def ask(self, question, request_id):
             raise AppError(code, "Error controlado.")
 
-    app = create_app(Settings(_env_file=None), Repository(), Failed())
+    secret = "test-shared-secret-that-is-long-enough"
+    app = create_app(Settings(_env_file=None, moodle_service_secret=secret), Repository(), Failed())
+    body = json.dumps({"query": "texto privado"}, separators=(",", ":")).encode()
+    headers = signed_moodle_headers(secret, body)
     with caplog.at_level("INFO", logger="rag_service"):
-        response = TestClient(app).post("/api/v1/chat/query", json={"query": "texto privado"})
+        response = TestClient(app).post("/api/v1/chat/query", content=body, headers=headers)
     assert response.status_code == status
     assert response.json()["code"] == code and response.json()["request_id"]
     assert "texto privado" not in caplog.text
 
 
 def test_api_response_and_invalid_request():
-    app = create_app(Settings(_env_file=None), Repository(), service())
+    secret = "test-shared-secret-that-is-long-enough"
+    settings = Settings(
+        _env_file=None, moodle_service_secret=secret, local_demo_query_enabled=True,
+    )
+    app = create_app(settings, Repository(), service())
     client = TestClient(app)
-    response = client.post("/api/v1/chat/query", json={"query": "¿Nota mínima?"})
+    body = json.dumps(
+        {"query": "¿Nota mínima?"}, ensure_ascii=False, separators=(",", ":"),
+    ).encode()
+    response = client.post(
+        "/api/v1/chat/query", content=body, headers=signed_moodle_headers(secret, body),
+    )
     assert response.status_code == 200 and response.json()["sources"][0]["page_start"] == 1
     assert client.post("/api/v1/chat/query", json={"query": "  "}).status_code == 422
     assert client.post("/api/v1/chat/query", json={"query": "x", "extra": "x"}).status_code == 422
     assert client.get("/demo").status_code == 200
+    demo = client.post("/api/v1/demo/chat/query", json={"query": "¿Nota mínima?"})
+    assert demo.status_code == 200
 
 
 class ChatAPI:

@@ -1,12 +1,14 @@
 import logging
 import time
 import uuid
-from typing import Literal
+from typing import Annotated, Literal
 from importlib.resources import files
 
 import psycopg
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
 from rag_service.config import Settings, get_settings
@@ -14,6 +16,10 @@ from rag_service.observability import log_event
 from rag_service.repository import Repository
 from rag_service.errors import AppError
 from rag_service.query import QueryRequest, QueryResponse, QueryService
+from rag_service.moodle_auth import verify_moodle_assertion
+
+bearer_auth = HTTPBearer(auto_error=False)
+BearerCredentials = Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_auth)]
 
 
 class HealthResponse(BaseModel):
@@ -50,18 +56,42 @@ def create_app(settings: Settings | None = None, repository=None, query_service=
         return JSONResponse(payload, status_code=200 if available else 503)
 
     service = query_service or QueryService(settings, repository)
-
     @application.get("/demo", response_class=HTMLResponse)
     def demo():
+        if not settings.local_demo_query_enabled:
+            raise HTTPException(status_code=404)
         return HTMLResponse(files("rag_service").joinpath("web/demo.html").read_text())
 
     @application.post("/api/v1/chat/query", response_model=QueryResponse)
-    def query(body: QueryRequest):
+    async def query(
+        request: Request,
+        body: QueryRequest,
+        credentials: BearerCredentials,
+    ):
+        raw_body = await request.body()
+        authorization = (
+            f"{credentials.scheme} {credentials.credentials}" if credentials is not None else None
+        )
+        claims = verify_moodle_assertion(
+            authorization,
+            raw_body,
+            settings.moodle_service_secret,
+        )
+        request.state.moodle_assertion = claims
+        return await run_in_threadpool(execute_query, body.query)
+
+    @application.post("/api/v1/demo/chat/query", response_model=QueryResponse)
+    def demo_query(body: QueryRequest):
+        if not settings.local_demo_query_enabled:
+            raise HTTPException(status_code=404)
+        return execute_query(body.query)
+
+    def execute_query(question: str):
         start = time.monotonic()
         request_id = str(uuid.uuid4())
         status, code = "ok", None
         try:
-            return service.ask(body.query, request_id)
+            return service.ask(question, request_id)
         except (AppError, psycopg.Error) as exc:
             status = "error"
             if isinstance(exc, psycopg.Error):

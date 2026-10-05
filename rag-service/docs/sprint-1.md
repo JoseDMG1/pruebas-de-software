@@ -33,6 +33,9 @@ Las interfaces añadidas son `POST /api/v1/chat/query`, `GET /demo`, `rag ask`, 
 `rag prepare-demo`. La ingesta, listado, eliminación, preparación de índice y salud siguen disponibles.
 No se añadió otra migración: se reutiliza el esquema versión 2.
 
+El endpoint de Moodle requiere una aserción firmada servidor a servidor. La página de demostración
+usa una ruta separada que solo se habilita con `LOCAL_DEMO_QUERY_ENABLED` en el Compose local.
+
 ## Trazabilidad del incremento
 
 | Requisito / historia | Evidencia del prototipo |
