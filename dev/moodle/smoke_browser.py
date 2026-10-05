@@ -81,6 +81,9 @@ with sync_playwright() as playwright:
     report["resolved_followup"] = ask(page, "Ejercicios de ecuaciones")
     assert "Ejercicios de ecuaciones" in report["resolved_followup"]
     assert "Informe de laboratorio" not in report["resolved_followup"]
+    for _ in range(4):
+        followup = ask(page, "¿Y a qué hora?")
+        assert "Ejercicios de ecuaciones" in followup and "Informe de laboratorio" not in followup, followup
     ask(page, "¿Qué tareas tengo?")
     ask(page, "¿Cuándo vence esa tarea?")
     newtopic = ask(page, "¿Qué cursos tengo?")

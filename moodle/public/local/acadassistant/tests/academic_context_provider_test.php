@@ -59,6 +59,54 @@ final class academic_context_provider_test extends \advanced_testcase {
         $this->assertArrayNotHasKey('userid', $context['academic_context']['assignments'][0]);
     }
 
+    public function test_named_task_survives_followups_but_not_a_new_topic(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
+        $generator = $this->getDataGenerator()->get_plugin_generator('mod_assign');
+        $generator->create_instance(['course' => $course->id, 'name' => 'Ejercicios de ecuaciones']);
+        $generator->create_instance(['course' => $course->id, 'name' => 'Informe de laboratorio']);
+        $this->setUser($student);
+        $provider = new \local_acadassistant\local\academic_context_provider();
+        $first = $provider->collect_for_question('¿Cuándo vence Ejercicios de ecuaciones?');
+        $history = [['question' => $first['context_question'], 'answer' => 'Fecha de entrega']];
+        for ($i = 0; $i < 4; $i++) {
+            $next = $provider->collect_for_question('¿Y a qué hora?', $history);
+            $this->assertSame(['Ejercicios de ecuaciones'], array_column($next['academic_context']['assignments'], 'name'));
+            $history = [['question' => $next['context_question'], 'answer' => 'Fecha de entrega']];
+        }
+        $newtopic = $provider->collect_for_question('¿Qué tareas tengo?', $history);
+        $this->assertCount(2, $newtopic['academic_context']['assignments']);
+        $changed = $provider->collect_for_question('¿Y cuándo vence Informe de laboratorio?', $history);
+        $this->assertSame(['Informe de laboratorio'], array_column($changed['academic_context']['assignments'], 'name'));
+    }
+
+    public function test_individual_extension_is_the_live_effective_due_date(): void {
+        global $DB, $CFG;
+        $this->resetAfterTest();
+        require_once($CFG->dirroot . '/mod/assign/locallib.php');
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
+        $assignment = $this->getDataGenerator()->get_plugin_generator('mod_assign')->create_instance([
+            'course' => $course->id, 'name' => 'Informe', 'duedate' => time() + DAYSECS,
+        ]);
+        $cm = get_coursemodule_from_instance('assign', $assignment->id, $course->id);
+        $assign = new \assign(\context_module::instance($cm->id), $cm, $course);
+        $flags = $assign->get_user_flags($student->id, true);
+        $flags->extensionduedate = $assignment->duedate + DAYSECS;
+        $DB->update_record('assign_user_flags', $flags);
+        $this->setUser($student);
+        $provider = new \local_acadassistant\local\academic_context_provider();
+        $result = $provider->collect_for_question('¿Qué tareas tengo?');
+        $this->assertSame((int)$flags->extensionduedate, $result['academic_context']['assignments'][0]['due_at']);
+        $flags->extensionduedate += DAYSECS;
+        $DB->update_record('assign_user_flags', $flags);
+        $result = $provider->collect_for_question('¿Qué tareas tengo?');
+        $this->assertSame((int)$flags->extensionduedate, $result['academic_context']['assignments'][0]['due_at']);
+    }
+
     public function test_calendar_query_includes_own_visible_events_not_other_users_events(): void {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course(['fullname' => 'Ciclo actual']);

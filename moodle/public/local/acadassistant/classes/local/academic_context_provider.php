@@ -68,8 +68,10 @@ final class academic_context_provider {
             }, array_values($listedcourses));
         }
 
+        $tasknames = [];
         if (array_intersect($requested, ['assignments', 'grades'])) {
-            [$assignments, $grades] = $this->assignment_and_grade_context($courses, $question, $requested, $plan['assignment_filter']);
+            $tasknames = $this->selected_task_names($courses, array_merge([$question], array_reverse($previousquestions)));
+            [$assignments, $grades] = $this->assignment_and_grade_context($courses, $question, $requested, $plan['assignment_filter'], $tasknames);
             if (in_array('assignments', $requested, true)) {
                 $context['assignments'] = $assignments;
             }
@@ -93,13 +95,6 @@ final class academic_context_provider {
         if ($requested && !$academicavailable) {
             $notices[] = 'No puedo consultar datos de ese curso con el acceso disponible. Precisa el curso que necesitas.';
             $context = [];
-        }
-        if (!empty($context['assignments'])) {
-            $matches = array_filter($context['assignments'], static fn($row) =>
-                str_contains(academic_question::normalise($question), academic_question::normalise($row['name'])));
-            if ($matches) {
-                $context['assignments'] = array_values($matches);
-            }
         }
         if ($plan['ambiguous_task'] && count($context['assignments'] ?? []) > 1) {
             $notices[] = '¿De cuál tarea necesitas la fecha? Indica su nombre y curso.';
@@ -132,7 +127,7 @@ final class academic_context_provider {
             'academic_context' => $context,
             'requested_categories' => $requested,
             'continuation_seen' => array_values(array_unique($newseen)),
-            'context_question' => $this->resolved_question($question, $plan, $courses),
+            'context_question' => $this->resolved_question($question . ($tasknames ? ' (' . implode(', ', $tasknames) . ')' : ''), $plan, $courses),
         ];
     }
 
@@ -295,19 +290,6 @@ final class academic_context_provider {
             strcasecmp($left->fullname, $right->fullname) ?: ((int)$left->id <=> (int)$right->id));
 
         $normalisedquestion = $this->normalise_text($question);
-        $matched = [];
-        foreach ($accessible as $course) {
-            foreach ([$course->fullname, $course->shortname] as $name) {
-                $normalisedname = $this->normalise_text((string)$name);
-                if (strlen($normalisedname) >= 3 && str_contains($normalisedquestion, $normalisedname)) {
-                    $matched[$course->id] = $course;
-                    break;
-                }
-            }
-        }
-        if ($matched) {
-            return $matched;
-        }
         $namesunknowncourse = preg_match(
             '/\b(?:en|del|para)\s+(?:el\s+)?curso\s+[^?.,;]+/u',
             $normalisedquestion
@@ -338,8 +320,28 @@ final class academic_context_provider {
         return $accessible;
     }
 
+    /** Resolve named visible tasks before pagination, preferring the current question over its topic. */
+    private function selected_task_names(array $courses, array $questions): array {
+        global $USER;
+        foreach ($questions as $question) {
+            $names = [];
+            foreach ($courses as $course) {
+                foreach (get_fast_modinfo($course, $USER->id)->get_instances_of('assign') as $cm) {
+                    if ($cm->uservisible && has_capability('mod/assign:view', \context_module::instance($cm->id)) &&
+                            str_contains(academic_question::normalise($question), academic_question::normalise($cm->name))) {
+                        $names[] = (string)$cm->name;
+                    }
+                }
+            }
+            if ($names) {
+                return array_values(array_unique($names));
+            }
+        }
+        return [];
+    }
+
     /** Read visible assignments and grades without creating or updating Moodle records. */
-    private function assignment_and_grade_context(array $courses, string $question, array $requested, string $assignmentfilter): array {
+    private function assignment_and_grade_context(array $courses, string $question, array $requested, string $assignmentfilter, array $tasknames): array {
         global $USER;
 
         $assignments = [];
@@ -372,11 +374,13 @@ final class academic_context_provider {
                     }
                 }
 
-                if ($wantsassignments && count($assignments) < $this->recordlimit) {
+                if ($wantsassignments && count($assignments) < $this->recordlimit &&
+                        (!$tasknames || in_array((string)$cm->name, $tasknames, true))) {
                     $submission = $instance->teamsubmission
                         ? $assign->get_group_submission($target['id'], 0, false)
                         : $assign->get_user_submission($target['id'], false);
-                    $duedate = (int)$instance->duedate;
+                    $flags = $assign->get_user_flags($target['id'], false);
+                    $duedate = max((int)$instance->duedate, (int)($flags->extensionduedate ?? 0));
                     $submissionstatus = $submission ? (string)$submission->status : 'not_submitted';
                     $matchesfilter = $assignmentfilter;
                     if (($matchesfilter === 'pending' && $submissionstatus === 'submitted') ||
