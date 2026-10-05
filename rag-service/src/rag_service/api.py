@@ -9,7 +9,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from starlette.concurrency import run_in_threadpool
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from rag_service.config import Settings, get_settings
 from rag_service.observability import log_event
@@ -17,6 +17,7 @@ from rag_service.repository import Repository
 from rag_service.errors import AppError
 from rag_service.query import QueryRequest, QueryResponse, QueryService
 from rag_service.moodle_auth import verify_moodle_assertion
+from rag_service.conversation import ConversationPlan, InterpretationRequest
 
 bearer_auth = HTTPBearer(auto_error=False)
 BearerCredentials = Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_auth)]
@@ -61,6 +62,23 @@ def create_app(settings: Settings | None = None, repository=None, query_service=
         if not settings.local_demo_query_enabled:
             raise HTTPException(status_code=404)
         return HTMLResponse(files("rag_service").joinpath("web/demo.html").read_text())
+
+    @application.post("/api/v1/chat/interpret", response_model=ConversationPlan)
+    async def interpret(
+        request: Request, body: InterpretationRequest, credentials: BearerCredentials,
+    ):
+        authorization = (f"{credentials.scheme} {credentials.credentials}"
+                         if credentials is not None else None)
+        verify_moodle_assertion(authorization, await request.body(), settings.moodle_service_secret)
+        try:
+            proposed = await run_in_threadpool(service.interpret, body)
+            return ConversationPlan.model_validate(proposed)
+        except (ValidationError, AppError) as exc:
+            raise HTTPException(status_code=503, detail={
+                "code": "interpretation_unavailable",
+                "message": ("No pude interpretar la consulta. "
+                            "Inténtalo de nuevo o precisa tu pregunta."),
+            }) from exc
 
     @application.post("/api/v1/chat/query", response_model=QueryResponse)
     async def query(

@@ -1,6 +1,6 @@
 # Interpretación natural y contexto temporal
 
-Status: ready-for-agent
+Status: in-progress
 
 ## Objetivo
 

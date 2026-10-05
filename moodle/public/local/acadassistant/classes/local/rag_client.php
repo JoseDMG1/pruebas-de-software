@@ -115,6 +115,29 @@ final class rag_client {
             throw new \moodle_exception('ragrequestfailed', 'local_acadassistant');
         }
 
+        return $this->send_request('/api/v1/chat/query', $body, $courseids);
+    }
+
+    /** Interpret user text; the signed server clock and session state are never model permissions. */
+    public function interpret(string $question, array $history = [], array $state = []): array {
+        if (trim($question) === '' || \core_text::strlen($question) > 1000 || count($history) > 4) {
+            throw new \moodle_exception('ragrequestfailed', 'local_acadassistant');
+        }
+        $body = json_encode(['query' => $question, 'conversation_context' => array_values($history),
+            'state' => (object)$state, 'runtime' => self::runtime()],
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if (strlen($body) > self::MAX_CONTEXT_BYTES) {
+            throw new \moodle_exception('ragrequestfailed', 'local_acadassistant');
+        }
+        return conversation_plan::validate($this->send_request('/api/v1/chat/interpret', $body, []));
+    }
+
+    public static function runtime(): array {
+        return ['now' => time(), 'timezone' => \core_date::get_user_timezone_object()->getName()];
+    }
+
+    private function send_request(string $path, string $body, array $courseids): array {
+        $this->validate_current_user_and_course_scope($courseids);
         $now = time();
         $claims = [
             'iss' => 'moodle',
@@ -127,7 +150,7 @@ final class rag_client {
             'body_sha256' => hash('sha256', $body),
         ];
         $assertion = $this->sign_assertion($claims);
-        $url = rtrim($this->baseurl, '/') . '/api/v1/chat/query';
+        $url = rtrim($this->baseurl, '/') . $path;
         $headers = [
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer ' . $assertion,
@@ -211,7 +234,7 @@ final class rag_client {
                 'Content-Type: application/json',
                 'Authorization: Bearer ' . $assertion,
             ],
-            'CURLOPT_TIMEOUT' => 30,
+            'CURLOPT_TIMEOUT' => 180,
             // Never forward the bearer assertion to a redirect target.
             'CURLOPT_FOLLOWLOCATION' => false,
         ]);
