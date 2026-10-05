@@ -549,3 +549,30 @@ def test_weekly_course_scope_cannot_be_rewritten_as_a_global_request():
         InterpretationRequest(query=query, runtime=payload()["runtime"])
     )
     assert plan.intent == "weekly_plan" and plan.scope_question == query
+
+
+def test_changing_teacher_course_cannot_become_a_confirmation_of_a_person():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"intents": ["teachers"], "confirmation": False, "follow_up": True}
+            if data["format"]["title"] == "ConversationPlan":
+                response = {"intent": "academic", "categories": ["teachers"],
+                            "teacher_confirmation": True, "teacher_reference": "Biologia 102"}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query="¿Y en Biologia 102?", runtime=payload()["runtime"],
+            state={"topic": {"intent": "academic", "categories": ["teachers"],
+                             "scope_question": "mis profesores"}})
+    )
+    assert plan.categories == ["teachers"]
+    assert not plan.teacher_confirmation and not plan.teacher_reference
+    assert plan.scope_question == "¿Y en Biologia 102?"

@@ -72,6 +72,37 @@ final class conversation_test extends \advanced_testcase {
         $this->assertSame(['academic'], $weekly['academic_provenance']);
     }
 
+    public function test_current_named_course_overrides_a_broad_or_stale_proposed_scope(): void {
+        $this->resetAfterTest();
+        $first = $this->getDataGenerator()->create_course(['fullname' => 'Algebra 101']);
+        $second = $this->getDataGenerator()->create_course(['fullname' => 'Biologia 102']);
+        $private = $this->getDataGenerator()->create_course(['fullname' => 'Reservado 103']);
+        $user = $this->getDataGenerator()->create_user();
+        foreach ([$first, $second] as $course) {
+            $this->getDataGenerator()->enrol_user($user->id, $course->id, 'student');
+        }
+        $this->setUser($user);
+        $provider = new \local_acadassistant\local\academic_context_provider();
+        foreach (['mis cursos', 'cursos de Algebra 101'] as $scope) {
+            $result = $provider->collect_for_plan(
+                ['intent' => 'academic', 'categories' => ['courses'], 'scope_question' => $scope],
+                [], 0, [], '¿Y en Biologia 102?');
+            $this->assertSame([(int)$second->id], array_column($result['academic_context']['courses'], 'course_id'));
+            $this->assertStringContainsString('Biologia 102', $result['context_question']);
+            $this->assertStringNotContainsString('Algebra 101', $result['context_question']);
+        }
+        $denied = $provider->collect_for_plan(
+            ['intent' => 'academic', 'categories' => ['courses'], 'scope_question' => 'mis cursos'],
+            [], 0, [], '¿Y en Reservado 103?');
+        $this->assertArrayNotHasKey('courses', $denied['academic_context']);
+        $this->assertNotEmpty($denied['academic_context']['query']['notices']);
+        $unknown = $provider->collect_for_plan(
+            ['intent' => 'academic', 'categories' => ['courses'], 'scope_question' => 'mis cursos'],
+            [], 0, [], '¿Y en el curso Desconocido 999?');
+        $this->assertArrayNotHasKey('courses', $unknown['academic_context']);
+        $this->assertNotEmpty($unknown['academic_context']['query']['notices']);
+    }
+
     public function test_model_resolved_global_scope_does_not_inherit_an_old_course(): void {
         $this->resetAfterTest();
         $first = $this->getDataGenerator()->create_course(['fullname' => 'Algebra']);

@@ -31,15 +31,16 @@ final class academic_context_provider {
     }
 
     /** Execute only validated operations; every record still requires native capabilities. */
-    public function collect_for_plan(array $proposal, array $history = [], int $offset = 0, array $seen = []): array {
+    public function collect_for_plan(array $proposal, array $history = [], int $offset = 0,
+            array $seen = [], string $currentquestion = ''): array {
         $plan = conversation_plan::validate($proposal);
         if (!in_array($plan['intent'], ['academic', 'document', 'weekly_plan'], true)) {
             throw new \moodle_exception('ragrequestfailed', 'local_acadassistant');
         }
-        return $this->collect($plan['scope_question'] ?: 'mis datos académicos', $history, $offset, $seen, $plan, true);
+        return $this->collect($plan['scope_question'] ?: 'mis datos académicos', $history, $offset, $seen, $plan, true, $currentquestion);
     }
 
-    private function collect(string $question, array $conversationcontext, int $offset, array $seen, array $plan, bool $resolvedscope = false): array {
+    private function collect(string $question, array $conversationcontext, int $offset, array $seen, array $plan, bool $resolvedscope = false, string $currentquestion = ''): array {
         global $CFG, $USER;
 
         if (!isloggedin() || isguestuser() || empty($USER->id)) {
@@ -56,7 +57,18 @@ final class academic_context_provider {
         $this->scopeavailable = true;
         $previousquestions = $plan['follow_up'] ? array_column(array_slice($conversationcontext, -2), 'question') : [];
         $scopehistory = $resolvedscope ? [] : $previousquestions;
-        $courses = $this->accessible_courses($plan['scope_question'], $scopehistory);
+        $courses = $this->accessible_courses($plan['scope_question'], $scopehistory,
+            $plan['document_question'] === '' ? $currentquestion : '');
+        if ($currentquestion !== '' && $plan['document_question'] === '' && count($courses) === 1) {
+            $course = reset($courses);
+            foreach ([$course->fullname, $course->shortname] as $name) {
+                if (strlen($this->normalise_text($name)) >= 3 &&
+                        str_contains($this->normalise_text($currentquestion), $this->normalise_text($name))) {
+                    $question = $currentquestion;
+                    break;
+                }
+            }
+        }
         if (($plan['intent'] ?? '') === 'weekly_plan') {
             $courses = $this->courses_for_mode($courses, 'enrolled');
         }
@@ -243,35 +255,53 @@ final class academic_context_provider {
     }
 
     /** Return courses Moodle permits this user to access, optionally narrowed by course name. */
-    private function accessible_courses(string $question, array $previousquestions = []): array {
+    private function accessible_courses(string $question, array $previousquestions = [],
+            string $currentquestion = ''): array {
         global $USER, $DB;
 
         // Resolve an explicit course before applying the broad-scope request bound.
         // Catalog names never become evidence until native access has been checked.
-        $normalisedquestion = $this->normalise_text($question);
-        $catalog = $DB->get_recordset('course', null, 'id ASC', 'id, fullname, shortname');
-        $named = [];
-        $namesfound = false;
-        foreach ($catalog as $candidate) {
-            if ((int)$candidate->id === (int)SITEID) {
+        // A named course in the current question overrides a broad or stale model scope.
+        foreach (array_unique([$currentquestion, $question]) as $scopequestion) {
+            if ($scopequestion === '') {
                 continue;
             }
-            foreach ([$candidate->fullname, $candidate->shortname] as $name) {
-                $normalisedname = $this->normalise_text($name);
-                if (strlen($normalisedname) >= 3 && str_contains($normalisedquestion, $normalisedname)) {
-                    $namesfound = true;
-                    $course = get_course($candidate->id);
-                    if (can_access_course($course, $USER, '', true)) {
-                        $named[$course->id] = $course;
+            $normalisedquestion = $this->normalise_text($scopequestion);
+            $catalog = $DB->get_recordset('course', null, 'id ASC', 'id, fullname, shortname');
+            $named = [];
+            $namesfound = false;
+            foreach ($catalog as $candidate) {
+                if ((int)$candidate->id === (int)SITEID) {
+                    continue;
+                }
+                foreach ([$candidate->fullname, $candidate->shortname] as $name) {
+                    $normalisedname = $this->normalise_text($name);
+                    if (strlen($normalisedname) >= 3 && str_contains($normalisedquestion, $normalisedname)) {
+                        $namesfound = true;
+                        $course = get_course($candidate->id);
+                        if (can_access_course($course, $USER, '', true)) {
+                            $named[$course->id] = $course;
+                        }
+                        break;
                     }
-                    break;
                 }
             }
-        }
-        $catalog->close();
-        if ($namesfound) {
-            $this->scopeavailable = (bool)$named;
-            return $named;
+            $catalog->close();
+            if ($namesfound) {
+                $this->scopeavailable = (bool)$named;
+                return $named;
+            }
+            $namesunknowncourse = preg_match(
+                '/\b(?:en|del|para)\s+(?:el\s+)?curso\s+[^?.,;]+/u',
+                $normalisedquestion
+            ) || preg_match(
+                '/\b(?:en|del|para)\s+(?:el\s+)?\p{Lu}[\p{L}\p{N}-]*(?:\s+\p{Lu}[\p{L}\p{N}-]*)*/u',
+                $scopequestion
+            );
+            if ($namesunknowncourse) {
+                $this->scopeavailable = false;
+                return [];
+            }
         }
 
         $courses = enrol_get_users_courses(
@@ -309,18 +339,6 @@ final class academic_context_provider {
         uasort($accessible, static fn($left, $right): int =>
             strcasecmp($left->fullname, $right->fullname) ?: ((int)$left->id <=> (int)$right->id));
 
-        $normalisedquestion = $this->normalise_text($question);
-        $namesunknowncourse = preg_match(
-            '/\b(?:en|del|para)\s+(?:el\s+)?curso\s+[^?.,;]+/u',
-            $normalisedquestion
-        ) || preg_match(
-            '/\b(?:en|del|para)\s+(?:el\s+)?\p{Lu}[\p{L}\p{N}-]*(?:\s+\p{Lu}[\p{L}\p{N}-]*)*/u',
-            $question
-        );
-        if ($namesunknowncourse) {
-            $this->scopeavailable = false;
-            return [];
-        }
         foreach (array_reverse($previousquestions) as $previousquestion) {
             $normalisedprevious = $this->normalise_text($previousquestion);
             $previousmatches = [];

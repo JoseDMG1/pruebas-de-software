@@ -206,6 +206,8 @@ Operaciones:
 - Tareas por defecto pending; entregadas submitted; todas all. Borrador sigue pendiente.
 - scope_question expresa datos a leer y cursos/tareas/personas referidos, resueltos con historial.
   No heredes el curso de una pregunta independiente. Conserva nombres completos de actividades.
+  Si query cambia explícitamente de curso, COPIA query completa como scope_question.
+  Si es una referencia sin nuevo curso/tarea, conserva previous_scope pertinente.
 - Referencia a una tarea entre varias: ambiguous_task=true. No adivines cuál.
 - Normas, calendario oficial y cómo usar Moodle: document_question conserva la consulta.
   intent=document cuando no hay operación académica. No sustituye un dato personal de Moodle.
@@ -284,6 +286,7 @@ class RoutingDecision(BaseModel):
     model_config = ConfigDict(extra="forbid")
     rationale: str = Field(default="", max_length=250)
     planning: StrictBool = False
+    confirmation: StrictBool = False
     intents: list[Literal[
         "social", "capabilities", "courses", "teachers", "assignments", "grades", "calendar",
         "document", "clarify", "blocked"
@@ -326,6 +329,8 @@ document: normas institucionales y guías para usar Moodle, incluida recuperar a
 Pedir pasos o CÓMO HACER una entrega en el portal es document; no leer sus tareas.
 planning=true si quiere ORGANIZAR, DISTRIBUIR o PLANIFICAR el estudio o ajustar un plan.
 planning=false si solo pide leer una lista o un dato. No depende de los nombres de operaciones.
+confirmation=true SOLO si pide verificar una afirmación, por ejemplo si una docente es la única.
+confirmation=false al pedir nombres o cambiar de curso; mencionar un curso no es una afirmación.
 El plan YA incluye la lectura necesaria de pendientes; NO añadas assignments por eso.
 Registra otras operaciones SOLO si el usuario formula otra pregunta independiente del plan.
 social: saludo, gracias, despedida. Puede acompañar otra petición; nunca reemplaza esa petición.

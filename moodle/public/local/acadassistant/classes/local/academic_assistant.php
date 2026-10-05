@@ -39,12 +39,12 @@ final class academic_assistant {
             'context_question' => $question, 'continuation_seen' => []];
         if (in_array($plan['intent'], ['academic', 'document', 'weekly_plan'], true)) {
             $provider = new academic_context_provider();
-            $context = $provider->collect_for_plan($plan, $conversationcontext, $offset, $seen);
+            $context = $provider->collect_for_plan($plan, $conversationcontext, $offset, $seen, $question);
             if ($plan['intent'] === 'weekly_plan') {
                 // Native access is revalidated for every page; neither names nor cursors grant access.
                 for ($page = 1; $page < 10 && $context['academic_context']['query']['has_more']; $page++) {
                     try {
-                        $next = $provider->collect_for_plan($plan, $conversationcontext, 0, $context['continuation_seen']);
+                        $next = $provider->collect_for_plan($plan, $conversationcontext, 0, $context['continuation_seen'], $question);
                     } catch (\Throwable) {
                         $context['academic_context']['query']['complete'] = false;
                         $context['academic_context']['query']['notices'][] =
@@ -77,6 +77,9 @@ final class academic_assistant {
         if (in_array($plan['intent'], ['academic', 'document', 'weekly_plan'], true) ||
                 ($plan['intent'] === 'clarify' && $plan['clarification'] === 'requests')) {
             $response['semantic_state']['topic'] = $plan;
+            if ($plan['intent'] === 'academic') {
+                $response['semantic_state']['topic']['scope_question'] = $context['context_question'];
+            }
         }
         if ($plan['intent'] === 'weekly_plan' && ($plan['availability'] || $plan['availability_unknown'])) {
             $response['semantic_state']['availability'] = $plan['availability'];
