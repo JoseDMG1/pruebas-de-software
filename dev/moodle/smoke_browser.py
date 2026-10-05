@@ -97,7 +97,8 @@ with sync_playwright() as playwright:
     assert 'Add submission' in guide and 'Save changes' in guide, guide
     assert 'Guía verificada Moodle 5.3dev' in page.locator('.local-acadassistant-turn').last.inner_text()
     unavailable = ask(page, '¿Cómo recupero mi contraseña en este portal?')
-    assert 'no' in unavailable.lower(), unavailable
+    assert 'No encontré una fuente verificada' in unavailable, unavailable
+    report['unsupported_portal_procedure'] = unavailable
     # A temporary institutional PDF carries a real instruction attack, then is always removed.
     from rag_service.demo_setup import make_pdf
     attack_pdf = root / 'rag-service/data/inbox/conversation-attack.pdf'
