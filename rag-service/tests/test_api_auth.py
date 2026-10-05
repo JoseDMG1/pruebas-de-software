@@ -20,11 +20,16 @@ class QuerySpy:
         self.calls = []
         self.course_scopes = []
         self.academic_contexts = []
+        self.conversation_contexts = []
 
-    def ask(self, query, request_id, *, course_ids=(), academic_context=None):
+    def ask(
+        self, query, request_id, *, course_ids=(), academic_context=None,
+        conversation_context=None,
+    ):
         self.calls.append((query, request_id))
         self.course_scopes.append(tuple(course_ids))
         self.academic_contexts.append(academic_context or {})
+        self.conversation_contexts.append(conversation_context or [])
         return {"answer": "Respuesta", "sources": [], "insufficient_context": False,
                 "request_id": request_id}
 
@@ -117,6 +122,42 @@ def test_query_passes_signed_academic_context_to_the_chat_service():
         "assignments": [{"name": "Informe", "status": "submitted", "source": "Moodle"}],
         "calendar": [{"name": "Inicio de ciclo", "source": "Calendario Moodle"}],
     }]
+
+
+def test_query_passes_signed_conversation_context_to_the_chat_service():
+    secret = "test-shared-secret-that-is-long-enough"
+    service = QuerySpy()
+    client = TestClient(create_app(
+        Settings(_env_file=None, moodle_service_secret=secret), query_service=service,
+    ))
+    history = [{"question": "¿Cuándo inicia el segundo ciclo?", "answer": "En agosto."}]
+    body = request_body(conversation_context=history)
+
+    response = client.post(
+        "/api/v1/chat/query", content=body,
+        headers=signed_moodle_headers(secret, body, user_id="42", courses=[18]),
+    )
+
+    assert response.status_code == 200
+    assert service.conversation_contexts == [history]
+
+
+def test_query_rejects_more_than_four_conversation_turns():
+    secret = "test-shared-secret-that-is-long-enough"
+    service = QuerySpy()
+    client = TestClient(create_app(
+        Settings(_env_file=None, moodle_service_secret=secret), query_service=service,
+    ))
+    history = [{"question": "Pregunta", "answer": "Respuesta"}] * 5
+    body = request_body(conversation_context=history)
+
+    response = client.post(
+        "/api/v1/chat/query", content=body,
+        headers=signed_moodle_headers(secret, body, courses=[18]),
+    )
+
+    assert response.status_code == 422
+    assert service.calls == []
 
 
 def test_query_rejects_expired_or_forged_assertions_before_calling_rag():

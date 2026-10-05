@@ -55,7 +55,12 @@ $academiccontext = [
     'assignments' => [['name' => 'Informe', 'status' => 'submitted', 'source' => 'Moodle']],
     'calendar' => [['name' => 'Inicio de ciclo', 'source' => 'Calendario Moodle']],
 ];
-$result = $client->query('¿Qué tareas me faltan?', [10, 20], $academiccontext);
+$conversationcontext = [
+    ['question' => '¿Cuándo inicia el segundo ciclo?', 'answer' => 'En agosto.'],
+];
+$result = $client->query(
+    '¿Qué fecha exacta?', [10, 20], $academiccontext, $conversationcontext
+);
 
 check($result === ['answer' => 'ok'], 'The Moodle client should decode the RAG response.');
 check(count($requests) === 1, 'The Moodle client should send one server-side request.');
@@ -84,6 +89,10 @@ check($claims['exp'] > $claims['iat'] && $claims['exp'] - $claims['iat'] <= 120,
 check($claims['body_sha256'] === hash('sha256', $body), 'The assertion must bind the complete request body.');
 $decodedbody = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
 check($decodedbody['academic_context'] === $academiccontext, 'The signed body must contain authorized academic context.');
+check(
+    $decodedbody['conversation_context'] === $conversationcontext,
+    'The signed body must contain only the current conversation context.'
+);
 
 $GLOBALS['testguest'] = true;
 $guestrejected = false;
@@ -114,6 +123,18 @@ try {
 }
 check($contextrejected, 'The Moodle client must reject unapproved academic context categories.');
 check(count($requests) === 1, 'Unapproved academic context must not reach the RAG service.');
+
+$historyrejected = false;
+try {
+    $client->query('Query with oversized history', [], [], array_fill(0, 5, [
+        'question' => 'Previous question',
+        'answer' => 'Previous answer',
+    ]));
+} catch (moodle_exception) {
+    $historyrejected = true;
+}
+check($historyrejected, 'The Moodle client must bound conversation context.');
+check(count($requests) === 1, 'Oversized conversation context must not reach the RAG service.');
 
 $GLOBALS['testallowedcourses'] = [10, 20];
 $GLOBALS['USER']->id = 99;

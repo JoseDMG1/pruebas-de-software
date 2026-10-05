@@ -20,7 +20,7 @@ final class academic_context_provider {
     /**
      * Collect only the categories that match the current question.
      *
-     * @return array{course_ids:int[], academic_context:array<string, array>}
+     * @return array{course_ids:int[], academic_context:array<string, array>, requested_categories:string[]}
      */
     public function collect_for_question(string $question): array {
         global $CFG, $USER;
@@ -65,7 +65,11 @@ final class academic_context_provider {
             $context['calendar'] = $this->calendar_context($courseids);
         }
 
-        return ['course_ids' => $courseids, 'academic_context' => $context];
+        return [
+            'course_ids' => $courseids,
+            'academic_context' => $context,
+            'requested_categories' => $requested,
+        ];
     }
 
     /** Return courses Moodle permits this user to access, optionally narrowed by course name. */

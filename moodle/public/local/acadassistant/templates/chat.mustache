@@ -1,0 +1,53 @@
+<section class="local-acadassistant-chat" aria-labelledby="assistant-title">
+    <h2 id="assistant-title">{{#str}}assistant, local_acadassistant{{/str}}</h2>
+    <p>{{#str}}assistantdescription, local_acadassistant{{/str}}</p>
+
+    {{#error}}
+        <div class="alert alert-danger" role="alert">{{error}}</div>
+    {{/error}}
+
+    <div id="conversation" aria-live="polite" aria-relevant="additions text">
+        {{#hasmessages}}
+            {{#messages}}
+                <article class="local-acadassistant-turn mb-4">
+                    <h3>{{#str}}yourquestion, local_acadassistant{{/str}}</h3>
+                    <p>{{question}}</p>
+                    <h3>{{#str}}assistantanswer, local_acadassistant{{/str}}</h3>
+                    <p>{{answer}}</p>
+                    {{#academiclabels}}
+                        <p class="small text-muted">{{label}}</p>
+                    {{/academiclabels}}
+                    {{#sources}}
+                        <details>
+                            <summary>{{label}}: {{title}}</summary>
+                            <p>{{filename}} ({{pagelabel}})</p>
+                            <blockquote>{{excerpt}}</blockquote>
+                        </details>
+                    {{/sources}}
+                </article>
+            {{/messages}}
+        {{/hasmessages}}
+        {{^hasmessages}}
+            <p>{{#str}}conversationempty, local_acadassistant{{/str}}</p>
+        {{/hasmessages}}
+    </div>
+
+    <p class="small text-muted">{{#str}}moodledataprovenance, local_acadassistant{{/str}}</p>
+
+    <form method="post" action="{{pageurl}}#conversation">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="action" value="ask">
+        <div class="mb-3">
+            <label for="assistant-question">{{#str}}questionlabel, local_acadassistant{{/str}}</label>
+            <textarea id="assistant-question" name="question" class="form-control" rows="3"
+                maxlength="1000" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">{{#str}}sendquestion, local_acadassistant{{/str}}</button>
+    </form>
+
+    <form method="post" action="{{pageurl}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="action" value="new">
+        <button type="submit" class="btn btn-secondary">{{#str}}newconversation, local_acadassistant{{/str}}</button>
+    </form>
+</section>

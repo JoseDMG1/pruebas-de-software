@@ -236,7 +236,9 @@ def test_protected_api_filters_course_documents_before_prompt_and_sources(reposi
         def __init__(self):
             self.prompt_fragments = []
 
-        def generate(self, question, fragments, *, academic_context=None):
+        def generate(
+            self, question, fragments, *, academic_context=None, conversation_context=None
+        ):
             self.prompt_fragments = [row["contenido"] for row in fragments]
             return GenerationOutput(
                 answer="Contenido disponible. [1]", insufficient_context=False, source_ids=[1],

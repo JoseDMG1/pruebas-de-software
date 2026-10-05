@@ -89,6 +89,7 @@ final class academic_context_provider_test extends \advanced_testcase {
             ->collect_for_question('¿Cuándo es el evento del calendario?');
 
         $this->assertSame('Calendario Moodle', $context['academic_context']['calendar'][0]['source']);
+        $this->assertSame(['calendar'], $context['requested_categories']);
         $eventnames = array_column($context['academic_context']['calendar'], 'name');
         $this->assertContains('Inicio de clases', $eventnames);
         $this->assertNotContains('Evento privado ajeno', $eventnames);

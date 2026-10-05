@@ -63,7 +63,12 @@ final class rag_client {
      * @param array $academiccontext Authorized courses, assignments, or grades from Moodle.
      * @return array Decoded RAG response.
      */
-    public function query(string $query, array $authorizedcourseids = [], array $academiccontext = []): array {
+    public function query(
+        string $query,
+        array $authorizedcourseids = [],
+        array $academiccontext = [],
+        array $conversationcontext = []
+    ): array {
         $query = trim($query);
         if ($query === '' || strlen($query) > 1000) {
             throw new \moodle_exception('ragrequestfailed', 'local_acadassistant');
@@ -82,10 +87,25 @@ final class rag_client {
         if (array_diff(array_keys($academiccontext), self::ACADEMIC_CONTEXT_CATEGORIES)) {
             throw new \moodle_exception('ragrequestfailed', 'local_acadassistant');
         }
+        if (count($conversationcontext) > 4) {
+            throw new \moodle_exception('ragrequestfailed', 'local_acadassistant');
+        }
+        foreach ($conversationcontext as $turn) {
+            if (!is_array($turn) || array_diff(array_keys($turn), ['question', 'answer']) ||
+                    !is_string($turn['question'] ?? null) || !is_string($turn['answer'] ?? null) ||
+                    trim($turn['question']) === '' || trim($turn['answer']) === '' ||
+                    strlen($turn['question']) > 1000 || strlen($turn['answer']) > 4000) {
+                throw new \moodle_exception('ragrequestfailed', 'local_acadassistant');
+            }
+        }
 
         try {
             $body = json_encode(
-                ['query' => $query, 'academic_context' => (object)$academiccontext],
+                [
+                    'query' => $query,
+                    'academic_context' => (object)$academiccontext,
+                    'conversation_context' => array_values($conversationcontext),
+                ],
                 JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
             );
         } catch (\JsonException) {

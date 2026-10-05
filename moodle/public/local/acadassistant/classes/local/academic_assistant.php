@@ -22,9 +22,27 @@ final class academic_assistant {
     }
 
     /** Collect authorized Moodle data and send it with the current question. */
-    public function ask(string $question): array {
+    public function ask(string $question, array $conversationcontext = []): array {
         $client = rag_client::from_current_user($this->transport);
-        $context = (new academic_context_provider())->collect_for_question($question);
-        return $client->query($question, $context['course_ids'], $context['academic_context']);
+        $recentquestions = array_column(array_slice($conversationcontext, -2), 'question');
+        $contextquestion = implode(' ', array_merge($recentquestions, [$question]));
+        $context = (new academic_context_provider())->collect_for_question($contextquestion);
+        $response = $client->query(
+            $question,
+            $context['course_ids'],
+            $context['academic_context'],
+            $conversationcontext
+        );
+        $response['academic_provenance'] = [];
+        if (in_array('calendar', $context['requested_categories'], true)) {
+            $response['academic_provenance'][] = 'calendar';
+        }
+        if (array_intersect(
+            ['courses', 'assignments', 'grades'],
+            $context['requested_categories']
+        )) {
+            $response['academic_provenance'][] = 'academic';
+        }
+        return $response;
     }
 }

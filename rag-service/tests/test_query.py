@@ -59,7 +59,7 @@ class Chat:
         )
         self.calls = 0
 
-    def generate(self, question, fragments, *, academic_context=None):
+    def generate(self, question, fragments, *, academic_context=None, conversation_context=None):
         self.calls += 1
         return self.output
 
@@ -76,6 +76,19 @@ def test_reject_invalid_questions(question):
         QueryRequest(query=question)
 
 
+def test_rejects_oversized_or_malformed_conversation_context():
+    with pytest.raises(ValidationError):
+        QueryRequest(
+            query="¿Y cuándo es?",
+            conversation_context=[{"question": "Una pregunta", "answer": "Contexto", "extra": 1}],
+        )
+    with pytest.raises(ValidationError):
+        QueryRequest(
+            query="¿Y cuándo es?",
+            conversation_context=[{"question": "q", "answer": "a"}] * 5,
+        )
+
+
 def test_sources_come_from_database_and_citations_are_present():
     result = service().ask("¿Nota mínima?", "test-request")
     assert result.sources[0].title == "Ficticio" and result.sources[0].fragment_id == 1
@@ -87,7 +100,9 @@ def test_sources_come_from_database_and_citations_are_present():
 
 def test_authorized_moodle_context_reaches_generation_even_without_document_fragments():
     class ContextChat(Chat):
-        def generate(self, question, fragments, *, academic_context=None):
+        def generate(
+            self, question, fragments, *, academic_context=None, conversation_context=None
+        ):
             self.context = academic_context
             return GenerationOutput(
                 answer="La entrega figura como presentada (Moodle).",
@@ -102,6 +117,36 @@ def test_authorized_moodle_context_reaches_generation_even_without_document_frag
     assert chat.context == context
     assert result.answer == "La entrega figura como presentada (Moodle)."
     assert not result.insufficient_context and result.sources == []
+
+
+def test_follow_up_conversation_reaches_generation_and_prior_question_supports_retrieval():
+    class FollowUpChat(Chat):
+        def generate(
+            self, question, fragments, *, academic_context=None, conversation_context=None
+        ):
+            self.received_question = question
+            self.conversation_context = conversation_context
+            return GenerationOutput(
+                answer="La fecha es el 12 de agosto. [1]",
+                insufficient_context=False,
+                source_ids=[1],
+            )
+
+    class CapturingEmbeddings(Embeddings):
+        def embed_query(self, text):
+            self.query_text = text
+            return super().embed_query(text)
+
+    chat = FollowUpChat()
+    embeddings = CapturingEmbeddings()
+    repository = Repository()
+    queryservice = QueryService(Settings(_env_file=None), repository, embeddings, chat)
+    history = [{"question": "¿Cuándo inicia el segundo ciclo?", "answer": "En agosto."}]
+
+    queryservice.ask("¿Qué fecha exacta?", conversation_context=history)
+
+    assert "¿Cuándo inicia el segundo ciclo?" in embeddings.query_text
+    assert chat.conversation_context == history
 
 
 def test_empty_corpus_does_not_call_chat():
@@ -165,7 +210,10 @@ def test_corpus_change_prevents_stale_response(insufficient):
 )
 def test_api_error_mapping_and_safe_logging(code, status, caplog):
     class Failed:
-        def ask(self, question, request_id, *, course_ids=(), academic_context=None):
+        def ask(
+            self, question, request_id, *, course_ids=(), academic_context=None,
+            conversation_context=None,
+        ):
             raise AppError(code, "Error controlado.")
 
     secret = "test-shared-secret-that-is-long-enough"
@@ -247,12 +295,19 @@ def test_chat_contract_includes_authorized_moodle_context_separately_from_docume
 
     OllamaChatProvider(Settings(_env_file=None), api).generate(
         "¿Cuándo inicia el ciclo?", [fragment()], academic_context=academic_context,
+        conversation_context=[{
+            "question": "¿Cuál es la fecha oficial?",
+            "answer": "12 de agosto.",
+        }],
     )
 
     payload = next(payload for path, payload in api.calls if path == "/api/chat")
     context = json.loads(payload["messages"][-1]["content"])
     assert context["academic_context"] == academic_context
     assert context["document_context"][0]["scope"] == "institutional"
+    assert context["conversation_context"] == [
+        {"question": "¿Cuál es la fecha oficial?", "answer": "12 de agosto."}
+    ]
     system_prompt = payload["messages"][0]["content"]
     assert "da prioridad a ese documento institucional" in system_prompt
 

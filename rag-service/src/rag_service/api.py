@@ -83,6 +83,7 @@ def create_app(settings: Settings | None = None, repository=None, query_service=
             body.query,
             tuple(claims["courses"]),
             body.academic_context,
+            [turn.model_dump() for turn in body.conversation_context],
         )
 
     @application.post("/api/v1/demo/chat/query", response_model=QueryResponse)
@@ -95,6 +96,7 @@ def create_app(settings: Settings | None = None, repository=None, query_service=
         question: str,
         course_ids: tuple[int, ...] = (),
         academic_context: dict | None = None,
+        conversation_context: list[dict] | None = None,
     ):
         start = time.monotonic()
         request_id = str(uuid.uuid4())
@@ -105,6 +107,7 @@ def create_app(settings: Settings | None = None, repository=None, query_service=
                 request_id,
                 course_ids=course_ids,
                 academic_context=academic_context or {},
+                conversation_context=conversation_context or [],
             )
         except (AppError, psycopg.Error) as exc:
             status = "error"

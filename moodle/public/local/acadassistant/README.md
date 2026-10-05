@@ -2,6 +2,8 @@
 
 El plugin firma las consultas en Moodle y las envía directamente al RAG con la sesión del usuario actual. La URL y el secreto compartido se configuran únicamente en el `config.php` del servidor Moodle; el plugin no los guarda en tablas de configuración ni los renderiza en páginas.
 
+El acceso aparece en la navegación global para cuentas personales autenticadas. La página muestra las preguntas, respuestas y fuentes documentales. Las preguntas de seguimiento reciben hasta tres turnos anteriores de la sesión Moodle; “Nueva conversación” los elimina. No hay endpoint ni listado de conversaciones históricas.
+
 ```php
 $CFG->local_acadassistant_rag_url = getenv('MOODLE_RAG_URL') ?: '';
 $CFG->local_acadassistant_rag_shared_secret = getenv('MOODLE_RAG_SHARED_SECRET') ?: '';
@@ -17,7 +19,7 @@ El cliente comprueba `can_access_course` para cada curso antes de firmar, confir
 
 RAG responde `401` para aserciones ausentes, inválidas, vencidas o con cuerpo distinto, `422` para cuerpos que no cumplen el contrato y `503` cuando no tiene un secreto de servicio configurado. La rotación requiere actualizar el mismo secreto en Moodle y RAG; prográmela como una operación coordinada.
 
-El RAG filtra los documentos de curso en PostgreSQL antes de recuperar fragmentos, según los IDs firmados en `courses`; los documentos institucionales comunes siguen disponibles para toda cuenta autenticada. Moodle es la fuente confiable de existencia de cursos: exporte su catálogo con `cli/export_course_catalog.php` y sincronícelo en RAG con `rag sync-courses`. Cada documento nuevo requiere clasificación explícita durante la ingesta. El campo `academic_context` contiene solo registros autorizados y pertinentes para la pregunta; no se persiste ni aparece en los logs ordinarios.
+El RAG filtra los documentos de curso en PostgreSQL antes de recuperar fragmentos, según los IDs firmados en `courses`; los documentos institucionales comunes siguen disponibles para toda cuenta autenticada. Moodle es la fuente confiable de existencia de cursos: exporte su catálogo con `cli/export_course_catalog.php` y sincronícelo en RAG con `rag sync-courses`. Cada documento nuevo requiere clasificación explícita durante la ingesta. `academic_context` contiene solo registros autorizados y pertinentes para la pregunta; no se persiste ni aparece en los logs ordinarios. `conversation_context` contiene hasta tres pares recientes de la conversación activa y forma parte del mismo cuerpo firmado.
 
 ## Prueba del contrato
 
