@@ -92,7 +92,7 @@ final class academic_assistant_test extends \advanced_testcase {
                 'answer' => 'Tienes una tarea pendiente.',
             ]];
             $response = (new \local_acadassistant\local\academic_assistant($transport))
-                ->ask('¿Y en Geometría?', $history);
+                ->ask('¿Y en Geometría 202?', $history);
 
             $this->assertSame(['academic'], $response['academic_provenance']);
             $this->assertCount(1, $requests);
@@ -100,8 +100,8 @@ final class academic_assistant_test extends \advanced_testcase {
             $payload = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
             $this->assertSame('https://rag.example.test/api/v1/chat/query', $url);
             $courseids = $this->verified_course_ids($headers, $body);
-            $this->assertSame([$firstcourse->id, $secondcourse->id], $courseids);
-            $this->assertCount(2, $payload['academic_context']['assignments']);
+            $this->assertSame([(int)$secondcourse->id], $courseids);
+            $this->assertCount(1, $payload['academic_context']['assignments']);
             $this->assertSame($history, $payload['conversation_context']);
             $this->assertStringStartsWith('Bearer ', $headers['Authorization']);
             $this->assertArrayNotHasKey('Authorization', $response);

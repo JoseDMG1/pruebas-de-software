@@ -37,8 +37,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             try {
                 $isfollowup = $store->is_follow_up($question);
-                $response = (new \local_acadassistant\local\academic_assistant())
-                    ->ask($question, $store->context_for_question($question));
+                $cursor = $store->continuation();
+                $continuing = \local_acadassistant\local\academic_question::is_continuation($question);
+                if ($continuing && !$cursor) {
+                    $response = ['answer' => 'No hay una lista pendiente de continuar. ¿Qué necesitas consultar?'];
+                } else {
+                    $response = (new \local_acadassistant\local\academic_assistant())
+                        ->ask($continuing ? $cursor['question'] : $question,
+                            $continuing ? [] : $store->context_for_question($question),
+                            0, $continuing ? $cursor['seen'] : []);
+                }
                 $answer = $response['answer'] ?? null;
                 if (!is_string($answer) || trim($answer) === '') {
                     throw new moodle_exception('ragrequestfailed', 'local_acadassistant');
@@ -48,7 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $answer,
                     $response['sources'] ?? [],
                     $response['academic_provenance'] ?? [],
-                    !$isfollowup
+                    !$isfollowup,
+                    $response['continuation'] ?? null
                 );
             } catch (\Throwable) {
                 $store->set_error(get_string('assistantunavailable', 'local_acadassistant'));

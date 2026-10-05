@@ -14,20 +14,24 @@ defined('MOODLE_INTERNAL') || die();
 final class conversation_store {
     private const MAX_DISPLAY_TURNS = 8;
     private const MAX_CONTEXT_TURNS = 3;
-    private const MAX_ANSWER_CHARS = 3000;
+    private const MAX_ANSWER_CHARS = 12000;
     private const MAX_EXCERPT_CHARS = 500;
 
     /** Return recent turns in the signed RAG context format. */
     public function context(): array {
         $state = $this->state();
-        return array_map(static fn(array $turn): array => [
-            'question' => \core_text::substr($turn['question'], 0, 500),
-            'answer' => \core_text::substr($turn['answer'], 0, 1200),
-        ], array_slice($state['turns'], -self::MAX_CONTEXT_TURNS));
+        return $this->format_context($state['turns']);
     }
 
     /** Decide whether a question explicitly depends on the previous exchange. */
     public function is_follow_up(string $question): bool {
+        if (academic_question::is_continuation($question)) {
+            return true;
+        }
+        $turns = $this->state()['turns'];
+        if ($turns && str_contains($turns[count($turns) - 1]['answer'], '¿De cuál tarea')) {
+            return true;
+        }
         $question = \core_text::strtolower(trim($question));
         $question = preg_replace('/^[\p{P}\s]+/u', '', $question);
         return (bool)preg_match(
@@ -48,10 +52,7 @@ final class conversation_store {
                 break;
             }
         }
-        return array_map(static fn(array $turn): array => [
-            'question' => \core_text::substr($turn['question'], 0, 500),
-            'answer' => \core_text::substr($turn['answer'], 0, 1200),
-        ], array_slice($turns, -self::MAX_CONTEXT_TURNS));
+        return $this->format_context($turns);
     }
 
     /** Return the visible messages for this conversation. */
@@ -65,7 +66,8 @@ final class conversation_store {
         string $answer,
         array $sources,
         array $academicprovenance = [],
-        bool $contextbreak = false
+        bool $contextbreak = false,
+        ?array $continuation = null
     ): void {
         $state = $this->state();
         $safeSources = [];
@@ -93,8 +95,14 @@ final class conversation_store {
             )),
             'contextbreak' => $contextbreak,
         ];
+        $state['continuation'] = $continuation;
         $state['turns'] = array_slice($state['turns'], -self::MAX_DISPLAY_TURNS);
         $this->save($state);
+    }
+
+    /** The cursor is never exposed to the browser and belongs to this identity/session. */
+    public function continuation(): ?array {
+        return $this->state()['continuation'] ?? null;
     }
 
     /** Clear only the current user's conversation. */
@@ -135,6 +143,14 @@ final class conversation_store {
     private function save(array $state): void {
         global $SESSION;
         $SESSION->local_acadassistant_conversation = $state;
+    }
+
+    /** Reference numbers belong to one retrieval batch; keep them only in the visible transcript. */
+    private function format_context(array $turns): array {
+        return array_map(static fn(array $turn): array => [
+            'question' => \core_text::substr($turn['question'], 0, 500),
+            'answer' => trim(\core_text::substr(preg_replace('/\[\d+\]/', '', $turn['answer']), 0, 1200)),
+        ], array_slice($turns, -self::MAX_CONTEXT_TURNS));
     }
 
     private function current_user_id(): int {

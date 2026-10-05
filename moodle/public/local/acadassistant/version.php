@@ -9,5 +9,5 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_acadassistant';
-$plugin->version = 2026100600;
+$plugin->version = 2026100602;
 $plugin->requires = 2025041400;

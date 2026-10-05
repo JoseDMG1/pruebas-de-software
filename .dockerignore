@@ -1,0 +1,7 @@
+**
+!moodle/
+!moodle/composer.json
+!moodle/composer.lock
+!dev/
+!dev/moodle/
+!dev/moodle/Dockerfile

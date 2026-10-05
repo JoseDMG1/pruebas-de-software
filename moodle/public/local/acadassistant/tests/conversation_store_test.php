@@ -12,6 +12,16 @@ defined('MOODLE_INTERNAL') || die();
 
 /** Tests session-only conversation state through its public operations. */
 final class conversation_store_test extends \advanced_testcase {
+    public function test_follow_up_does_not_reuse_document_reference_numbers_from_an_earlier_answer(): void {
+        $this->resetAfterTest();
+        $this->setUser($this->getDataGenerator()->create_user());
+        $store = new \local_acadassistant\local\conversation_store();
+        $store->append('¿Cuándo inicia el ciclo?', 'En agosto. [4]', []);
+
+        $this->assertSame('En agosto.', $store->context_for_question('¿Y qué fecha exacta?')[0]['answer']);
+        $this->assertSame('En agosto. [4]', $store->messages()[0]['answer']);
+    }
+
     public function test_follow_up_context_is_session_scoped_and_new_conversation_clears_it(): void {
         $this->resetAfterTest();
         $firstuser = $this->getDataGenerator()->create_user();
@@ -107,5 +117,19 @@ final class conversation_store_test extends \advanced_testcase {
         $this->setUser($user);
         $this->assertSame([], $store->messages());
         $this->assertSame([], $store->context_for_question('¿Y qué fecha exacta?'));
+    }
+    public function test_continuation_is_private_temporary_and_does_not_restore(): void {
+        $this->resetAfterTest();
+        $this->setUser($this->getDataGenerator()->create_user());
+        $store = new \local_acadassistant\local\conversation_store();
+        $cursor = ['question' => '¿Qué materias llevo?', 'seen' => ['courses:123']];
+        $store->append('¿Qué materias llevo?', 'Una lista parcial.', [], [], true, $cursor);
+        $this->assertSame($cursor, $store->continuation());
+        $this->assertTrue($store->is_follow_up('continúa'));
+        $store->clear();
+        $this->assertNull($store->continuation());
+        $store->append('cursos', 'Lista parcial.', [], [], true, $cursor);
+        $this->setUser($this->getDataGenerator()->create_user());
+        $this->assertNull($store->continuation());
     }
 }

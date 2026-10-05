@@ -14,6 +14,8 @@ defined('MOODLE_INTERNAL') || die();
 final class academic_context_provider {
     private const MAX_COURSES = 500;
     private const MAX_RECORDS_PER_CATEGORY = 20;
+    private int $recordlimit = 21;
+    private bool $scopecomplete = true;
     private const CALENDAR_DAYS_BACK = 30;
     private const CALENDAR_DAYS_AHEAD = 180;
 
@@ -22,7 +24,7 @@ final class academic_context_provider {
      *
      * @return array{course_ids:int[], academic_context:array<string, array>, requested_categories:string[]}
      */
-    public function collect_for_question(string $question): array {
+    public function collect_for_question(string $question, array $conversationcontext = [], int $offset = 0, array $seen = []): array {
         global $CFG, $USER;
 
         if (!isloggedin() || isguestuser() || empty($USER->id)) {
@@ -33,12 +35,22 @@ final class academic_context_provider {
         require_once($CFG->libdir . '/gradelib.php');
         require_once($CFG->dirroot . '/calendar/lib.php');
 
-        $courses = $this->accessible_courses($question);
-        $courseids = array_map(static fn($course): int => (int)$course->id, $courses);
-        $requested = $this->requested_categories($question);
+        $offset = max(0, min(10000, $offset));
+        $this->recordlimit = $offset + count($seen) + self::MAX_RECORDS_PER_CATEGORY + 1;
+        $this->scopecomplete = true;
+        $plan = academic_question::interpret($question, $conversationcontext);
+        $previousquestions = $plan['follow_up'] ? array_column(array_slice($conversationcontext, -2), 'question') : [];
+        $scopequestion = $question;
+        if ($plan['document_question'] !== '' && $plan['categories']) {
+            $scopequestion = str_replace($plan['document_question'], '', $question);
+        }
+        $courses = $this->accessible_courses($scopequestion, $previousquestions);
+        $courseids = array_values(array_map(static fn($course): int => (int)$course->id, $courses));
+        $requested = $plan['categories'];
         $context = [];
 
         if (in_array('courses', $requested, true)) {
+            $listedcourses = $this->courses_for_mode($courses, $plan['course_mode']);
             $context['courses'] = array_map(static function($course): array {
                 return [
                     'course_id' => (int)$course->id,
@@ -48,11 +60,11 @@ final class academic_context_provider {
                     'ends_at' => (int)$course->enddate,
                     'source' => 'Moodle',
                 ];
-            }, array_slice($courses, 0, self::MAX_RECORDS_PER_CATEGORY));
+            }, array_values($listedcourses));
         }
 
         if (array_intersect($requested, ['assignments', 'grades'])) {
-            [$assignments, $grades] = $this->assignment_and_grade_context($courses, $question, $requested);
+            [$assignments, $grades] = $this->assignment_and_grade_context($courses, $question, $requested, $plan['assignment_filter']);
             if (in_array('assignments', $requested, true)) {
                 $context['assignments'] = $assignments;
             }
@@ -61,19 +73,137 @@ final class academic_context_provider {
             }
         }
 
+        if (in_array('teachers', $requested, true)) {
+            $context['teachers'] = $this->teacher_context($this->courses_for_mode($courses, $plan['course_mode']));
+        }
+
         if (in_array('calendar', $requested, true)) {
             $context['calendar'] = $this->calendar_context($courseids);
         }
 
+        $notices = [];
+        if ($plan['finance']) {
+            $notices[] = 'El asistente todavía no consulta cuotas, saldos ni pagos personales.';
+        }
+        if (!$courses && preg_match('/\b(?:en|del|para)\s+(?:el\s+)?curso\b/u', academic_question::normalise($question))) {
+            $notices[] = 'No puedo consultar datos de ese curso con el acceso disponible.';
+        }
+        if (!empty($context['assignments'])) {
+            $matches = array_filter($context['assignments'], static fn($row) =>
+                str_contains(academic_question::normalise($question), academic_question::normalise($row['name'])));
+            if ($matches) {
+                $context['assignments'] = array_values($matches);
+            }
+        }
+        if ($plan['ambiguous_task'] && count($context['assignments'] ?? []) > 1) {
+            $notices[] = '¿De cuál tarea necesitas la fecha? Indica su nombre y curso.';
+            unset($context['assignments']);
+        }
+        $hasmore = false;
+        $newseen = $seen;
+        foreach ($context as $category => &$records) {
+            $records = array_values($records);
+            if ($seen) {
+                $records = array_values(array_filter($records, static fn($record) =>
+                    !in_array(self::record_key($category, $record), $seen, true)));
+            }
+            $hasmore = $hasmore || count($records) > ($seen ? 0 : $offset) + self::MAX_RECORDS_PER_CATEGORY;
+            $records = array_slice($records, $seen ? 0 : $offset, self::MAX_RECORDS_PER_CATEGORY);
+            foreach ($records as $record) {
+                $newseen[] = self::record_key($category, $record);
+            }
+        }
+        unset($records);
+        $context['query'] = [
+            'categories' => $requested, 'course_mode' => $plan['course_mode'],
+            'assignment_filter' => $plan['assignment_filter'], 'has_more' => $hasmore,
+            'complete' => $this->scopecomplete, 'notices' => $notices,
+            'document_question' => $plan['document_question'],
+        ];
         return [
             'course_ids' => $courseids,
             'academic_context' => $context,
             'requested_categories' => $requested,
+            'continuation_seen' => array_values(array_unique($newseen)),
         ];
     }
 
+    /** Stable identities for continuation; changing a due date does not repeat an activity. */
+    private static function record_key(string $category, array $record): string {
+        $identity = match ($category) {
+            'courses' => $record['course_id'],
+            'assignments' => $record['assignment_id'],
+            'calendar' => $record['event_id'],
+            'grades' => [$record['course_id'], $record['item_name'], $record['participant']],
+            'teachers' => [$record['course_id'], $record['names']],
+        };
+        return $category . ':' . hash('sha256', json_encode($identity));
+    }
+
+    /** Membership and course-local teaching roles are independent of global access. */
+    private function courses_for_mode(array $courses, string $mode): array {
+        global $USER;
+        if ($mode === 'accessible') {
+            return $courses;
+        }
+        $enrolled = enrol_get_users_courses($USER->id, true);
+        $teacherroles = get_archetype_roles('teacher') + get_archetype_roles('editingteacher');
+        return array_filter($courses, static function($course) use ($USER, $mode, $enrolled, $teacherroles): bool {
+            if (!isset($enrolled[$course->id])) {
+                return false;
+            }
+            if ($mode === 'enrolled') {
+                return true;
+            }
+            foreach (get_user_roles(\context_course::instance($course->id), $USER->id, false) as $role) {
+                if (isset($teacherroles[$role->roleid])) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    /** Use Moodle's participants search, including hidden roles and compulsory group filters. */
+    private function teacher_context(array $courses): array {
+        global $CFG, $USER;
+        require_once($CFG->dirroot . '/course/lib.php');
+        $roles = get_archetype_roles('teacher') + get_archetype_roles('editingteacher');
+        $result = [];
+        foreach ($courses as $course) {
+            $context = \context_course::instance($course->id);
+            $names = [];
+            $allowed = course_can_view_participants($context);
+            if ($course->groupmode == SEPARATEGROUPS && !has_capability('moodle/site:accessallgroups', $context)
+                    && !groups_get_all_groups($course->id, $USER->id)) {
+                $allowed = false;
+            }
+            if ($allowed && $roles) {
+                $filters = new \core_user\table\participants_filterset();
+                $filterclass = \core_table\local\filter\integer_filter::class;
+                $jointype = \core_table\local\filter\filter::JOINTYPE_DEFAULT;
+                $filters->add_filter(new $filterclass('courseid', $jointype, [(int)$course->id]));
+                $filters->add_filter(new $filterclass('roles', $jointype, array_map('intval', array_keys($roles))));
+                $search = new \core_user\table\participants_search($course, $context, $filters);
+                $participants = $search->get_participants(sort: 'id ASC');
+                foreach ($participants as $participant) {
+                    if (is_enrolled($context, $participant->id, '', true)) {
+                        $names[] = fullname($participant, has_capability('moodle/site:viewfullnames', $context));
+                    }
+                }
+                $participants->close();
+            }
+            foreach ($names ?: [''] as $name) {
+            $result[] = ['course_id' => (int)$course->id, 'course_name' => $course->fullname,
+                'names' => $name === '' ? [] : [$name], 'state' => $allowed ? 'ok' : 'unavailable',
+                'source' => 'Moodle'];
+            }
+        }
+        return $result;
+    }
+
     /** Return courses Moodle permits this user to access, optionally narrowed by course name. */
-    private function accessible_courses(string $question): array {
+    private function accessible_courses(string $question, array $previousquestions = []): array {
         global $USER, $DB;
 
         $courses = enrol_get_users_courses(
@@ -85,18 +215,22 @@ final class academic_context_provider {
         $capabilitycourses = get_user_capability_course(
             'moodle/course:view',
             $USER->id,
-            false,
+            true,
             'fullname, shortname, startdate, enddate',
             'fullname ASC',
-            self::MAX_COURSES
+            self::MAX_COURSES + 1
         );
-        foreach ((array)$capabilitycourses as $course) {
+        foreach ($capabilitycourses ?: [] as $course) {
             $courses[$course->id] = $course;
         }
 
         $accessible = [];
         foreach ($courses as $courseid => $course) {
-            if ((int)$courseid === SITEID || count($accessible) >= self::MAX_COURSES) {
+            if ((int)$courseid === (int)SITEID) {
+                continue;
+            }
+            if (count($accessible) >= self::MAX_COURSES) {
+                $this->scopecomplete = false;
                 continue;
             }
             $course = $DB->get_record('course', ['id' => $courseid]);
@@ -104,7 +238,8 @@ final class academic_context_provider {
                 $accessible[$course->id] = $course;
             }
         }
-        uasort($accessible, static fn($left, $right): int => strcasecmp($left->fullname, $right->fullname));
+        uasort($accessible, static fn($left, $right): int =>
+            strcasecmp($left->fullname, $right->fullname) ?: ((int)$left->id <=> (int)$right->id));
 
         $normalisedquestion = $this->normalise_text($question);
         $matched = [];
@@ -127,11 +262,30 @@ final class academic_context_provider {
             '/\b(?:en|del|para)\s+(?:el\s+)?\p{Lu}[\p{L}\p{N}-]*(?:\s+\p{Lu}[\p{L}\p{N}-]*)*/u',
             $question
         );
-        return $namesunknowncourse ? [] : $accessible;
+        if ($namesunknowncourse) {
+            return [];
+        }
+        foreach (array_reverse($previousquestions) as $previousquestion) {
+            $normalisedprevious = $this->normalise_text($previousquestion);
+            $previousmatches = [];
+            foreach ($accessible as $course) {
+                foreach ([$course->fullname, $course->shortname] as $name) {
+                    $normalisedname = $this->normalise_text((string)$name);
+                    if (strlen($normalisedname) >= 3 && str_contains($normalisedprevious, $normalisedname)) {
+                        $previousmatches[$course->id] = $course;
+                        break;
+                    }
+                }
+            }
+            if ($previousmatches) {
+                return $previousmatches;
+            }
+        }
+        return $accessible;
     }
 
     /** Read visible assignments and grades without creating or updating Moodle records. */
-    private function assignment_and_grade_context(array $courses, string $question, array $requested): array {
+    private function assignment_and_grade_context(array $courses, string $question, array $requested, string $assignmentfilter): array {
         global $USER;
 
         $assignments = [];
@@ -159,22 +313,29 @@ final class academic_context_provider {
                 }
                 $instance = $assign->get_instance($target['id']);
                 foreach ($assign->override_exists($target['id']) as $field => $value) {
-                    if (in_array($field, ['duedate', 'cutoffdate', 'allowsubmissionsfromdate'], true)) {
+                    if ($value !== null && in_array($field, ['duedate', 'cutoffdate', 'allowsubmissionsfromdate'], true)) {
                         $instance->{$field} = $value;
                     }
                 }
 
-                if ($wantsassignments && count($assignments) < self::MAX_RECORDS_PER_CATEGORY) {
+                if ($wantsassignments && count($assignments) < $this->recordlimit) {
                     $submission = $instance->teamsubmission
                         ? $assign->get_group_submission($target['id'], 0, false)
                         : $assign->get_user_submission($target['id'], false);
                     $duedate = (int)$instance->duedate;
+                    $submissionstatus = $submission ? (string)$submission->status : 'not_submitted';
+                    $matchesfilter = $assignmentfilter;
+                    if (($matchesfilter === 'pending' && $submissionstatus === 'submitted') ||
+                            ($matchesfilter === 'submitted' && $submissionstatus !== 'submitted')) {
+                        continue;
+                    }
                     $assignments[] = [
                         'course_id' => (int)$course->id,
                         'course_name' => (string)$course->fullname,
                         'assignment_id' => (int)$instance->id,
                         'name' => (string)$cm->name,
                         'due_at' => $duedate > 0 ? $duedate : null,
+                        'due_date' => $duedate > 0 ? userdate($duedate, '%Y-%m-%d %H:%M') : null,
                         'status' => $submission ? (string)$submission->status : 'not_submitted',
                         'participant' => $target['name'],
                         'source' => 'Moodle',
@@ -183,7 +344,7 @@ final class academic_context_provider {
 
             }
 
-            if ($wantsgrades && count($grades) < self::MAX_RECORDS_PER_CATEGORY) {
+            if ($wantsgrades && count($grades) < $this->recordlimit) {
                 $this->append_visible_module_grades($grades, $course, $modinfo, $target);
             }
         }
@@ -219,7 +380,10 @@ final class academic_context_provider {
             \context_course::instance($course->id),
             '',
             0,
-            'u.id, u.firstname, u.lastname',
+            'u.id, ' . implode(', ', array_map(
+                static fn($field) => 'u.' . $field,
+                \core_user\fields::get_name_fields()
+            )),
             'u.id ASC',
             0,
             self::MAX_COURSES,
@@ -256,7 +420,7 @@ final class academic_context_provider {
         array $target
     ): void {
         foreach ((array)\grade_item::fetch_all(['courseid' => $course->id]) as $gradeitem) {
-            if (count($grades) >= self::MAX_RECORDS_PER_CATEGORY || $gradeitem->itemtype !== 'mod') {
+            if (count($grades) >= $this->recordlimit || $gradeitem->itemtype !== 'mod') {
                 continue;
             }
             $instances = $modinfo->get_instances_of($gradeitem->itemmodule);
@@ -349,43 +513,18 @@ final class academic_context_provider {
             true
         );
         $result = [];
-        foreach (array_slice($events, 0, self::MAX_RECORDS_PER_CATEGORY) as $event) {
+        foreach (array_slice($events, 0, $this->recordlimit) as $event) {
             $result[] = [
                 'event_id' => (int)$event->id,
                 'course_id' => (int)$event->courseid,
                 'name' => clean_param((string)$event->name, PARAM_TEXT),
                 'starts_at' => (int)$event->timestart,
+                'starts_date' => userdate((int)$event->timestart, '%Y-%m-%d %H:%M'),
                 'duration_seconds' => (int)$event->timeduration,
                 'source' => 'Calendario Moodle',
             ];
         }
         return $result;
-    }
-
-    /** Choose only data categories suggested by the user's question. */
-    private function requested_categories(string $question): array {
-        $question = $this->normalise_text($question);
-        $categories = [];
-        if (preg_match('/\b(cursos?|llevo|matriculad[oa]s?|inscrit[oa]s?)\b/u', $question)) {
-            $categories[] = 'courses';
-        }
-        if (preg_match(
-            '/\b(tareas?|actividades?|entregas?|entregad[oa]s?|entregar|presentar|subir|'
-                . 'pendientes?|faltantes?|atrasad[oa]s?|vencen|vencimiento|plazos?)\b/u',
-            $question
-        )) {
-            $categories[] = 'assignments';
-        }
-        if (preg_match('/\b(calificaciones?|calificadas?|notas?|promedios?|puntajes?)\b/u', $question)) {
-            $categories[] = 'grades';
-        }
-        if (preg_match(
-            '/\b(calendario|eventos?|fechas?|cuando|inicia|empieza|comienza|ciclo|examen(?:es)?)\b/u',
-            $question
-        )) {
-            $categories[] = 'calendar';
-        }
-        return $categories;
     }
 
     /** Lowercase and collapse whitespace for safe exact phrase matching. */

@@ -425,3 +425,56 @@ def test_zero_query_vector_is_rejected_before_retrieval():
     with pytest.raises(AppError) as error:
         QueryService(Settings(_env_file=None), Repository(), Zero(), Chat()).ask("Pregunta")
     assert error.value.code == "invalid_embedding"
+
+
+def test_protected_endpoint_answers_courses_even_if_model_would_abstain():
+    secret = 'a-local-test-secret-with-at-least-32-chars'
+    settings = Settings(_env_file=None, moodle_service_secret=secret)
+    chat = Chat(GenerationOutput(answer='No sé', insufficient_context=True, source_ids=[]))
+    queryservice = service(chat=chat)
+    app = create_app(settings, repository=Repository(), query_service=queryservice)
+    payload = {
+        'query': 'qué cursos tengo?',
+        'academic_context': {
+            'courses': [{'course_id': 2, 'name': 'Algebra 101',
+                         'short_name': 'ALG101', 'source': 'Moodle'}],
+            'query': {'categories': ['courses'], 'course_mode': 'enrolled',
+                      'assignment_filter': 'pending', 'has_more': False, 'complete': True,
+                      'notices': [], 'document_question': ''},
+        },
+        'conversation_context': [{'question': 'cuánto pago?', 'answer': 'No hay información.'}],
+    }
+    body = json.dumps(payload).encode()
+    response = TestClient(app).post('/api/v1/chat/query', content=body,
+        headers=signed_moodle_headers(secret, body, courses=[2]))
+    assert response.status_code == 200
+    data = response.json()
+    assert 'Algebra 101' in data['answer'] and 'Moodle' in data['answer']
+    assert not data['insufficient_context'] and data['sources'] == []
+    assert chat.calls == 0
+
+
+def test_academic_results_distinguish_empty_errors_and_partial_answers():
+    plan = {'categories': ['assignments'], 'assignment_filter': 'pending',
+            'has_more': False, 'complete': True, 'document_question': '', 'notices': []}
+    result = service().ask('tareas', academic_context={'query': plan, 'assignments': []})
+    assert 'no tienes tareas pendientes' in result.answer and not result.insufficient_context
+    with pytest.raises(AppError, match='datos académicos'):
+        service().ask('tareas', academic_context={'query': plan, 'assignments': 'failed'})
+    plan['notices'] = ['El asistente todavía no consulta pagos personales.']
+    result = service().ask('tareas y pagos', academic_context={'query': plan, 'assignments': []})
+    assert 'no tienes tareas pendientes' in result.answer and 'pagos personales' in result.answer
+
+
+def test_mixed_answer_keeps_moodle_facts_separate_from_document_citations():
+    context = {'courses': [{'name': 'Algebra 101', 'short_name': 'ALG101'}],
+               'query': {'categories': ['courses'], 'document_question': 'nota mínima'}}
+    result = service().ask('cursos y nota mínima', academic_context=context)
+    academic, documentary = result.answer.split('Documentos:')
+    assert 'Algebra 101' in academic and '[' not in academic
+    assert '11' in documentary and '[1]' in documentary and len(result.sources) == 1
+
+
+def test_new_signed_contract_does_not_allow_arbitrary_operations():
+    with pytest.raises(ValidationError):
+        QueryRequest(query='consulta', academic_context={'query': {'categories': ['payments']}})

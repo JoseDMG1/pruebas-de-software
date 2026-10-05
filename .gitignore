@@ -13,3 +13,10 @@ rag-service/**/*.py[cod]
 # Local account and tool configuration.
 .aws/
 .codex/
+
+# Local Moodle runtime and credentials.
+.moodle.env
+.local/
+moodle/config.php
+moodle/vendor/
+moodle/phpunit.xml

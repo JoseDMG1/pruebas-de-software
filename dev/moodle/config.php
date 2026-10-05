@@ -1,0 +1,21 @@
+<?php
+unset($CFG);
+global $CFG;
+$CFG = new stdClass();
+$CFG->dbtype = 'pgsql';
+$CFG->dblibrary = 'native';
+$CFG->dbhost = '127.0.0.1';
+$CFG->dbname = 'moodle';
+$CFG->dbuser = 'moodle';
+$CFG->dbpass = getenv('POSTGRES_PASSWORD');
+$CFG->prefix = 'mdl_';
+$CFG->dboptions = ['dbpersist' => false, 'dbport' => 55433, 'dbsocket' => false];
+$CFG->wwwroot = 'http://127.0.0.1:8088';
+$CFG->dataroot = '/var/moodledata';
+$CFG->directorypermissions = 02777;
+$CFG->noemailever = true;
+$CFG->local_acadassistant_rag_url = getenv('MOODLE_RAG_URL');
+$CFG->local_acadassistant_rag_shared_secret = getenv('MOODLE_RAG_SHARED_SECRET');
+$CFG->phpunit_prefix = 'phpu_';
+$CFG->phpunit_dataroot = '/var/moodletestdata';
+require_once(__DIR__ . '/lib/setup.php');

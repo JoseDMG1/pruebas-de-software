@@ -44,15 +44,18 @@ final class academic_context_provider_test extends \advanced_testcase {
         ]);
 
         $this->setUser($student);
+        $assign = new \assign(\context_module::instance($cm->id), $cm, $course);
+        $this->assertTrue($assign->submit_for_grading(new \stdClass(), []));
         $before = $DB->get_records('assign_submission', ['assignment' => $assignment->id]);
         $context = (new \local_acadassistant\local\academic_context_provider())
-            ->collect_for_question('¿Qué entregas tengo pendientes en Biología 101?');
+            ->collect_for_question('¿Qué entregas tengo en total, todas, en Biología 101?');
         $after = $DB->get_records('assign_submission', ['assignment' => $assignment->id]);
 
         $this->assertEquals($before, $after, 'Collecting academic context must be read-only.');
-        $this->assertSame([$course->id], $context['course_ids']);
+        $this->assertSame([(int)$course->id], $context['course_ids']);
         $this->assertCount(1, $context['academic_context']['assignments']);
         $this->assertSame('submitted', $context['academic_context']['assignments'][0]['status']);
+        $this->assertSame((int)$assignment->duedate, $context['academic_context']['assignments'][0]['due_at']);
         $this->assertArrayNotHasKey('userid', $context['academic_context']['assignments'][0]);
     }
 
@@ -165,14 +168,14 @@ final class academic_context_provider_test extends \advanced_testcase {
             '¿Qué calificación tiene María Estudiante en Ensayo de Historia 202?'
         );
 
-        $this->assertSame([$biology->id], $authorized['course_ids']);
+        $this->assertSame([(int)$biology->id], $authorized['course_ids']);
         $this->assertCount(1, $authorized['academic_context']['grades']);
         $this->assertSame(
             'María Estudiante',
             $authorized['academic_context']['grades'][0]['participant']
         );
         $this->assertStringContainsString('85', $authorized['academic_context']['grades'][0]['grade']);
-        $this->assertSame([$history->id], $denied['course_ids']);
+        $this->assertSame([(int)$history->id], $denied['course_ids']);
         $this->assertSame([], $denied['academic_context']['grades']);
     }
 
@@ -211,9 +214,98 @@ final class academic_context_provider_test extends \advanced_testcase {
                 '¿Qué calificación tiene Luis Alumno en Trabajo final de Administración 301?'
             );
 
-        $this->assertSame([$course->id], $context['course_ids']);
+        $this->assertSame([(int)$course->id], $context['course_ids']);
         $this->assertCount(1, $context['academic_context']['grades']);
         $this->assertSame('Luis Alumno', $context['academic_context']['grades'][0]['participant']);
         $this->assertStringContainsString('90', $context['academic_context']['grades'][0]['grade']);
+    }
+    public function test_equivalent_course_questions_do_not_inherit_unrelated_tasks(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course(['fullname' => 'Álgebra 101']);
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
+        $this->setUser($student);
+        $provider = new \local_acadassistant\local\academic_context_provider();
+        foreach (['¿Qué materias llevo?', '¿En qué estoy matriculado?', '¿Qué cursos tengo?'] as $question) {
+            $result = $provider->collect_for_question($question, [[
+                'question' => '¿Qué tareas tengo?', 'answer' => 'Dos tareas.',
+            ]]);
+            $this->assertSame(['courses'], $result['requested_categories']);
+            $this->assertSame('Álgebra 101', $result['academic_context']['courses'][0]['name']);
+        }
+    }
+    public function test_membership_and_teaching_are_not_global_access(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $own = $generator->create_course(['fullname' => 'Curso propio']);
+        $other = $generator->create_course(['fullname' => 'Curso ajeno']);
+        $user = $generator->create_user();
+        $generator->enrol_user($user->id, $own->id, 'editingteacher');
+        role_assign((int)$GLOBALS['DB']->get_field('role', 'id', ['shortname' => 'manager'], MUST_EXIST), $user->id, \context_system::instance()->id);
+        $this->setUser($user);
+        $provider = new \local_acadassistant\local\academic_context_provider();
+        foreach (['¿Qué cursos tengo?', '¿Qué cursos enseño?'] as $question) {
+            $result = $provider->collect_for_question($question);
+            $this->assertSame(['Curso propio'], array_column($result['academic_context']['courses'], 'name'));
+            $this->assertContains((int)$other->id, $result['course_ids']);
+        }
+        $result = $provider->collect_for_question('¿Qué cursos puedo consultar?');
+        $this->assertCount(2, $result['academic_context']['courses']);
+    }
+    public function test_teachers_respect_participants_and_separate_groups(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(['fullname' => 'Biología', 'groupmode' => SEPARATEGROUPS]);
+        $student = $generator->create_user();
+        $visible = $generator->create_user(['firstname' => 'Carla', 'lastname' => 'Visible']);
+        $hidden = $generator->create_user(['firstname' => 'Ana', 'lastname' => 'Otrogrupo']);
+        $generator->enrol_user($student->id, $course->id, 'student');
+        foreach ([$visible, $hidden] as $teacher) {
+            $generator->enrol_user($teacher->id, $course->id, 'editingteacher');
+        }
+        $group = $generator->create_group(['courseid' => $course->id]);
+        groups_add_member($group, $student);
+        groups_add_member($group, $visible);
+        $this->setUser($student);
+        $provider = new \local_acadassistant\local\academic_context_provider();
+        $result = $provider->collect_for_question('¿Cómo se llaman mis profesores?');
+        $this->assertSame(['Carla Visible'], $result['academic_context']['teachers'][0]['names']);
+        assign_capability('moodle/course:viewparticipants', CAP_PROHIBIT,
+            (int)$GLOBALS['DB']->get_field('role', 'id', ['shortname' => 'student']),
+            \context_course::instance($course->id)->id);
+        accesslib_clear_all_caches_for_unit_testing();
+        $result = $provider->collect_for_question('¿Quiénes son mis docentes?');
+        $this->assertSame([], $result['academic_context']['teachers'][0]['names']);
+        $this->assertSame('unavailable', $result['academic_context']['teachers'][0]['state']);
+    }
+    public function test_course_pages_are_complete_and_recheck_membership(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $student = $generator->create_user();
+        $courses = [];
+        for ($i = 0; $i < 22; $i++) {
+            $course = $generator->create_course(['fullname' => sprintf('Curso %02d', $i)]);
+            $generator->enrol_user($student->id, $course->id, 'student');
+            $courses[] = $course;
+        }
+        $this->setUser($student);
+        $provider = new \local_acadassistant\local\academic_context_provider();
+        $first = $provider->collect_for_question('¿Qué cursos tengo?');
+        $this->assertTrue($first['academic_context']['query']['has_more']);
+        $second = $provider->collect_for_question('¿Qué cursos tengo?', [], 20);
+        $this->assertFalse($second['academic_context']['query']['has_more']);
+        $this->assertSame(['Curso 20', 'Curso 21'], array_column($second['academic_context']['courses'], 'name'));
+    }
+    public function test_institution_in_mixed_question_is_not_an_unknown_course(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(['fullname' => 'Algebra 101']);
+        $student = $generator->create_user();
+        $generator->enrol_user($student->id, $course->id, 'student');
+        $this->setUser($student);
+        $result = (new \local_acadassistant\local\academic_context_provider())->collect_for_question(
+            '¿Qué cursos tengo y cuál es la nota mínima aprobatoria en Universidad Demo del Valle?');
+        $this->assertSame('Algebra 101', $result['academic_context']['courses'][0]['name']);
+        $this->assertSame([(int)$course->id], $result['course_ids']);
     }
 }

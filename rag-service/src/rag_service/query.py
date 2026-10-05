@@ -15,6 +15,7 @@ from pydantic import (
     field_validator,
 )
 
+from rag_service.academic_answers import AcademicPlan, compose_academic
 from rag_service.errors import AppError
 from rag_service.local_embeddings import OllamaEmbeddingProvider
 
@@ -36,9 +37,11 @@ class QueryRequest(BaseModel):
     @field_validator("academic_context")
     @classmethod
     def limit_academic_context_categories(cls, value):
-        allowed_categories = {"courses", "assignments", "grades", "calendar"}
+        allowed_categories = {"courses", "assignments", "grades", "calendar", "teachers", "query"}
         if not set(value).issubset(allowed_categories):
             raise ValueError("academic_context contiene una categoría no permitida.")
+        if "query" in value:
+            AcademicPlan.model_validate(value["query"])
         return value
 
     @field_validator("query")
@@ -95,6 +98,11 @@ Si hay información, insufficient_context=false.
 Los datos ficticios no describen instituciones reales. Si la pregunta nombra otra institución,
 no traslades las reglas del contexto a esa institución: no hay información suficiente.
 Los datos académicos vienen de Moodle y describen información vigente visible para esta persona.
+En assignments, status=not_submitted o draft indica una tarea no entregada;
+submitted indica entregada. Usa el nombre de la actividad y course_name;
+due_date es la fecha de vencimiento formateada por Moodle.
+Para tareas pendientes enumera todas las actividades no entregadas que correspondan a la consulta.
+Los estados, notas y plazos de actividades proceden de Moodle: no los atribuyas a documentos.
 Identifica en el texto cuándo un dato procede de Moodle. Si una fecha del Calendario Moodle
 contradice un documento con alcance institucional, conserva ambas fechas, explica la diferencia y
 da prioridad a ese documento institucional como calendario oficial. No presentes documentos de curso
@@ -190,6 +198,38 @@ EXAMPLE_MESSAGES = EXAMPLE_MESSAGES[2:] + EXAMPLE_MESSAGES[:2] + [
 ]
 
 
+ACADEMIC_EXAMPLE_MESSAGES = [
+    {
+        "role": "user",
+        "content": json.dumps({
+            "question": "¿Qué tareas tengo pendientes?",
+            "document_context": [{"source_id": 1, "text": "La biblioteca abre a las 8:00."}],
+            "academic_context": {"assignments": [
+                {"course_name": "Literatura", "name": "Reseña", "status": "not_submitted",
+                 "due_date": "2026-11-10 18:00", "source": "Moodle"},
+                {"course_name": "Fisica", "name": "Laboratorio", "status": "not_submitted",
+                 "due_date": "2026-11-11 16:00", "source": "Moodle"},
+                {"course_name": "Historia", "name": "Ensayo", "status": "submitted",
+                 "due_date": "2026-11-12 18:00", "source": "Moodle"},
+            ]},
+            "conversation_context": [],
+        }, ensure_ascii=False),
+    },
+    {
+        "role": "assistant",
+        "content": json.dumps({
+            "answer": (
+                "Según Moodle, tienes pendientes la Reseña de Literatura "
+                "(10 de noviembre de 2026 a las 18:00) y el Laboratorio de Fisica "
+                "(11 de noviembre de 2026 a las 16:00)."
+            ),
+            "insufficient_context": False,
+            "source_ids": [],
+        }, ensure_ascii=False),
+    },
+]
+
+
 class OllamaChatProvider:
     def __init__(self, settings, client=None):
         self.settings = settings
@@ -262,6 +302,10 @@ class OllamaChatProvider:
                 "messages": [
                     {"role": "system", "content": SYSTEM_PROMPT},
                     *EXAMPLE_MESSAGES,
+                    *(ACADEMIC_EXAMPLE_MESSAGES if any(
+                        (academic_context or {}).get(category)
+                        for category in ("assignments", "grades")
+                    ) else []),
                     {
                         "role": "user",
                         "content": json.dumps(
@@ -304,6 +348,36 @@ class QueryService:
         conversation_context=None,
     ):
         question = QueryRequest(query=question).query
+        if academic_context and "query" in academic_context:
+            plan = AcademicPlan.model_validate(academic_context["query"])
+            try:
+                academic_answer = compose_academic(academic_context, plan)
+            except (KeyError, TypeError, ValueError) as exc:
+                raise AppError(
+                    "invalid_academic_context", "No se pudieron leer los datos académicos."
+                ) from exc
+            request_id = request_id or str(uuid.uuid4())
+            if not plan.document_question:
+                return QueryResponse(
+                    answer=academic_answer or "¿Qué información académica necesitas consultar?",
+                    sources=[], insufficient_context=False, request_id=request_id
+                )
+            # Documentary generation never determines whether authorized academic facts exist.
+            documentary = self.ask(plan.document_question, request_id, course_ids=course_ids,
+                                   conversation_context=conversation_context)
+            if academic_answer:
+                document_answer = ("No encontré evidencia documental suficiente "
+                                   "para esa parte de la pregunta."
+                                   if documentary.insufficient_context else documentary.answer)
+                documentary.answer = academic_answer + "\nDocumentos: " + document_answer
+                documentary.insufficient_context = False
+                if 'calendar' in plan.categories and documentary.sources:
+                    documentary.answer += ("\nAnte discrepancias, el calendario institucional "
+                                           "oficial tiene prioridad.")
+            elif documentary.insufficient_context:
+                documentary.answer = ("No encontré evidencia para esa consulta. "
+                                      "¿Puedes precisar qué necesitas?")
+            return documentary
         conversation_context = [
             ConversationTurn.model_validate(turn).model_dump()
             for turn in (conversation_context or [])
