@@ -11,6 +11,41 @@ from rag_service.config import Settings
 SECRET = "a-conversation-test-secret-with-at-least-32-chars"
 
 
+@pytest.mark.parametrize("proposed_scope", [
+    "Qué cursos tengo", "cuál es la nota mínima en Universidad Ejemplo"
+])
+def test_mixed_academic_and_documentary_scopes_are_separate_literal_requests(proposed_scope):
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"intents": ["courses"], "documentary": True, "scope_explicit": True}
+            if data["format"]["title"] == "ConversationPlan":
+                properties = data["format"]["properties"]
+                assert properties["scope_question"]["enum"] == [
+                    "Qué cursos tengo", "cuál es la nota mínima en Universidad Ejemplo"
+                ]
+                assert properties["document_question"]["minLength"] == 1
+                response = {"intent": "academic", "categories": ["courses"],
+                            "scope_question": proposed_scope,
+                            "document_question": "cuál es la nota mínima en Universidad Ejemplo"}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query=(
+            "¿Qué cursos tengo y cuál es la nota mínima en Universidad Ejemplo?"),
+                              runtime=payload()["runtime"])
+    )
+    assert plan.scope_question == "Qué cursos tengo"
+    assert plan.document_question == "cuál es la nota mínima en Universidad Ejemplo"
+
+
 class Interpreter:
     calls = 0
 

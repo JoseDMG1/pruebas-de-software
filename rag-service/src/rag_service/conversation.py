@@ -307,6 +307,7 @@ class RoutingDecision(BaseModel):
     confirmation: StrictBool = False
     task_reference: StrictBool = False
     scope_explicit: StrictBool = False
+    documentary: StrictBool = False
     intents: list[Literal[
         "social", "capabilities", "courses", "teachers", "assignments", "grades", "calendar",
         "document", "clarify", "blocked"
@@ -317,6 +318,10 @@ class RoutingDecision(BaseModel):
 
     @model_validator(mode="after")
     def has_request(self):
+        if self.documentary and "document" not in self.intents:
+            if len(self.intents) >= 6:
+                raise ValueError("Demasiadas operaciones en una solicitud.")
+            self.intents.append("document")
         if not self.planning and not self.intents:
             raise ValueError("Falta una intención reconocida.")
         return self
@@ -346,6 +351,9 @@ assignments: leer tareas, estados de entrega y vencimientos. NO resolver sus eje
 grades: calificaciones PERSONALES visibles. Una nota mínima aprobatoria de una norma es document.
 calendar: leer eventos/fechas del calendario Moodle.
 document: normas institucionales y guías para usar Moodle, incluida recuperar acceso.
+documentary=true si pide una norma, requisito de aprobación, calendario oficial,
+información publicada de un curso o guía del portal, aunque también pida datos personales.
+documentary=false para notas personales, listas de tareas/docentes y operaciones excluidas.
 Pedir pasos o CÓMO HACER una entrega en el portal es document; no leer sus tareas.
 planning=true si quiere ORGANIZAR, DISTRIBUIR o PLANIFICAR el estudio o ajustar un plan.
 planning=false si solo pide leer una lista o un dato. No depende de los nombres de operaciones.
@@ -424,6 +432,12 @@ ROUTE_EXAMPLES = (
      "Quiere organizar trabajo y consultar una norma de aprobación, no sus notas personales."),
     ("¿Qué promedio exige el reglamento para aprobar?", ["document"], "none", False,
      "Pide una norma institucional del reglamento, no una calificación personal."),
+    ("Lista mis materias y dime qué promedio exige el reglamento para aprobar",
+     ["courses", "document"], "none", False,
+     "Sus cursos se leen en Moodle; el requisito para aprobar es documental, no grades."),
+    ("Dime mis trabajos en Química y qué clave de tutoría tiene Historia",
+     ["assignments", "document"], "none", False,
+     "Dos consultas: tareas personales de Química y una norma documental de Historia."),
     ("¿Dónde puedo adjuntar mi tarea en el portal?", ["document"], "none", False,
      "Pide un procedimiento de uso de Moodle; requiere una guía verificada del portal."),
     ("¿Cuánto debo en pensiones este mes?", ["blocked"], "none", True,

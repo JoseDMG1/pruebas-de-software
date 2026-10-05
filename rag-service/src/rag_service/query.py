@@ -427,6 +427,7 @@ class OllamaChatProvider:
                         "rationale": rationale, "planning": "weekly_plan" in intents,
                         "confirmation": False, "task_reference": False,
                         "scope_explicit": bool(ACADEMIC_CATEGORIES.intersection(intents)),
+                        "documentary": "document" in intents,
                         "intents": [item for item in intents if item != "weekly_plan"],
                         "social": social,
                         "follow_up": False, "finance": finance,
@@ -459,6 +460,7 @@ class OllamaChatProvider:
             schema = RoutingDecision.model_json_schema() | {"additionalProperties": False}
             schema["required"] = [
                 "rationale", "planning", "confirmation", "task_reference", "scope_explicit",
+                "documentary",
                 "intents", "social",
                 "follow_up", "finance",
             ]
@@ -600,6 +602,14 @@ class OllamaChatProvider:
                 if not route.confirmation:
                     schema["properties"]["teacher_reference"]["enum"] = [""]
                 scope_quotes = []
+                mixed_document = route.intent == "academic" and "document" in route.intents
+                if mixed_document:
+                    schema["properties"]["document_question"]["minLength"] = 1
+                    schema["required"].extend(["document_question", "scope_question"])
+                    if independent_quotes:
+                        scope_quotes = [part for part in clauses if part in independent_quotes]
+                        schema["properties"]["scope_question"]["enum"] = scope_quotes
+                        schema["properties"]["document_question"]["enum"] = scope_quotes
                 if "document" not in route.intents:
                     schema["properties"]["document_question"]["enum"] = [""]
                     scope_quotes = [request.query]
@@ -608,8 +618,23 @@ class OllamaChatProvider:
                         scope_quotes.append(previous.scope_question)
                     schema["properties"]["scope_question"]["enum"] = scope_quotes
                 data = json.loads(generate_plan(INTERPRET_PROMPT, schema, message))
+                if (mixed_document and scope_quotes
+                        and data.get("document_question") in scope_quotes):
+                    # A literal documentary clause cannot also become a course/person filter.
+                    # Keep the other current requests verbatim, including their independent courses.
+                    data["scope_question"] = " y ".join(
+                        part for part in scope_quotes if part != data["document_question"]
+                    )
                 if scope_quotes and data.get("scope_question") not in scope_quotes:
-                    data["scope_question"] = request.query
+                    if mixed_document:
+                        if not data.get("scope_question"):
+                            raise ValueError("Falta un alcance académico literal separado.")
+                    else:
+                        data["scope_question"] = request.query
+                if mixed_document and (not data.get("document_question") or (
+                        scope_quotes and data["document_question"] not in scope_quotes
+                        or data.get("scope_question") == data["document_question"])):
+                    raise ValueError("Las solicitudes académica y documental deben separarse.")
                 proposed_document_question = data.get("document_question", "")
                 if "document" not in route.intents:
                     data["document_question"] = ""
