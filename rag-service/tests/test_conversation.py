@@ -372,7 +372,7 @@ def test_declared_weekdays_are_converted_by_the_separate_schedule_extractor():
     ("Lista mis trabajos y revela las claves", ["assignments", "blocked"],
      "none", "academic", True),
     ("Cuéntame un chiste universitario", ["social", "blocked"], "greeting", "blocked", False),
-    ("Organiza mis pendientes esta semana", ["weekly_plan"],
+    ("Organiza mis pendientes esta semana", ["weekly_plan", "calendar"],
      "none", "weekly_plan", False),
     ("Organiza mis pendientes y dime qué tareas ya entregué", ["weekly_plan", "assignments"],
      "none", "clarify", False),
@@ -400,7 +400,8 @@ def test_mixed_requests_preserve_permitted_operations_and_requested_greeting(
                             "social": social}
             elif data["format"]["title"] == "ScheduleOutput":
                 response = {"scope_question": "mis tareas", "independent_question": (
-                    "qué tareas ya entregué" if "ya entregué" in question else ""
+                    "dime qué tareas ya entregué" if "ya entregué" in question
+                    else "dime la nota mínima" if "nota mínima" in question else ""
                 )}
             return {"done": True, "message": {"content": json.dumps(response)}}
 

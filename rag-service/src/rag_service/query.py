@@ -459,17 +459,7 @@ class OllamaChatProvider:
                     "query": request.query,
                 }, ensure_ascii=False), ROUTE_EXAMPLES)
             )
-            if (
-                route.planning
-                and (ACADEMIC_CATEGORIES - {"assignments"} | {"document"}).intersection(
-                    route.intents
-                )
-            ):
-                data = ConversationPlan(
-                    intent="clarify", clarification="requests", scope_question=request.query,
-                    blocked_part=route.blocked_part,
-                ).model_dump()
-            elif route.intent == "social":
+            if route.intent == "social":
                 social = SocialDecision.model_validate_json(generate_plan(
                     SOCIAL_PROMPT, SocialDecision.model_json_schema(),
                     json.dumps({"query": request.query}, ensure_ascii=False),
