@@ -350,9 +350,14 @@ teachers: leer nombres de docentes visibles de cursos.
 assignments: leer tareas, estados de entrega y vencimientos. NO resolver sus ejercicios.
 grades: calificaciones PERSONALES visibles. Una nota mínima aprobatoria de una norma es document.
 calendar: leer eventos/fechas del calendario Moodle.
-document: normas institucionales y guías para usar Moodle, incluida recuperar acceso.
+document: información institucional publicada, normas, calendario oficial y guías del portal.
+Las lecturas Moodle SOLO proporcionan matrículas/cursos, nombres de docentes,
+tareas/estados/vencimientos, notas personales y eventos. Códigos de tutoría, reglas,
+contactos institucionales o instrucciones del portal NO son campos de esas lecturas;
+requieren document incluso si la misma query pide tareas o cursos.
 documentary=true si pide una norma, requisito de aprobación, calendario oficial,
-información publicada de un curso o guía del portal, aunque también pida datos personales.
+información publicada de un curso (como un código de tutoría) o guía del portal,
+aunque también pida datos personales. Analiza CADA petición, no solo la primera.
 documentary=false para notas personales, listas de tareas/docentes y operaciones excluidas.
 Pedir pasos o CÓMO HACER una entrega en el portal es document; no leer sus tareas.
 planning=true si quiere ORGANIZAR, DISTRIBUIR o PLANIFICAR el estudio o ajustar un plan.

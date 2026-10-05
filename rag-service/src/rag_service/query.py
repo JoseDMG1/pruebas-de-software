@@ -424,10 +424,10 @@ class OllamaChatProvider:
                 messages.extend([
                     {"role": "user", "content": json.dumps({"query": example}, ensure_ascii=False)},
                     {"role": "assistant", "content": json.dumps({
+                        "documentary": "document" in intents,
                         "rationale": rationale, "planning": "weekly_plan" in intents,
                         "confirmation": False, "task_reference": False,
                         "scope_explicit": bool(ACADEMIC_CATEGORIES.intersection(intents)),
-                        "documentary": "document" in intents,
                         "intents": [item for item in intents if item != "weekly_plan"],
                         "social": social,
                         "follow_up": False, "finance": finance,
@@ -458,6 +458,11 @@ class OllamaChatProvider:
         proposed_document_question = ""
         try:
             schema = RoutingDecision.model_json_schema() | {"additionalProperties": False}
+            schema["properties"] = {
+                "documentary": schema["properties"]["documentary"],
+                **{key: value for key, value in schema["properties"].items()
+                   if key != "documentary"},
+            }
             schema["required"] = [
                 "rationale", "planning", "confirmation", "task_reference", "scope_explicit",
                 "documentary",
@@ -588,6 +593,7 @@ class OllamaChatProvider:
                 schema["properties"]["selected_assignment_id"]["enum"] = [0]
                 schema["properties"]["selected_participant_name"]["enum"] = [""]
                 schema["properties"]["intent"] = {"type": "string", "enum": [route.intent]}
+                schema["properties"]["categories"]["uniqueItems"] = True
                 if route.intent == "document":
                     schema["properties"]["categories"]["maxItems"] = 0
                     schema["properties"]["document_question"]["minLength"] = 1
@@ -606,8 +612,8 @@ class OllamaChatProvider:
                 if mixed_document:
                     schema["properties"]["document_question"]["minLength"] = 1
                     schema["required"].extend(["document_question", "scope_question"])
-                    if independent_quotes:
-                        scope_quotes = [part for part in clauses if part in independent_quotes]
+                    if len(clauses) > 1:
+                        scope_quotes = list(dict.fromkeys(clauses))
                         schema["properties"]["scope_question"]["enum"] = scope_quotes
                         schema["properties"]["document_question"]["enum"] = scope_quotes
                 if "document" not in route.intents:
@@ -618,17 +624,16 @@ class OllamaChatProvider:
                         scope_quotes.append(previous.scope_question)
                     schema["properties"]["scope_question"]["enum"] = scope_quotes
                 data = json.loads(generate_plan(INTERPRET_PROMPT, schema, message))
-                if (mixed_document and scope_quotes
+                if (mixed_document and len(clauses) == 2 and len(scope_quotes) == 2
                         and data.get("document_question") in scope_quotes):
                     # A literal documentary clause cannot also become a course/person filter.
-                    # Keep the other current requests verbatim, including their independent courses.
+                    # With more clauses, retain the chosen request: others may be excluded.
                     data["scope_question"] = " y ".join(
                         part for part in scope_quotes if part != data["document_question"]
                     )
                 if scope_quotes and data.get("scope_question") not in scope_quotes:
                     if mixed_document:
-                        if not data.get("scope_question"):
-                            raise ValueError("Falta un alcance académico literal separado.")
+                        raise ValueError("Falta un alcance académico literal separado.")
                     else:
                         data["scope_question"] = request.query
                 if mixed_document and (not data.get("document_question") or (
@@ -649,6 +654,7 @@ class OllamaChatProvider:
                     data["scope_question"] = previous.scope_question
                     data["assignment_filter"] = "all"
                 data["teacher_confirmation"] = route.confirmation
+                data["categories"] = list(dict.fromkeys(data.get("categories", [])))
                 if not route.confirmation:
                     data["teacher_reference"] = ""
                 for field in SCHEDULE_FIELDS:

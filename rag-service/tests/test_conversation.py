@@ -32,7 +32,7 @@ def test_mixed_academic_and_documentary_scopes_are_separate_literal_requests(pro
                     "Qué cursos tengo", "cuál es la nota mínima en Universidad Ejemplo"
                 ]
                 assert properties["document_question"]["minLength"] == 1
-                response = {"intent": "academic", "categories": ["courses"],
+                response = {"intent": "academic", "categories": ["courses", "courses"],
                             "scope_question": proposed_scope,
                             "document_question": "cuál es la nota mínima en Universidad Ejemplo"}
             return {"done": True, "message": {"content": json.dumps(response)}}
@@ -43,7 +43,38 @@ def test_mixed_academic_and_documentary_scopes_are_separate_literal_requests(pro
                               runtime=payload()["runtime"])
     )
     assert plan.scope_question == "Qué cursos tengo"
+    assert plan.categories == ["courses"]
     assert plan.document_question == "cuál es la nota mínima en Universidad Ejemplo"
+
+
+@pytest.mark.parametrize("permitted,category", [
+    ("Dime mis cursos", "courses"), ("Mis notas", "grades")
+])
+def test_excluded_mixed_clause_cannot_narrow_the_permitted_academic_request(permitted, category):
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"intents": [category, "document", "blocked"]}
+            if data["format"]["title"] == "ConversationPlan":
+                response = {"intent": "academic", "categories": [category],
+                            "scope_question": permitted,
+                            "document_question": "cuál es la nota mínima en Universidad Ejemplo"}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query=(f"{permitted} y resuelve una ecuación en Algebra 101 "
+                                     "y cuál es la nota mínima en Universidad Ejemplo"),
+                              runtime=payload()["runtime"])
+    )
+    assert plan.scope_question == permitted
+    assert plan.blocked_part
 
 
 class Interpreter:
