@@ -180,9 +180,11 @@ def test_model_receives_reformulation_context_before_any_moodle_read():
     response = post(app, data)
     assert response.status_code == 200
     assert response.json()["categories"] == ["teachers"]
-    message = json.loads(model.calls[0]["messages"][-1]["content"])
+    message = json.loads(model.calls[0]["messages"][-2]["content"])
     assert message["conversation_context"] == data["conversation_context"]
     assert "academic_context" not in message
+    current = json.loads(model.calls[0]["messages"][-1]["content"])
+    assert current == {"query": data["query"]}
 
 
 def test_social_and_blocked_responses_never_retrieve_documents():
@@ -716,7 +718,8 @@ def test_activity_title_selection_receives_the_pending_task_context_before_routi
                 return {"capabilities": ["completion"]}
             message = json.loads(data["messages"][-1]["content"])
             if data["format"]["title"] == "RoutingDecision":
-                if message["previous_topic"].get("ambiguous_task"):
+                context = json.loads(data["messages"][-2]["content"])
+                if context["previous_topic"].get("ambiguous_task"):
                     response = {"intents": ["assignments"], "scope_explicit": True}
                 else:
                     response = {"intents": ["blocked"]}
@@ -762,7 +765,8 @@ def test_signed_task_selection_uses_session_identities_without_guessing_from_a_t
         assert "Algebra 101" in plan["scope_question"]
 
 
-def test_task_followup_keeps_the_selected_native_identity_and_reads_changed_status():
+@pytest.mark.parametrize("routing_follow_up", [True, False])
+def test_task_followup_keeps_selected_native_identity_and_reads_changed_status(routing_follow_up):
     from rag_service.conversation import InterpretationRequest
     from rag_service.query import OllamaChatProvider
 
@@ -773,10 +777,11 @@ def test_task_followup_keeps_the_selected_native_identity_and_reads_changed_stat
         def request(self, method, path, data):
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
-            response = {"intents": ["assignments"], "follow_up": True, "task_reference": True}
+            response = {"intents": ["assignments"], "follow_up": routing_follow_up,
+                        "task_reference": True}
             if data["format"]["title"] == "ConversationPlan":
                 response = {"intent": "academic", "categories": ["assignments"],
-                            "scope_question": "¿Y a qué hora?"}
+                            "scope_question": "¿Y a qué hora?", "follow_up": True}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
     plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(

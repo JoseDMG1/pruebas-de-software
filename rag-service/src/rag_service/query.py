@@ -418,7 +418,7 @@ class OllamaChatProvider:
             ensure_ascii=False,
         )
 
-        def generate_plan(prompt, schema, message, examples=()):
+        def generate_plan(prompt, schema, message, examples=(), context=None):
             messages = [{"role": "system", "content": prompt}]
             for example, intents, social, finance, rationale in examples:
                 messages.extend([
@@ -433,6 +433,10 @@ class OllamaChatProvider:
                         "follow_up": False, "finance": finance,
                     })},
                 ])
+            if context:
+                messages.append({"role": "assistant", "content": json.dumps(
+                    context, ensure_ascii=False
+                )})
             messages.append({"role": "user", "content": message})
             result = self.client.request(
                 "POST",
@@ -470,7 +474,9 @@ class OllamaChatProvider:
                 "follow_up", "finance",
             ]
             route = RoutingDecision.model_validate_json(
-                generate_plan(ROUTE_PROMPT, schema, json.dumps({
+                generate_plan(ROUTE_PROMPT, schema,
+                    json.dumps({"query": request.query}, ensure_ascii=False),
+                    ROUTE_EXAMPLES, context={
                     **({"previous_topic": {"intent": previous.intent,
                         "categories": previous.categories, "scope": previous.scope_question,
                         "clarification": previous.clarification,
@@ -478,8 +484,7 @@ class OllamaChatProvider:
                         if previous else {}),
                     **({"conversation_context": [request.conversation_context[-1].model_dump()]}
                         if request.conversation_context and not previous else {}),
-                    "query": request.query,
-                }, ensure_ascii=False), ROUTE_EXAMPLES)
+                })
             )
             if route.intent == "social":
                 social = SocialDecision.model_validate_json(generate_plan(
@@ -646,7 +651,10 @@ class OllamaChatProvider:
                 data["ambiguous_task"] = route.task_reference or data.get("ambiguous_task", False)
                 data["selected_assignment_id"] = 0
                 data["selected_participant_name"] = ""
-                data["follow_up"] = route.follow_up and not route.scope_explicit
+                data["categories"] = list(dict.fromkeys(data.get("categories", [])))
+                data["follow_up"] = (
+                    (route.follow_up or data.get("follow_up") is True) and not route.scope_explicit
+                )
                 if (data["follow_up"] and previous and previous.selected_assignment_id
                         and data["categories"] == ["assignments"]):
                     data["selected_assignment_id"] = previous.selected_assignment_id
@@ -654,7 +662,6 @@ class OllamaChatProvider:
                     data["scope_question"] = previous.scope_question
                     data["assignment_filter"] = "all"
                 data["teacher_confirmation"] = route.confirmation
-                data["categories"] = list(dict.fromkeys(data.get("categories", [])))
                 if not route.confirmation:
                     data["teacher_reference"] = ""
                 for field in SCHEDULE_FIELDS:
