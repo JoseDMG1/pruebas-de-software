@@ -488,6 +488,10 @@ class OllamaChatProvider:
                 pending_request = (previous.scope_question if previous
                     and previous.intent == "clarify"
                     and previous.clarification == "requests" else "")
+                scope_quotes = ([part.strip() for part in re.split(
+                    r"\s+(?:y|además|también)\s+|[;?!¿¡]", pending_request, flags=re.I
+                ) if part.strip()] if pending_request else [request.query])
+                schedule_schema["properties"]["scope_question"]["enum"] = ["", *scope_quotes]
                 explicit_dates = set()
                 for candidate in re.findall(
                     r"\b\d{4}-\d{2}-\d{2}\b", request.query + " " + pending_request
@@ -522,6 +526,8 @@ class OllamaChatProvider:
                         ),
                     )
                 )
+                if schedule.scope_question not in scope_quotes:
+                    schedule.scope_question = ""
                 if (schedule.independent_question
                     and schedule.independent_question not in request.query):
                     if not ACADEMIC_CATEGORIES.intersection(route.intents):

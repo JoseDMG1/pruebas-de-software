@@ -509,7 +509,8 @@ def test_choosing_a_pending_plan_preserves_its_explicit_week_or_asks(selected_da
             response = {"planning": True, "intents": []}
             if data["format"]["title"] == "ScheduleOutput":
                 assert "2026-10-19" in data["format"]["properties"]["week_start"]["enum"]
-                response = {"scope_question": "Biologia 102", "week_start": selected_date,
+                response = {"scope_question": "Organiza Biologia 102 desde 2026-10-19",
+                            "week_start": selected_date,
                             "week_explicit": bool(selected_date)}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
@@ -522,3 +523,26 @@ def test_choosing_a_pending_plan_preserves_its_explicit_week_or_asks(selected_da
         assert plan.intent == "weekly_plan" and plan.week_start == selected_date
     else:
         assert plan.intent == "clarify" and plan.clarification == "week" and not plan.categories
+
+
+def test_weekly_course_scope_cannot_be_rewritten_as_a_global_request():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"planning": True, "intents": []}
+            if data["format"]["title"] == "ScheduleOutput":
+                response = {"scope_question": "mis tareas"}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    query = "Organiza mis tareas de Biologia 102 esta semana"
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query=query, runtime=payload()["runtime"])
+    )
+    assert plan.intent == "weekly_plan" and plan.scope_question == query
