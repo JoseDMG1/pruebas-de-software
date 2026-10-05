@@ -40,11 +40,7 @@ final class academic_context_provider {
         $this->scopecomplete = true;
         $plan = academic_question::interpret($question, $conversationcontext);
         $previousquestions = $plan['follow_up'] ? array_column(array_slice($conversationcontext, -2), 'question') : [];
-        $scopequestion = $question;
-        if ($plan['document_question'] !== '' && $plan['categories']) {
-            $scopequestion = str_replace($plan['document_question'], '', $question);
-        }
-        $courses = $this->accessible_courses($scopequestion, $previousquestions);
+        $courses = $this->accessible_courses($plan['scope_question'], $previousquestions);
         $courseids = array_values(array_map(static fn($course): int => (int)$course->id, $courses));
         $requested = $plan['categories'];
         $context = [];
@@ -117,7 +113,7 @@ final class academic_context_provider {
         $context['query'] = [
             'categories' => $requested, 'course_mode' => $plan['course_mode'],
             'assignment_filter' => $plan['assignment_filter'], 'has_more' => $hasmore,
-            'complete' => $this->scopecomplete, 'notices' => $notices,
+            'complete' => $this->scopecomplete, 'continuing' => (bool)$seen, 'notices' => $notices,
             'document_question' => $plan['document_question'],
         ];
         return [
@@ -125,7 +121,25 @@ final class academic_context_provider {
             'academic_context' => $context,
             'requested_categories' => $requested,
             'continuation_seen' => array_values(array_unique($newseen)),
+            'context_question' => $this->resolved_question($question, $plan, $courses),
         ];
+    }
+
+    /** Keep the interpreted operation across bounded follow-up chains and continuation. */
+    private function resolved_question(string $question, array $plan, array $courses): string {
+        if (!$plan['categories']) {
+            return $question;
+        }
+        $names = ['courses' => match ($plan['course_mode']) {
+            'enrolled' => 'mis cursos', 'accessible' => 'cursos que puedo consultar', 'teaching' => 'cursos que enseño',
+        }, 'teachers' => 'mis profesores', 'grades' => 'calificaciones', 'calendar' => 'calendario',
+            'assignments' => match ($plan['assignment_filter']) {
+                'pending' => 'tareas pendientes', 'submitted' => 'tareas entregadas', 'all' => 'todas las tareas',
+            }];
+        $operations = array_map(static fn($category) => $names[$category], $plan['categories']);
+        // A single narrowed course keeps a reference without narrowing a global multi-course question.
+        $scope = count($courses) === 1 ? ' en ' . reset($courses)->fullname : '';
+        return \core_text::substr(implode(' y ', $operations) . $scope . ': ' . $question, 0, 1000);
     }
 
     /** Stable identities for continuation; changing a due date does not repeat an activity. */
@@ -206,6 +220,33 @@ final class academic_context_provider {
     private function accessible_courses(string $question, array $previousquestions = []): array {
         global $USER, $DB;
 
+        // Resolve an explicit course before applying the broad-scope request bound.
+        // Catalog names never become evidence until native access has been checked.
+        $normalisedquestion = $this->normalise_text($question);
+        $catalog = $DB->get_recordset('course', null, 'id ASC', 'id, fullname, shortname');
+        $named = [];
+        $namesfound = false;
+        foreach ($catalog as $candidate) {
+            if ((int)$candidate->id === (int)SITEID) {
+                continue;
+            }
+            foreach ([$candidate->fullname, $candidate->shortname] as $name) {
+                $normalisedname = $this->normalise_text($name);
+                if (strlen($normalisedname) >= 3 && str_contains($normalisedquestion, $normalisedname)) {
+                    $namesfound = true;
+                    $course = get_course($candidate->id);
+                    if (can_access_course($course, $USER, '', true)) {
+                        $named[$course->id] = $course;
+                    }
+                    break;
+                }
+            }
+        }
+        $catalog->close();
+        if ($namesfound) {
+            return $named;
+        }
+
         $courses = enrol_get_users_courses(
             $USER->id,
             true,
@@ -218,7 +259,7 @@ final class academic_context_provider {
             true,
             'fullname, shortname, startdate, enddate',
             'fullname ASC',
-            self::MAX_COURSES + 1
+            self::MAX_COURSES + 2
         );
         foreach ($capabilitycourses ?: [] as $course) {
             $courses[$course->id] = $course;
@@ -529,8 +570,6 @@ final class academic_context_provider {
 
     /** Lowercase and collapse whitespace for safe exact phrase matching. */
     private function normalise_text(string $text): string {
-        $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
-        $normalised = \core_text::strtolower($ascii === false ? $text : $ascii);
-        return trim(preg_replace('/\s+/', ' ', $normalised) ?? '');
+        return academic_question::normalise($text);
     }
 }

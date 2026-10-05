@@ -64,6 +64,10 @@ with sync_playwright() as playwright:
     assert "todavía no consulta" in report["financial_limit"]
     report["teacher_names"] = ask(page, "cuáles son todos los nombres de mis profesores?")
     assert "Carla Docente" in report["teacher_names"]
+    assert "Carla Docente" in ask(page, "¿Quiénes me enseñan?")
+    assert "Carla Docente" in ask(page, "¿Y en Biologia 102?")
+    assert "Algebra 101" in ask(page, "¿Y en Algebra 101?")
+    assert "Carla Docente" in ask(page, "¿Y en Biologia 102?")
     for question in ["qué cursos tengo?", "qué cursos tengo?", "¿Qué materias llevo?", "¿En qué estoy matriculado?"]:
         answer = ask(page, question)
         assert "Algebra 101" in answer and "Biologia 102" in answer, answer
@@ -77,6 +81,10 @@ with sync_playwright() as playwright:
     report["resolved_followup"] = ask(page, "Ejercicios de ecuaciones")
     assert "Ejercicios de ecuaciones" in report["resolved_followup"]
     assert "Informe de laboratorio" not in report["resolved_followup"]
+    ask(page, "¿Qué tareas tengo?")
+    ask(page, "¿Cuándo vence esa tarea?")
+    newtopic = ask(page, "¿Qué cursos tengo?")
+    assert "Algebra 101" in newtopic and "Biologia 102" in newtopic
     clear(page)
     report["mixed_documentary"] = ask(page,
         "¿Qué cursos tengo y cuál es la nota mínima aprobatoria en Universidad Demo del Valle?")
@@ -88,6 +96,7 @@ with sync_playwright() as playwright:
     assert page.locator(".local-acadassistant-turn details").count() > 0
     clear(page)
     report["restricted_denied"] = ask(page, "¿Cuál es el código de entrega del proyecto del curso Reservado 103?")
+    assert page.locator(".local-acadassistant-turn").last.locator("details").count() == 0
     assert "ORQUIDEA-73" not in page.locator(".local-acadassistant-turn").inner_text()
     # Backdate only this fixture account's session, then exercise Moodle's native timeout.
     subprocess.run(["docker", "compose", "-f", "compose.moodle.yaml", "exec", "-T", "-u", "www-data",
@@ -116,13 +125,16 @@ with sync_playwright() as playwright:
         if username == "estudiante2":
             empty = ask(page, "¿Qué tareas tengo pendientes en Biologia 102?")
             assert "no tienes tareas pendientes" in empty, empty
-            submitted = ask(page, "¿Qué tareas tengo entregadas en Biologia 102?")
+            submitted = ask(page, "¿Qué he entregado en Biologia 102?")
             assert "Informe de laboratorio" in submitted and "entregada" in submitted
         if username == "autoridad1":
             own = ask(page, "¿Qué cursos tengo?")
             assert "no hay cursos" in own and "Reservado 103" not in own
         report[username] = ask(page, question)
         assert expected.lower() in report[username].lower(), report[username]
+        if username == "estudiante2":
+            assert page.locator(".local-acadassistant-turn").last.locator("details").count() > 0
+            assert "Documento de prueba RES103" in page.locator(".local-acadassistant-turn").last.inner_text()
         context.close()
         print("Verified", username, flush=True)
     subprocess.run(["docker", "compose", "-f", "compose.moodle.yaml", "exec", "-T", "-u", "www-data",

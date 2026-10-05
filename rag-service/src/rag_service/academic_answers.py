@@ -12,6 +12,7 @@ class AcademicPlan(BaseModel):
     assignment_filter: Literal["pending", "submitted", "all"] = "pending"
     has_more: StrictBool = False
     complete: StrictBool = True
+    continuing: StrictBool = False
     notices: list[str] = Field(default_factory=list, max_length=10)
     document_question: str = Field(default="", max_length=1000)
 
@@ -67,7 +68,13 @@ def compose_academic(context: dict, plan: AcademicPlan) -> str:
                     "; ".join(items)
                     if items
                     else (
-                        "no tienes tareas pendientes"
+                        (
+                            "no hay más tareas pendientes en este resultado"
+                            if plan.continuing
+                            else "no tienes tareas pendientes"
+                            if plan.complete
+                            else "no hay tareas pendientes entre los registros consultados"
+                        )
                         if plan.assignment_filter == "pending"
                         else "no hay tareas en este resultado"
                     )
@@ -122,3 +129,62 @@ def compose_academic(context: dict, plan: AcademicPlan) -> str:
             "este resultado no representa todos tus datos."
         )
     return "\n".join(parts)
+
+
+def calendar_discrepancies(context: dict, sources: list) -> list[str]:
+    """Compare unambiguous dates for the same event; leave ambiguous documents unclassified."""
+    import re
+    from datetime import date
+
+    months = {
+        name: number
+        for number, name in enumerate(
+            (
+                "enero",
+                "febrero",
+                "marzo",
+                "abril",
+                "mayo",
+                "junio",
+                "julio",
+                "agosto",
+                "septiembre",
+                "octubre",
+                "noviembre",
+                "diciembre",
+            ),
+            1,
+        )
+    }
+    notices = []
+    for source in sources:
+        if source.scope != "institutional" or source.document_type != "CALENDARIO":
+            continue
+        text = source.excerpt.lower()
+        dates = set(re.findall(r"\b\d{4}-\d{2}-\d{2}\b", text))
+        for day, month, year in re.findall(r"\b(\d{1,2}) de (\w+) de (\d{4})\b", text):
+            if month not in months:
+                continue
+            try:
+                dates.add(date(int(year), months[month], int(day)).isoformat())
+            except ValueError:
+                continue
+        if len(dates) != 1:
+            continue
+        official = next(iter(dates))
+        for event in context.get("calendar", []):
+            topics = set(re.findall(r"ciclo|matrícula|examen", event["name"].lower()))
+            if not topics or not any(topic in text for topic in topics):
+                continue
+            qualifiers = re.findall(r"primero|primer|segundo|tercer[oa]?|cuarto|20\d{2}",
+                                    event["name"].lower())
+            if any(qualifier not in text for qualifier in qualifiers):
+                continue
+            native = event["starts_date"][:10]
+            if native != official:
+                notices.append(
+                    f"Discrepancia para {event['name']}: Moodle indica {native}; "
+                    f"el calendario institucional indica {official} [{source.source_id}]. "
+                    "El calendario oficial tiene prioridad."
+                )
+    return list(dict.fromkeys(notices))

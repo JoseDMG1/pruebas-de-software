@@ -295,6 +295,14 @@ final class academic_context_provider_test extends \advanced_testcase {
         $second = $provider->collect_for_question('¿Qué cursos tengo?', [], 20);
         $this->assertFalse($second['academic_context']['query']['has_more']);
         $this->assertSame(['Curso 20', 'Curso 21'], array_column($second['academic_context']['courses'], 'name'));
+        $instances = enrol_get_instances($courses[20]->id, true);
+        $instance = reset($instances);
+        enrol_get_plugin($instance->enrol)->unenrol_user($instance, $student->id);
+        accesslib_clear_all_caches_for_unit_testing();
+        $fresh = $provider->collect_for_question('¿Qué cursos tengo?', [], 0, $first['continuation_seen']);
+        $this->assertSame(['Curso 21'], array_column($fresh['academic_context']['courses'], 'name'));
+        $this->assertNotContains((int)$courses[20]->id, $fresh['course_ids']);
+
     }
     public function test_institution_in_mixed_question_is_not_an_unknown_course(): void {
         $this->resetAfterTest();
@@ -307,5 +315,58 @@ final class academic_context_provider_test extends \advanced_testcase {
             '¿Qué cursos tengo y cuál es la nota mínima aprobatoria en Universidad Demo del Valle?');
         $this->assertSame('Algebra 101', $result['academic_context']['courses'][0]['name']);
         $this->assertSame([(int)$course->id], $result['course_ids']);
+    }
+    public function test_delivered_question_returns_presented_work_not_pending(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        $student = $generator->create_user();
+        $generator->enrol_user($student->id, $course->id, 'student');
+        $assignmentgenerator = $generator->get_plugin_generator('mod_assign');
+        $assignment = $assignmentgenerator->create_instance([
+            'course' => $course->id, 'name' => 'Trabajo entregado', 'assignsubmission_onlinetext_enabled' => 1,
+        ]);
+        $cm = get_coursemodule_from_instance('assign', $assignment->id, $course->id);
+        $assignmentgenerator->create_submission(['userid' => $student->id, 'cmid' => $cm->id,
+            'onlinetext' => 'Entrega de prueba']);
+        $this->setUser($student);
+        $assign = new \assign(\context_module::instance($cm->id), $cm, $course);
+        $assign->submit_for_grading(new \stdClass(), []);
+        $result = (new \local_acadassistant\local\academic_context_provider())
+            ->collect_for_question('¿Qué he entregado?');
+        $this->assertSame('submitted', $result['academic_context']['query']['assignment_filter']);
+        $this->assertSame('Trabajo entregado', $result['academic_context']['assignments'][0]['name']);
+    }
+    public function test_teacher_synonyms_and_repeated_followups_keep_the_operation(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(['fullname' => 'Biologia 102']);
+        $student = $generator->create_user();
+        $teacher = $generator->create_user(['firstname' => 'Carla', 'lastname' => 'Docente']);
+        $generator->enrol_user($student->id, $course->id, 'student');
+        $generator->enrol_user($teacher->id, $course->id, 'editingteacher');
+        $this->setUser($student);
+        $provider = new \local_acadassistant\local\academic_context_provider();
+        $result = $provider->collect_for_question('¿Quiénes me enseñan?');
+        $this->assertSame(['teachers'], $result['requested_categories']);
+        $this->assertSame(['Carla Docente'], $result['academic_context']['teachers'][0]['names']);
+        $history = [['question' => '¿Quiénes son mis profesores?', 'answer' => 'Carla.'],
+            ['question' => '¿Y en Biologia 102?', 'answer' => 'Carla.']];
+        $result = $provider->collect_for_question('¿Y en Biologia 102?', $history);
+        $this->assertSame(['teachers'], $result['requested_categories']);
+        $this->assertSame(['Carla Docente'], $result['academic_context']['teachers'][0]['names']);
+    }
+    public function test_document_code_does_not_request_unrelated_assignments(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(['fullname' => 'Reservado 103']);
+        $student = $generator->create_user();
+        $generator->enrol_user($student->id, $course->id, 'student');
+        $this->setUser($student);
+        $result = (new \local_acadassistant\local\academic_context_provider())->collect_for_question(
+            '¿Cuál es el código de entrega del proyecto del curso Reservado 103?');
+        $this->assertSame([], $result['requested_categories']);
+        $this->assertSame([(int)$course->id], $result['course_ids']);
+        $this->assertArrayNotHasKey('assignments', $result['academic_context']);
     }
 }

@@ -132,4 +132,15 @@ final class conversation_store_test extends \advanced_testcase {
         $this->setUser($this->getDataGenerator()->create_user());
         $this->assertNull($store->continuation());
     }
+    public function test_unanswered_clarification_does_not_capture_a_new_topic(): void {
+        $this->resetAfterTest();
+        $this->setUser($this->getDataGenerator()->create_user());
+        $store = new \local_acadassistant\local\conversation_store();
+        $store->append('¿Cuándo vence esa tarea en Biologia 102?',
+            '¿De cuál tarea necesitas la fecha? Indica su nombre y curso.', []);
+        $this->assertFalse($store->is_follow_up('¿Qué cursos tengo?'));
+        $this->assertSame([], $store->context_for_question('¿Qué cursos tengo?'));
+        $this->assertFalse($store->is_follow_up('¿Cuánto pago?'));
+        $this->assertTrue($store->is_follow_up('Informe de laboratorio'));
+    }
 }

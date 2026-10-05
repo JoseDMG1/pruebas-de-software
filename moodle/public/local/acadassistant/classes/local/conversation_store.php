@@ -25,19 +25,7 @@ final class conversation_store {
 
     /** Decide whether a question explicitly depends on the previous exchange. */
     public function is_follow_up(string $question): bool {
-        if (academic_question::is_continuation($question)) {
-            return true;
-        }
-        $turns = $this->state()['turns'];
-        if ($turns && str_contains($turns[count($turns) - 1]['answer'], '¿De cuál tarea')) {
-            return true;
-        }
-        $question = \core_text::strtolower(trim($question));
-        $question = preg_replace('/^[\p{P}\s]+/u', '', $question);
-        return (bool)preg_match(
-            '/^(?:y\b|entonces\b|eso\b|esa\b|ese\b|también\b|además\b|en ese\b|en esa\b|de ese\b|de esa\b)|\b(?:fecha exacta|hora exacta|cuál de ellos|qué fecha exacta)\b/u',
-            $question
-        );
+        return academic_question::is_follow_up($question, $this->context());
     }
 
     /** Return only recent turns in the current topic when the question is a follow-up. */
@@ -67,7 +55,8 @@ final class conversation_store {
         array $sources,
         array $academicprovenance = [],
         bool $contextbreak = false,
-        ?array $continuation = null
+        ?array $continuation = null,
+        ?string $contextquestion = null
     ): void {
         $state = $this->state();
         $safeSources = [];
@@ -87,6 +76,7 @@ final class conversation_store {
         }
         $state['turns'][] = [
             'question' => \core_text::substr(trim($question), 0, 1000),
+            'context_question' => \core_text::substr(trim($contextquestion ?? $question), 0, 1000),
             'answer' => \core_text::substr(trim($answer), 0, self::MAX_ANSWER_CHARS),
             'sources' => $safeSources,
             'academic_sources' => array_values(array_intersect(
@@ -148,7 +138,7 @@ final class conversation_store {
     /** Reference numbers belong to one retrieval batch; keep them only in the visible transcript. */
     private function format_context(array $turns): array {
         return array_map(static fn(array $turn): array => [
-            'question' => \core_text::substr($turn['question'], 0, 500),
+            'question' => \core_text::substr($turn['context_question'] ?? $turn['question'], 0, 500),
             'answer' => trim(\core_text::substr(preg_replace('/\[\d+\]/', '', $turn['answer']), 0, 1200)),
         ], array_slice($turns, -self::MAX_CONTEXT_TURNS));
     }

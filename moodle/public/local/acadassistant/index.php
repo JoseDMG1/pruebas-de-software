@@ -57,7 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $response['sources'] ?? [],
                     $response['academic_provenance'] ?? [],
                     !$isfollowup,
-                    $response['continuation'] ?? null
+                    $response['continuation'] ?? null,
+                    $response['context_question'] ?? null
                 );
             } catch (\Throwable) {
                 $store->set_error(get_string('assistantunavailable', 'local_acadassistant'));

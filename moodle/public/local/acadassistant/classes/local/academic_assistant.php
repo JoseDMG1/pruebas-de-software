@@ -32,7 +32,8 @@ final class academic_assistant {
             $conversationcontext
         );
         $response['continuation'] = $context['academic_context']['query']['has_more']
-            ? ['question' => $question, 'seen' => $context['continuation_seen']] : null;
+            ? ['question' => $context['context_question'], 'seen' => $context['continuation_seen']] : null;
+        $response['context_question'] = $context['context_question'];
         $response['academic_provenance'] = [];
         if (in_array('calendar', $context['requested_categories'], true)) {
             $response['academic_provenance'][] = 'calendar';

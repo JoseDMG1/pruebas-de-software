@@ -10,8 +10,6 @@ namespace local_acadassistant\local;
 
 defined('MOODLE_INTERNAL') || die();
 
-use Closure;
-
 /** Interprets supported academic operations without granting access to any record. */
 final class academic_question {
     public static function normalise(string $text): string {
@@ -24,16 +22,46 @@ final class academic_question {
             self::normalise($question));
     }
 
-    public static function interpret(string $question, array $history = []): array {
+    /** Decide from the supplied topic only; no hidden session dependency. */
+    public static function is_follow_up(string $question, array $history = []): bool {
         $text = self::normalise($question);
-        $followup = (new conversation_store())->is_follow_up($question);
-        $previous = $history ? self::interpret($history[count($history) - 1]['question']) : null;
+        if (self::is_continuation($question)) {
+            return true;
+        }
+        $text = preg_replace('/^[\p{P}\s]+/u', '', $text);
+        if (preg_match('/^(?:y\b|entonces\b|eso\b|esa\b|ese\b|tambien\b|ademas\b|en ese\b|en esa\b|de ese\b|de esa\b)|\b(?:fecha exacta|hora exacta|cual de ellos|esa tarea|esa entrega)\b/u', $text)) {
+            return true;
+        }
+        $last = $history ? $history[count($history) - 1] : null;
+        if ($last && str_contains($last['answer'], '¿De cuál tarea')) {
+            return !preg_match('/^(?:que|quien|quienes|como|cuanto|cuando|cuales|cual)\b/u', $text);
+        }
+        return false;
+    }
+
+    public static function interpret(string $question, array $history = []): array {
+        $clauses = preg_split('/\s+y\s+|[;\n]/u', $question);
+        $academicclauses = [];
+        $documentclauses = [];
+        foreach ($clauses as $clause) {
+            $normal = self::normalise($clause);
+            $isdocument = (bool)preg_match('/reglamento|normativa|nota minima|aprobatori|documento|silabo|codigo|tutoria|biblioteca|ciclo/', $normal);
+            if ($isdocument) {
+                $documentclauses[] = $clause;
+            }
+            if (!$isdocument || preg_match('/mis cursos|cursos tengo|materias llevo|mis tareas|tareas tengo|mis calificaciones|mis profesores|ciclo|calendario/', $normal)) {
+                $academicclauses[] = $clause;
+            }
+        }
+        $text = self::normalise(implode(' y ', $academicclauses));
+        $followup = self::is_follow_up($question, $history);
+        $previous = $history ? self::interpret($history[count($history) - 1]['question'], array_slice($history, 0, -1)) : null;
         $categories = [];
         $documentary = (bool)preg_match('/reglamento|normativa|nota minima|aprobatori|documento|silabo|codigo|tutoria/', $text);
         if (preg_match('/\b(cursos?|materias?|asignaturas?|llevo|matriculad[oa]s?|inscrit[oa]s?|enseno|imparto)\b/', $text) && (!$documentary || preg_match('/mis cursos|cursos tengo|materias llevo|estoy matriculad/', $text))) {
             $categories[] = 'courses';
         }
-        if (preg_match('/\b(profesores?|profesoras?|docentes?|quien (?:me )?ensena|quien (?:me )?dicta|profes)\b/', $text)) {
+        if (preg_match('/\b(profesores?|profesoras?|docentes?|quienes? (?:me )?ensenan?|quienes? (?:me )?dictan?|profes)\b/', $text)) {
             $categories[] = 'teachers';
             if (!preg_match('/mis cursos|cursos tengo|materias llevo/', $text)) {
                 $categories = array_values(array_diff($categories, ['courses']));
@@ -60,24 +88,15 @@ final class academic_question {
             $mode = $previous['course_mode'];
         }
         $filter = preg_match('/\b(todas?|todos?)\b/', $text) ? 'all' : 'pending';
-        if (preg_match('/(?:ya |si )?(?:entregue|presente)|\bentregadas\b|\bpresentadas\b/', $text)) {
+        if (preg_match('/(?:ya |si )?(?:entregue|presente)|\bentregad[oa]s?\b|\bpresentad[oa]s?\b/', $text)) {
             $filter = 'submitted';
         } else if ($followup && $previous && !preg_match('/pendientes|todas?|todos?/', $text)) {
             $filter = $previous['assignment_filter'];
         }
-        if (preg_match('/no (?:entregadas|presentadas)/', $text)) {
+        if (preg_match('/no (?:he )?(?:entregad[oa]s?|presentad[oa]s?|entregue|presente)/', $text)) {
             $filter = 'pending';
         }
         $finance = (bool)preg_match('/cuotas?|pagos?|pagar|saldo|costando|cuanto.*(?:debo|cuesta)|precio.*matricula/', $text);
-        // Only non-academic clauses go to documentary generation in a mixed query.
-        $clauses = preg_split('/\s+y\s+|[;\n]/', $question);
-        $documentclauses = [];
-        foreach ($clauses as $clause) {
-            $normal = self::normalise($clause);
-            if (preg_match('/reglamento|normativa|aprobatori|documento|silabo|codigo|tutoria|biblioteca|ciclo/', $normal)) {
-                $documentclauses[] = $clause;
-            }
-        }
         return [
             'categories' => array_values(array_unique($categories)),
             'course_mode' => $mode,
@@ -85,6 +104,7 @@ final class academic_question {
             'finance' => $finance,
             'follow_up' => $followup,
             'ambiguous_task' => (bool)preg_match('/\b(cuando vence|cuando debo entregarla|esa tarea|esa entrega)\b/', $text),
+            'scope_question' => $academicclauses && $categories ? implode(' y ', $academicclauses) : $question,
             'document_question' => $documentclauses ? implode(' y ', $documentclauses) : ($categories || $finance ? '' : $question),
         ];
     }

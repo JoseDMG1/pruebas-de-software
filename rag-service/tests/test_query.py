@@ -478,3 +478,15 @@ def test_mixed_answer_keeps_moodle_facts_separate_from_document_citations():
 def test_new_signed_contract_does_not_allow_arbitrary_operations():
     with pytest.raises(ValidationError):
         QueryRequest(query='consulta', academic_context={'query': {'categories': ['payments']}})
+
+
+def test_mixed_calendar_reports_a_clear_official_date_discrepancy():
+    official = fragment() | {'tipo_documento': 'CALENDARIO',
+                             'contenido': 'El ciclo inicia el 12 de agosto de 2026.'}
+    chat = Chat(GenerationOutput(answer='El ciclo inicia el 12 de agosto de 2026. [1]',
+                                insufficient_context=False, source_ids=[1]))
+    context = {'calendar': [{'name': 'Inicio del ciclo', 'starts_date': '2026-09-01 08:00'}],
+               'query': {'categories': ['calendar'], 'document_question': 'cuándo inicia el ciclo'}}
+    result = service(Repository([official]), chat).ask('fecha del ciclo', academic_context=context)
+    assert 'Discrepancia' in result.answer and '2026-09-01' in result.answer
+    assert '2026-08-12' in result.answer and 'oficial tiene prioridad' in result.answer

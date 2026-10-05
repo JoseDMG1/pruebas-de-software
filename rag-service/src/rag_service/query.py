@@ -15,7 +15,7 @@ from pydantic import (
     field_validator,
 )
 
-from rag_service.academic_answers import AcademicPlan, compose_academic
+from rag_service.academic_answers import AcademicPlan, calendar_discrepancies, compose_academic
 from rag_service.errors import AppError
 from rag_service.local_embeddings import OllamaEmbeddingProvider
 
@@ -371,9 +371,9 @@ class QueryService:
                                    if documentary.insufficient_context else documentary.answer)
                 documentary.answer = academic_answer + "\nDocumentos: " + document_answer
                 documentary.insufficient_context = False
-                if 'calendar' in plan.categories and documentary.sources:
-                    documentary.answer += ("\nAnte discrepancias, el calendario institucional "
-                                           "oficial tiene prioridad.")
+                discrepancies = calendar_discrepancies(academic_context, documentary.sources)
+                if discrepancies:
+                    documentary.answer += '\n' + '\n'.join(discrepancies)
             elif documentary.insufficient_context:
                 documentary.answer = ("No encontré evidencia para esa consulta. "
                                       "¿Puedes precisar qué necesitas?")
