@@ -55,4 +55,57 @@ final class conversation_store_test extends \advanced_testcase {
             $store->context_for_question('¿Y qué fecha exacta?')
         );
     }
+
+    public function test_moodle_logout_discards_context_before_the_user_logs_in_again(): void {
+        global $SESSION;
+
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $store = new \local_acadassistant\local\conversation_store();
+        $store->append('¿Cuándo inicia el ciclo?', 'En agosto.', []);
+
+        require_logout();
+        $this->assertFalse(isloggedin());
+        $this->assertFalse(property_exists($SESSION, 'local_acadassistant_conversation'));
+        $this->assertSame([], $store->messages());
+
+        $this->setUser($user);
+        $this->assertSame([], $store->messages());
+        $this->assertSame([], $store->context_for_question('¿Y qué fecha exacta?'));
+    }
+
+    public function test_context_is_not_shared_when_identity_changes_in_the_active_session(): void {
+        $this->resetAfterTest();
+        $firstuser = $this->getDataGenerator()->create_user();
+        $seconduser = $this->getDataGenerator()->create_user();
+        $this->setUser($firstuser);
+        $store = new \local_acadassistant\local\conversation_store();
+        $store->append('¿Qué tareas tengo pendientes?', 'Tienes una tarea.', []);
+
+        \core\session\manager::set_user($seconduser);
+        $this->assertSame([], $store->messages());
+
+        \core\session\manager::set_user($firstuser);
+        $this->assertSame([], $store->context_for_question('¿Y cuándo vence?'));
+    }
+
+    public function test_new_moodle_session_after_expiration_cannot_restore_context(): void {
+        global $SESSION;
+
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $store = new \local_acadassistant\local\conversation_store();
+        $store->append('¿Cuándo inicia el ciclo?', 'En agosto.', []);
+
+        // Moodle replaces the session payload when a session expires; model that boundary here.
+        \core\session\manager::init_empty_session();
+        $this->assertFalse(property_exists($SESSION, 'local_acadassistant_conversation'));
+        $this->assertSame([], $store->messages());
+
+        $this->setUser($user);
+        $this->assertSame([], $store->messages());
+        $this->assertSame([], $store->context_for_question('¿Y qué fecha exacta?'));
+    }
 }
