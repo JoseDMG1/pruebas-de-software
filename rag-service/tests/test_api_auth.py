@@ -19,10 +19,12 @@ class QuerySpy:
     def __init__(self):
         self.calls = []
         self.course_scopes = []
+        self.academic_contexts = []
 
-    def ask(self, query, request_id, *, course_ids=()):
+    def ask(self, query, request_id, *, course_ids=(), academic_context=None):
         self.calls.append((query, request_id))
         self.course_scopes.append(tuple(course_ids))
+        self.academic_contexts.append(academic_context or {})
         return {"answer": "Respuesta", "sources": [], "insufficient_context": False,
                 "request_id": request_id}
 
@@ -92,6 +94,29 @@ def test_query_passes_only_verified_moodle_courses_to_document_access_scope():
 
     assert response.status_code == 200
     assert service.course_scopes == [(18, 21)]
+
+
+def test_query_passes_signed_academic_context_to_the_chat_service():
+    secret = "test-shared-secret-that-is-long-enough"
+    service = QuerySpy()
+    client = TestClient(create_app(
+        Settings(_env_file=None, moodle_service_secret=secret), query_service=service,
+    ))
+    body = request_body(academic_context={
+        "assignments": [{"name": "Informe", "status": "submitted", "source": "Moodle"}],
+        "calendar": [{"name": "Inicio de ciclo", "source": "Calendario Moodle"}],
+    })
+
+    response = client.post(
+        "/api/v1/chat/query", content=body,
+        headers=signed_moodle_headers(secret, body, courses=[18]),
+    )
+
+    assert response.status_code == 200
+    assert service.academic_contexts == [{
+        "assignments": [{"name": "Informe", "status": "submitted", "source": "Moodle"}],
+        "calendar": [{"name": "Inicio de ciclo", "source": "Calendario Moodle"}],
+    }]
 
 
 def test_query_rejects_expired_or_forged_assertions_before_calling_rag():

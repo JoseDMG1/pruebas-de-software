@@ -336,9 +336,11 @@ class Repository:
                 )
             return connection.execute(
                 f"""SELECT f.id_fragmento, f.id_documento, f.contenido, f.pagina_inicio,
-                f.pagina_fin, d.clave, d.titulo, d.nombre_archivo, d.version
+                f.pagina_fin, d.clave, d.titulo, d.nombre_archivo, d.version,
+                d.alcance, t.nombre AS tipo_documento
                 FROM fragmento_embedding fe JOIN fragmento f USING (id_fragmento)
                 JOIN documento d USING (id_documento)
+                JOIN tipo_documento t USING (id_tipo_documento)
                 WHERE fe.id_espacio = %s AND d.vigente AND {access_filter}
                     AND (fe.embedding <=> %s::vector) IS NOT NULL
                 ORDER BY fe.embedding <=> %s::vector, f.id_fragmento LIMIT %s""",

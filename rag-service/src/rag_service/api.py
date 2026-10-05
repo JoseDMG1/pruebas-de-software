@@ -78,7 +78,12 @@ def create_app(settings: Settings | None = None, repository=None, query_service=
             settings.moodle_service_secret,
         )
         request.state.moodle_assertion = claims
-        return await run_in_threadpool(execute_query, body.query, tuple(claims["courses"]))
+        return await run_in_threadpool(
+            execute_query,
+            body.query,
+            tuple(claims["courses"]),
+            body.academic_context,
+        )
 
     @application.post("/api/v1/demo/chat/query", response_model=QueryResponse)
     def demo_query(body: QueryRequest):
@@ -86,12 +91,21 @@ def create_app(settings: Settings | None = None, repository=None, query_service=
             raise HTTPException(status_code=404)
         return execute_query(body.query)
 
-    def execute_query(question: str, course_ids: tuple[int, ...] = ()):
+    def execute_query(
+        question: str,
+        course_ids: tuple[int, ...] = (),
+        academic_context: dict | None = None,
+    ):
         start = time.monotonic()
         request_id = str(uuid.uuid4())
         status, code = "ok", None
         try:
-            return service.ask(question, request_id, course_ids=course_ids)
+            return service.ask(
+                question,
+                request_id,
+                course_ids=course_ids,
+                academic_context=academic_context or {},
+            )
         except (AppError, psycopg.Error) as exc:
             status = "error"
             if isinstance(exc, psycopg.Error):

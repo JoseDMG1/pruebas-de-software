@@ -16,7 +16,7 @@ use Closure;
 final class rag_client {
     private const ASSERTION_TTL = 60;
     private const MAX_CONTEXT_BYTES = 32768;
-    private const ACADEMIC_CONTEXT_CATEGORIES = ['courses', 'assignments', 'grades'];
+    private const ACADEMIC_CONTEXT_CATEGORIES = ['courses', 'assignments', 'grades', 'calendar'];
 
     /**
      * @param callable|null $transport Test seam. Receives URL, body, and headers; returns status/body.

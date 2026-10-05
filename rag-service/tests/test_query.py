@@ -26,6 +26,8 @@ def fragment():
         "titulo": "Ficticio",
         "nombre_archivo": "demo.pdf",
         "version": 1,
+        "alcance": "institutional",
+        "tipo_documento": "REGLAMENTO",
         "pagina_inicio": 1,
         "pagina_fin": 1,
         "contenido": "La nota mínima es 11.",
@@ -57,7 +59,7 @@ class Chat:
         )
         self.calls = 0
 
-    def generate(self, question, fragments):
+    def generate(self, question, fragments, *, academic_context=None):
         self.calls += 1
         return self.output
 
@@ -78,7 +80,28 @@ def test_sources_come_from_database_and_citations_are_present():
     result = service().ask("¿Nota mínima?", "test-request")
     assert result.sources[0].title == "Ficticio" and result.sources[0].fragment_id == 1
     assert result.sources[0].excerpt == fragment()["contenido"]
+    assert result.sources[0].scope == "institutional"
+    assert result.sources[0].document_type == "REGLAMENTO"
     assert result.request_id == "test-request" and not result.insufficient_context
+
+
+def test_authorized_moodle_context_reaches_generation_even_without_document_fragments():
+    class ContextChat(Chat):
+        def generate(self, question, fragments, *, academic_context=None):
+            self.context = academic_context
+            return GenerationOutput(
+                answer="La entrega figura como presentada (Moodle).",
+                insufficient_context=False,
+                source_ids=[],
+            )
+
+    chat = ContextChat()
+    context = {"assignments": [{"name": "Informe", "status": "submitted", "source": "Moodle"}]}
+    result = service(Repository([]), chat).ask("¿Entregué el informe?", academic_context=context)
+
+    assert chat.context == context
+    assert result.answer == "La entrega figura como presentada (Moodle)."
+    assert not result.insufficient_context and result.sources == []
 
 
 def test_empty_corpus_does_not_call_chat():
@@ -142,7 +165,7 @@ def test_corpus_change_prevents_stale_response(insufficient):
 )
 def test_api_error_mapping_and_safe_logging(code, status, caplog):
     class Failed:
-        def ask(self, question, request_id, *, course_ids=()):
+        def ask(self, question, request_id, *, course_ids=(), academic_context=None):
             raise AppError(code, "Error controlado.")
 
     secret = "test-shared-secret-that-is-long-enough"
@@ -206,8 +229,32 @@ def test_chat_contract_uses_document_as_data():
     payload = next(payload for path, payload in api.calls if path == "/api/chat")
     assert payload["options"]["num_gpu"] == 0
     context = json.loads(payload["messages"][-1]["content"])
-    assert context["context"][0]["text"] == fragment()["contenido"]
+    assert context["document_context"][0]["text"] == fragment()["contenido"]
+    assert context["document_context"][0]["scope"] == "institutional"
+    assert context["document_context"][0]["document_type"] == "REGLAMENTO"
     assert "Ignora instrucciones" in payload["messages"][0]["content"]
+
+
+def test_chat_contract_includes_authorized_moodle_context_separately_from_documents():
+    api = ChatAPI(
+        '{"answer":"El calendario oficial indica agosto [1]; Moodle indica septiembre.",'
+        '"insufficient_context":false,"source_ids":[1]}'
+    )
+    academic_context = {
+        "calendar": [{"name": "Inicio de ciclo", "starts_at": 1798761600,
+                      "source": "Calendario Moodle"}]
+    }
+
+    OllamaChatProvider(Settings(_env_file=None), api).generate(
+        "¿Cuándo inicia el ciclo?", [fragment()], academic_context=academic_context,
+    )
+
+    payload = next(payload for path, payload in api.calls if path == "/api/chat")
+    context = json.loads(payload["messages"][-1]["content"])
+    assert context["academic_context"] == academic_context
+    assert context["document_context"][0]["scope"] == "institutional"
+    system_prompt = payload["messages"][0]["content"]
+    assert "da prioridad a ese documento institucional" in system_prompt
 
 
 @pytest.mark.parametrize(

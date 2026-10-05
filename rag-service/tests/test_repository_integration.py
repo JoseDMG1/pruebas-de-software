@@ -186,6 +186,8 @@ def test_retrieval_filters_course_documents_before_returning_fragments(repositor
     assert any("COURSE EIGHTEEN MATERIAL" in text for text in contents)
     assert any("INSTITUTIONAL COMMON MATERIAL" in text for text in contents)
     assert all("COURSE NINETEEN SECRET" not in text for text in contents)
+    assert {row["alcance"] for row in rows} == {"course", "institutional"}
+    assert all(row["tipo_documento"] == "OTRO" for row in rows)
 
     common_only = repository.retrieve(
         EmbeddingSpace("bedrock", repository.settings.bedrock_model_id, "", 1024),
@@ -234,7 +236,7 @@ def test_protected_api_filters_course_documents_before_prompt_and_sources(reposi
         def __init__(self):
             self.prompt_fragments = []
 
-        def generate(self, question, fragments):
+        def generate(self, question, fragments, *, academic_context=None):
             self.prompt_fragments = [row["contenido"] for row in fragments]
             return GenerationOutput(
                 answer="Contenido disponible. [1]", insufficient_context=False, source_ids=[1],

@@ -51,7 +51,11 @@ $transport = static function (string $url, string $body, array $headers) use (&$
     return ['status' => 200, 'body' => '{"answer":"ok"}'];
 };
 $client = \local_acadassistant\local\rag_client::from_current_user($transport);
-$result = $client->query('¿Qué tareas me faltan?', [10, 20], ['assignments' => ['A1']]);
+$academiccontext = [
+    'assignments' => [['name' => 'Informe', 'status' => 'submitted', 'source' => 'Moodle']],
+    'calendar' => [['name' => 'Inicio de ciclo', 'source' => 'Calendario Moodle']],
+];
+$result = $client->query('¿Qué tareas me faltan?', [10, 20], $academiccontext);
 
 check($result === ['answer' => 'ok'], 'The Moodle client should decode the RAG response.');
 check(count($requests) === 1, 'The Moodle client should send one server-side request.');
@@ -78,6 +82,8 @@ check($claims['courses'] === [10, 20], 'The assertion must include the authorize
 check($claims['iss'] === 'moodle' && $claims['aud'] === 'rag-service', 'The assertion audience is incorrect.');
 check($claims['exp'] > $claims['iat'] && $claims['exp'] - $claims['iat'] <= 120, 'The assertion must have a short lifetime.');
 check($claims['body_sha256'] === hash('sha256', $body), 'The assertion must bind the complete request body.');
+$decodedbody = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+check($decodedbody['academic_context'] === $academiccontext, 'The signed body must contain authorized academic context.');
 
 $GLOBALS['testguest'] = true;
 $guestrejected = false;
