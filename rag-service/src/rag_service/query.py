@@ -606,6 +606,7 @@ class OllamaChatProvider:
                 if "document" not in route.intents:
                     data["document_question"] = ""
                 data["ambiguous_task"] = route.task_reference or data.get("ambiguous_task", False)
+                data["follow_up"] = route.follow_up and not route.scope_explicit
                 data["teacher_confirmation"] = route.confirmation
                 if not route.confirmation:
                     data["teacher_reference"] = ""

@@ -605,7 +605,13 @@ def test_unnamed_task_reference_requires_native_disambiguation_without_document_
     assert not plan.document_question
 
 
-def test_general_teacher_request_cannot_keep_a_previous_course_filter():
+@pytest.mark.parametrize("query,category,previous_scope", [
+    ("¿Qué profes tengo este ciclo?", "teachers", "mis profesores en Biologia 102"),
+    ("Y muéstrame todas mis tareas", "assignments", "tareas: Ejercicios de ecuaciones"),
+])
+def test_general_academic_request_cannot_keep_a_previous_record_filter(
+    query, category, previous_scope
+):
     from rag_service.conversation import InterpretationRequest
     from rag_service.query import OllamaChatProvider
 
@@ -616,16 +622,16 @@ def test_general_teacher_request_cannot_keep_a_previous_course_filter():
         def request(self, method, path, data):
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
-            response = {"intents": ["teachers"], "scope_explicit": True, "follow_up": True}
+            response = {"intents": [category], "scope_explicit": True, "follow_up": True}
             if data["format"]["title"] == "ConversationPlan":
-                response = {"intent": "academic", "categories": ["teachers"],
-                            "scope_question": "mis profesores en Biologia 102"}
+                response = {"intent": "academic", "categories": [category],
+                            "scope_question": previous_scope, "follow_up": True}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    query = "¿Qué profes tengo este ciclo?"
     plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query=query, runtime=payload()["runtime"],
-            state={"topic": {"intent": "academic", "categories": ["teachers"],
-                             "scope_question": "mis profesores en Biologia 102"}})
+            state={"topic": {"intent": "academic", "categories": [category],
+                             "scope_question": previous_scope}})
     )
-    assert plan.categories == ["teachers"] and plan.scope_question == query
+    assert plan.categories == [category] and plan.scope_question == query
+    assert not plan.follow_up

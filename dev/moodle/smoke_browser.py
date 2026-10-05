@@ -187,6 +187,9 @@ with sync_playwright() as playwright:
     for _ in range(4):
         followup = ask(page, "¿Y a qué hora?")
         assert "Ejercicios de ecuaciones" in followup and "Informe de laboratorio" not in followup, followup
+    broader = ask(page, "Ahora muéstrame todas mis tareas")
+    assert "Ejercicios de ecuaciones" in broader and "Informe de laboratorio" in broader, broader
+    report["explicit_general_task_scope"] = broader
     ask(page, "¿Qué tareas tengo?")
     ask(page, "¿Cuándo vence esa tarea?")
     newtopic = ask(page, "¿Qué cursos tengo?")
