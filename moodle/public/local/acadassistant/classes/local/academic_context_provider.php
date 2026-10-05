@@ -400,7 +400,7 @@ final class academic_context_provider {
                     $flags = $assign->get_user_flags($target['id'], false);
                     $duedate = max((int)$instance->duedate, (int)($flags->extensionduedate ?? 0));
                     $submissionstatus = $submission ? (string)$submission->status : 'not_submitted';
-                    if ($submissionstatus === ASSIGN_SUBMISSION_STATUS_NEW) {
+                    if (in_array($submissionstatus, [ASSIGN_SUBMISSION_STATUS_NEW, ASSIGN_SUBMISSION_STATUS_REOPENED], true)) {
                         $submissionstatus = 'not_submitted';
                     }
                     $matchesfilter = $assignmentfilter;

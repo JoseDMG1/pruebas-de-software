@@ -71,6 +71,7 @@ class ConversationPlan(BaseModel):
     document_question: str = Field(default="", max_length=1000)
     follow_up: StrictBool = False
     teacher_confirmation: StrictBool = False
+    teacher_reference: str = Field(default="", max_length=200)
     ambiguous_task: StrictBool = False
     finance: StrictBool = False
     blocked_part: StrictBool = False
@@ -268,4 +269,29 @@ INTERPRET_PROMPT += """
 week_explicit=true si el mensaje actual elige una semana (actual, próxima o fechas).
 Una respuesta que solo ajusta horarios NO elige otra semana: week_explicit=false.
 No cambies el periodo anterior al interpretar solo una disponibilidad.
+"""
+
+INTERPRET_PROMPT += """
+Confirmación docente: teacher_reference copia el nombre referido de query o conversación;
+no inventes nombres. 'Ella es la única?' tras una sola Carla Docente visible:
+{"intent":"academic","categories":["teachers"],"scope_question":"mis profesores",
+"follow_up":true,"teacher_confirmation":true,"teacher_reference":"Carla Docente"}
+Si el antecedente docente es ambiguo, intent=clarify sin lecturas.
+Las preguntas exclusivamente sobre cuotas o pagos personales NO tienen categorías académicas.
+'cuánto me está costando las cuotas?' ->
+{"intent":"blocked","categories":[],"finance":true,"document_question":""}
+'qué cursos tengo y cuánto debo pagar?' ->
+{"intent":"academic","categories":["courses"],"scope_question":"mis cursos","finance":true}
+"""
+
+INTERPRET_PROMPT += """
+La intención depende de la tarea activa: preguntar la HORA DE VENCIMIENTO de una tarea
+es academic, NO plan semanal ni declaración de disponibilidad. Nunca inventes horarios.
+weekly_plan solo para organizar/planificar estudio o ajustar un plan semanal activo.
+Si previous_intent=academic y pregunta '¿Y a qué hora?', conserva academic y su operación.
+Ejemplo, tema anterior tarea Ejercicios:
+'¿Y a qué hora?' -> {"intent":"academic","categories":["assignments"],
+"scope_question":"tareas pendientes: Ejercicios","follow_up":true,"availability":null}
+No leas un nombre aislado de actividad como petición de resolver ejercicios o tutoría:
+si estaba aclarando cuál tarea consultar, conserva la operación académica del historial.
 """

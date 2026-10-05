@@ -33,7 +33,9 @@ def extract(chat, question, fragments):
                     "role": "system",
                     "content": (
                         "Selecciona pasajes LITERALES que contesten la consulta "
-                        "universitaria. "
+                        "universitaria. Solo un pasaje que contiene la respuesta, "
+                        "no títulos, nombres de guía ni encabezados. "
+                        "Para un procedimiento no verificado devuelve passages=[]. "
                         "No escribas respuestas libres. source_id es la posición 1..4; "
                         "quote copia texto "
                         "exacto. "
@@ -86,6 +88,12 @@ def extract(chat, question, fragments):
                 )
             ):
                 raise ValueError("Pasaje sin soporte o instrucción no confiable")
+        evidence.passages = [
+            passage
+            for passage in evidence.passages
+            if not passage.quote.lstrip().startswith("#")
+            and passage.quote.strip() != fragments[passage.source_id - 1].get("titulo")
+        ]
         if not any(
             m["name"] == model["name"] and m["digest"] == model["digest"]
             for m in chat.client._models()

@@ -216,3 +216,69 @@ def test_mixed_document_failure_keeps_authorized_academic_result():
     )
     assert "Seminario" in result.answer and "No pude verificar" in result.answer
     assert not result.sources
+
+
+def test_pronominal_teacher_confirmation_is_checked_against_live_identities():
+    from rag_service.query import QueryService
+
+    service = QueryService(Settings(_env_file=None), object(), chat=object(), embeddings=object())
+    data = {
+        "teachers": [{"names": ["Carla Docente"], "teacher_id": 5, "course_name": "Biología"}],
+        "query": {"categories": ["teachers"], "teacher_confirmation": True},
+    }
+    result = service.ask(
+        "Entonces ella es la única?",
+        conversation_plan={
+            "intent": "academic",
+            "categories": ["teachers"],
+            "teacher_confirmation": True,
+            "teacher_reference": "Carla Docente",
+        },
+        runtime=payload()["runtime"],
+        academic_context=data,
+    )
+    assert result.answer.startswith("Sí, Carla Docente")
+
+
+def test_conversational_calendar_preserves_official_priority():
+    from rag_service.query import QueryService, QueryResponse, Source
+
+    class Documentary(QueryService):
+        def documentary_evidence(self, *args):
+            source = Source(
+                source_id=1,
+                fragment_id=1,
+                document_id=1,
+                key="calendar",
+                title="Calendario oficial",
+                filename="calendar.pdf",
+                version=1,
+                scope="institutional",
+                document_type="CALENDARIO",
+                page_start=1,
+                page_end=1,
+                excerpt="El ciclo inicia el 12 de agosto de 2026.",
+            )
+            return QueryResponse(
+                answer="El ciclo inicia el 12 de agosto de 2026. [1]",
+                sources=[source],
+                insufficient_context=False,
+                request_id="test",
+            )
+
+    result = Documentary(
+        Settings(_env_file=None), object(), embeddings=object(), chat=object()
+    ).ask(
+        "fechas del ciclo",
+        conversation_plan={
+            "intent": "academic",
+            "categories": ["calendar"],
+            "document_question": "calendario oficial",
+        },
+        runtime=payload()["runtime"],
+        academic_context={
+            "calendar": [{"name": "Inicio del ciclo", "starts_date": "2026-09-01 08:00"}],
+            "query": {"categories": ["calendar"], "document_question": "calendario oficial"},
+        },
+    )
+    assert "Discrepancia" in result.answer and "oficial tiene prioridad" in result.answer

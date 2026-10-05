@@ -1,6 +1,6 @@
 """Bounded responses: facts come from authorized reads, never from model examples."""
 
-from rag_service.academic_answers import AcademicPlan, compose_academic
+from rag_service.academic_answers import AcademicPlan, compose_academic, calendar_discrepancies
 from rag_service.errors import AppError
 import psycopg
 
@@ -45,7 +45,13 @@ def respond(service, question, proposal, runtime, context, history, course_ids, 
 
                 answer = compose_week(context, plan, proposal, runtime)
             else:
-                answer = compose_academic(context, plan, question)
+                answer = compose_academic(
+                    context,
+                    plan,
+                    proposal.teacher_reference or question
+                    if plan.teacher_confirmation
+                    else question,
+                )
                 if answer.startswith("Según Moodle:\n"):
                     answer = (
                         answer.removeprefix("Según Moodle:\n")
@@ -54,7 +60,10 @@ def respond(service, question, proposal, runtime, context, history, course_ids, 
             if plan.document_question:
                 try:
                     result = service.documentary_evidence(
-                        plan.document_question, tuple(plan.document_course_ids or ()), request_id
+                        plan.document_question,
+                        tuple(plan.document_course_ids or ()),
+                        request_id,
+                        question,
                     )
                     answer += ("\n" if answer else "") + (
                         result.answer
@@ -63,6 +72,9 @@ def respond(service, question, proposal, runtime, context, history, course_ids, 
                         "No puedo confirmar normas o pasos sin esa evidencia."
                     )
                     sources = result.sources
+                    discrepancies = calendar_discrepancies(context, sources)
+                    if discrepancies:
+                        answer += "\n" + "\n".join(discrepancies)
                     insufficient = not bool(proposal.categories) and result.insufficient_context
                 except (AppError, psycopg.Error):
                     if not proposal.categories:

@@ -523,7 +523,7 @@ class QueryService:
     def interpret(self, request):
         return self.chat.interpret(request)
 
-    def documentary_evidence(self, question, course_ids, request_id):
+    def documentary_evidence(self, question, course_ids, request_id, original_question=""):
         from rag_service.document_evidence import extract
 
         batch = self.embeddings.embed_query(question)
@@ -537,7 +537,9 @@ class QueryService:
                 insufficient_context=True,
                 request_id=request_id,
             )
-        evidence = extract(self.chat, question, fragments)
+        evidence_question = (f"Consulta actual: {original_question}\nParte documental: {question}"
+                             if original_question else question)
+        evidence = extract(self.chat, evidence_question, fragments)
         if not self.repository.sources_current(fragments):
             raise AppError("corpus_changed", "Los documentos cambiaron; repite la consulta.")
         sources = []

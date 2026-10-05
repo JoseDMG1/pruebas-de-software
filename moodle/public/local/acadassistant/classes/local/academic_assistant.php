@@ -77,7 +77,7 @@ final class academic_assistant {
         if (in_array($plan['intent'], ['academic', 'document', 'weekly_plan'], true)) {
             $response['semantic_state']['topic'] = $plan;
         }
-        if ($plan['availability'] || $plan['availability_unknown']) {
+        if ($plan['intent'] === 'weekly_plan' && ($plan['availability'] || $plan['availability_unknown'])) {
             $response['semantic_state']['availability'] = $plan['availability'];
             $response['semantic_state']['availability_unknown'] = $plan['availability_unknown'];
         }

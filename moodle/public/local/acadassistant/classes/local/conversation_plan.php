@@ -9,7 +9,7 @@ final class conversation_plan {
     public static function validate(array $input): array {
         $defaults = ['intent' => '', 'social' => 'none', 'categories' => [], 'course_mode' => 'enrolled',
             'assignment_filter' => 'pending', 'scope_question' => '', 'document_question' => '',
-            'follow_up' => false, 'teacher_confirmation' => false, 'ambiguous_task' => false,
+            'follow_up' => false, 'teacher_confirmation' => false, 'teacher_reference' => '', 'ambiguous_task' => false,
             'finance' => false, 'blocked_part' => false, 'availability' => null,
             'availability_unknown' => false, 'week_offset' => 0, 'week_explicit' => false, 'week_start' => '',
             'priority' => [], 'clarification' => 'intent'];
@@ -31,8 +31,8 @@ final class conversation_plan {
                 self::invalid();
             }
         }
-        foreach (['scope_question', 'document_question', 'week_start'] as $key) {
-            if (!is_string($plan[$key]) || \core_text::strlen($plan[$key]) > ($key === 'week_start' ? 10 : 1000)) {
+        foreach (['scope_question', 'document_question', 'week_start', 'teacher_reference'] as $key) {
+            if (!is_string($plan[$key]) || \core_text::strlen($plan[$key]) > ($key === 'week_start' ? 10 : ($key === 'teacher_reference' ? 200 : 1000))) {
                 self::invalid();
             }
         }

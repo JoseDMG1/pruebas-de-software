@@ -72,6 +72,28 @@ final class conversation_test extends \advanced_testcase {
         $this->assertSame(['academic'], $weekly['academic_provenance']);
     }
 
+    public function test_schedule_followup_keeps_the_explicit_week(): void {
+        global $CFG;
+        $this->resetAfterTest();
+        $this->setUser($this->getDataGenerator()->create_user());
+        $CFG->local_acadassistant_rag_url = 'https://rag.example.test';
+        $CFG->local_acadassistant_rag_shared_secret = str_repeat('a', 40);
+        $transport = function($url, $body): array {
+            if (str_ends_with($url, '/interpret')) {
+                $result = ['intent' => 'weekly_plan', 'categories' => ['assignments'], 'follow_up' => true,
+                    'availability' => ['days' => [1, 3], 'start_hour' => 14, 'end_hour' => 16]];
+            } else {
+                $payload = json_decode($body, true);
+                $this->assertSame(1, $payload['conversation_plan']['week_offset']);
+                $this->assertSame([1, 3], $payload['conversation_plan']['availability']['days']);
+                $result = ['answer' => 'No hay pendientes.', 'sources' => []];
+            }
+            return ['status' => 200, 'body' => json_encode($result)];
+        };
+        $state = ['topic' => ['intent' => 'weekly_plan', 'categories' => ['assignments']], 'week_offset' => 1];
+        (new \local_acadassistant\local\academic_assistant($transport))->ask('martes y jueves de 14 a 16', [], 0, [], $state);
+    }
+
     public function test_interpreter_request_uses_server_clock_and_rejects_unpermitted_plan(): void {
         global $CFG;
         $this->resetAfterTest();
