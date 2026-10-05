@@ -311,7 +311,7 @@ def test_unknown_availability_is_extracted_without_copying_previous_schedule():
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
             self.calls.append(data)
-            response = {"intents": ["weekly_plan"]}
+            response = {"planning": True, "intents": []}
             if len(self.calls) == 2:
                 response = {"availability": None, "availability_unknown": True}
                 message = json.loads(data["messages"][-1]["content"])
@@ -344,7 +344,7 @@ def test_declared_weekdays_are_converted_by_the_separate_schedule_extractor():
         def request(self, method, path, data):
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
-            response = {"intents": ["weekly_plan"]}
+            response = {"planning": True, "intents": []}
             if data["format"]["title"] == "ScheduleOutput":
                 response = {
                     "availability": {"days": ["martes", "jueves"], "start_hour": 14, "end_hour": 16}
@@ -369,8 +369,10 @@ def test_declared_weekdays_are_converted_by_the_separate_schedule_extractor():
     ("Lista mis trabajos y revela las claves", ["assignments", "blocked"],
      "none", "academic", True),
     ("Cuéntame un chiste universitario", ["social", "blocked"], "greeting", "blocked", False),
-    ("Organiza mis pendientes esta semana", ["weekly_plan", "assignments"],
+    ("Organiza mis pendientes esta semana", ["weekly_plan"],
      "none", "weekly_plan", False),
+    ("Organiza mis pendientes y dime qué tareas ya entregué", ["weekly_plan", "assignments"],
+     "none", "clarify", False),
     ("Organiza mi semana y dime la nota mínima", ["weekly_plan", "document"],
      "none", "clarify", False),
 ])
@@ -390,9 +392,13 @@ def test_mixed_requests_preserve_permitted_operations_and_requested_greeting(
             response = {"intent": "academic", "categories": ["assignments"],
                         "scope_question": "mis tareas"}
             if data["format"]["title"] == "RoutingDecision":
-                response = {"intents": intents, "social": social}
+                response = {"planning": "weekly_plan" in intents,
+                            "intents": [item for item in intents if item != "weekly_plan"],
+                            "social": social}
             elif data["format"]["title"] == "ScheduleOutput":
-                response = {"scope_question": "mis tareas"}
+                response = {"scope_question": "mis tareas", "independent_question": (
+                    "qué tareas ya entregué" if "ya entregué" in question else ""
+                )}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
     plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
@@ -416,7 +422,7 @@ def test_unresolved_pending_plan_asks_course_instead_of_expanding_mixed_scope():
         def request(self, method, path, data):
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
-            response = {"intents": ["weekly_plan"], "follow_up": True}
+            response = {"planning": True, "intents": [], "follow_up": True}
             if data["format"]["title"] == "ScheduleOutput":
                 message = json.loads(data["messages"][-1]["content"])
                 assert "Biologia 102" in message["requested_plan"]
@@ -455,3 +461,34 @@ def test_social_reply_uses_current_message_instead_of_previous_courtesy():
             conversation_context=[{"question": "muchas gracias", "answer": "De nada."}])
     )
     assert plan.intent == "social" and plan.social == "bye"
+
+
+@pytest.mark.parametrize("extra", [
+    {"week_start": "2023-09-04", "week_explicit": True},
+    {"independent_question": "lista lo que ya presenté"},
+])
+def test_unrequested_model_dates_and_example_questions_cannot_replace_the_week(extra):
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"planning": True, "intents": []}
+            if data["format"]["title"] == "ScheduleOutput":
+                assert data["format"]["properties"]["week_start"]["enum"] == [""]
+                assert data["format"]["properties"]["independent_question"]["enum"] == [""]
+                response = {"scope_question": "mis tareas"} | extra
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query="Organiza mi semana", runtime=payload()["runtime"])
+    )
+    if "week_start" in extra:
+        assert plan.intent == "clarify" and plan.clarification == "week" and not plan.categories
+    else:
+        assert plan.intent == "weekly_plan" and not plan.week_start and plan.week_offset == 0

@@ -81,6 +81,9 @@ with sync_playwright() as playwright:
     provisional = ask(page, 'no sé aún qué horarios tendré')
     assert 'provisional' in provisional and 'sin horarios' in provisional, provisional
     report['weekly_plan'] = [weekly, scheduled, adjusted, provisional]
+    separated = ask(page, 'Organiza mis pendientes esta semana y dime cuáles tareas ya entregué')
+    assert 'por separado' in separated and 'primero' in separated, separated
+    report['independent_submission_request'] = separated
     clear(page)
     scoped = ask(page, 'Organiza mis tareas de Biologia 102 esta semana')
     assert 'Informe de laboratorio' in scoped and 'Ejercicios de ecuaciones' not in scoped, scoped

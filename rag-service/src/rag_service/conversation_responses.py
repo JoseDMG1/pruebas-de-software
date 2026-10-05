@@ -36,7 +36,7 @@ def respond(service, question, proposal, runtime, context, history, course_ids, 
             ),
             "course": "¿De qué curso necesitas esa información?",
             "task": "¿A qué tarea y curso te refieres?",
-            "week": "¿Qué semana quieres organizar? Indica las fechas.",
+            "week": "¿Qué semana quieres organizar? Indica el inicio en formato AAAA-MM-DD.",
             "availability": "¿Qué días y horas tienes disponibles para estudiar?",
         }[proposal.clarification]
     else:

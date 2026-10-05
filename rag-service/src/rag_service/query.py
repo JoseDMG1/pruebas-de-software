@@ -1,6 +1,7 @@
 """Consulta RAG local: un único espacio vectorial y referencias verificadas."""
 
 import json
+from datetime import date
 import re
 import uuid
 
@@ -414,11 +415,13 @@ class OllamaChatProvider:
 
         def generate_plan(prompt, schema, message, examples=()):
             messages = [{"role": "system", "content": prompt}]
-            for example, intents, social, finance in examples:
+            for example, intents, social, finance, rationale in examples:
                 messages.extend([
                     {"role": "user", "content": json.dumps({"query": example}, ensure_ascii=False)},
                     {"role": "assistant", "content": json.dumps({
-                        "intents": intents, "social": social,
+                        "rationale": rationale, "planning": "weekly_plan" in intents,
+                        "intents": [item for item in intents if item != "weekly_plan"],
+                        "social": social,
                         "follow_up": False, "finance": finance,
                     })},
                 ])
@@ -440,7 +443,7 @@ class OllamaChatProvider:
 
         try:
             schema = RoutingDecision.model_json_schema() | {"additionalProperties": False}
-            schema["required"] = ["intents", "social", "follow_up", "finance"]
+            schema["required"] = ["rationale", "planning", "intents", "social", "follow_up", "finance"]
             route = RoutingDecision.model_validate_json(
                 generate_plan(ROUTE_PROMPT, schema, json.dumps({
                     **({"previous_topic": {"intent": previous.intent,
@@ -448,12 +451,12 @@ class OllamaChatProvider:
                         "clarification": previous.clarification}}
                         if previous else {}),
                     **({"conversation_context": [request.conversation_context[-1].model_dump()]}
-                        if request.conversation_context else {}),
+                        if request.conversation_context and not previous else {}),
                     "query": request.query,
                 }, ensure_ascii=False), ROUTE_EXAMPLES)
             )
             if (
-                "weekly_plan" in route.intents
+                route.planning
                 and (ACADEMIC_CATEGORIES - {"assignments"} | {"document"}).intersection(
                     route.intents
                 )
@@ -479,7 +482,23 @@ class OllamaChatProvider:
                 ).model_dump()
             elif route.intent == "weekly_plan":
                 schedule_schema = ScheduleOutput.model_json_schema()
-                schedule_schema["required"] = ["scope_question"]
+                schedule_schema["required"] = ["scope_question", "independent_question"]
+                explicit_dates = set()
+                for candidate in re.findall(r"\b\d{4}-\d{2}-\d{2}\b", request.query):
+                    try:
+                        explicit_dates.add(date.fromisoformat(candidate).isoformat())
+                    except ValueError:
+                        pass
+                schedule_schema["properties"]["week_start"]["enum"] = ["", *sorted(explicit_dates)]
+                clauses = [part.strip() for part in re.split(
+                    r"\s+(?:y|además|también)\s+|[;,.?!¿¡]", request.query, flags=re.I
+                ) if part.strip()]
+                independent_quotes = (
+                    {part for part in clauses if len(part) >= 10} if len(clauses) > 1 else set()
+                )
+                schedule_schema["properties"]["independent_question"]["enum"] = [
+                    "", *sorted(independent_quotes)
+                ]
                 schedule = ScheduleOutput.model_validate_json(
                     generate_plan(
                         SCHEDULE_PROMPT,
@@ -496,7 +515,18 @@ class OllamaChatProvider:
                         ),
                     )
                 )
-                if schedule.week_ambiguous:
+                if (schedule.independent_question
+                    and schedule.independent_question not in request.query):
+                    if not ACADEMIC_CATEGORIES.intersection(route.intents):
+                        schedule.independent_question = ""
+                if schedule.independent_question:
+                    data = ConversationPlan(
+                        intent="clarify", clarification="requests", scope_question=request.query,
+                        blocked_part=route.blocked_part,
+                    ).model_dump()
+                elif schedule.week_ambiguous or (
+                    schedule.week_start and schedule.week_start not in explicit_dates
+                ):
                     data = ConversationPlan(intent="clarify", clarification="week").model_dump()
                 elif (previous and previous.intent == "clarify"
                       and previous.clarification == "requests" and not schedule.scope_question):
@@ -509,7 +539,9 @@ class OllamaChatProvider:
                         follow_up=route.follow_up,
                         blocked_part=route.blocked_part,
                     ).model_dump()
-                    data.update(schedule.model_dump(exclude={"week_ambiguous", "scope_question"}))
+                    data.update(schedule.model_dump(
+                        exclude={"week_ambiguous", "scope_question", "independent_question"}
+                    ))
                     if schedule.scope_question:
                         data["scope_question"] = schedule.scope_question
                     if (
