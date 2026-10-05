@@ -117,6 +117,19 @@ def test_query_rejects_a_body_changed_after_it_was_signed():
     assert service.calls == []
 
 
+def test_query_rejects_unapproved_academic_context_categories():
+    service = QuerySpy()
+    client = TestClient(create_app(Settings(_env_file=None), query_service=service))
+
+    response = client.post(
+        "/api/v1/chat/query",
+        json={"query": "¿Qué cursos llevo?", "academic_context": {"profile": {"email": "x"}}},
+    )
+
+    assert response.status_code == 422
+    assert service.calls == []
+
+
 def test_query_rejects_changed_user_or_course_claims_without_a_new_signature():
     secret = "test-shared-secret-that-is-long-enough"
     service = QuerySpy()

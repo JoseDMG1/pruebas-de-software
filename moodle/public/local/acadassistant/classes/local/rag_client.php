@@ -16,6 +16,7 @@ use Closure;
 final class rag_client {
     private const ASSERTION_TTL = 60;
     private const MAX_CONTEXT_BYTES = 32768;
+    private const ACADEMIC_CONTEXT_CATEGORIES = ['courses', 'assignments', 'grades'];
 
     /**
      * @param callable|null $transport Test seam. Receives URL, body, and headers; returns status/body.
@@ -59,7 +60,7 @@ final class rag_client {
      *
      * @param string $query User question.
      * @param int[] $authorizedcourseids Course IDs Moodle has authorized for the current user.
-     * @param array $academiccontext Minimal authorized academic data relevant to the question.
+     * @param array $academiccontext Authorized courses, assignments, or grades from Moodle.
      * @return array Decoded RAG response.
      */
     public function query(string $query, array $authorizedcourseids = [], array $academiccontext = []): array {
@@ -78,6 +79,9 @@ final class rag_client {
         $courseids = array_values($courseids);
         sort($courseids, SORT_NUMERIC);
         $this->validate_current_user_and_course_scope($courseids);
+        if (array_diff(array_keys($academiccontext), self::ACADEMIC_CONTEXT_CATEGORIES)) {
+            throw new \moodle_exception('ragrequestfailed', 'local_acadassistant');
+        }
 
         try {
             $body = json_encode(

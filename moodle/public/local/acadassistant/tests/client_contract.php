@@ -100,6 +100,15 @@ try {
 check($courserejected, 'The Moodle client must reject a course Moodle does not authorize.');
 check(count($requests) === 1, 'An unauthorized course must not reach the RAG service.');
 
+$contextrejected = false;
+try {
+    $client->query('Query with unrelated profile data', [], ['profile' => ['email' => 'private@example.test']]);
+} catch (moodle_exception) {
+    $contextrejected = true;
+}
+check($contextrejected, 'The Moodle client must reject unapproved academic context categories.');
+check(count($requests) === 1, 'Unapproved academic context must not reach the RAG service.');
+
 $GLOBALS['testallowedcourses'] = [10, 20];
 $GLOBALS['USER']->id = 99;
 $userrejected = false;

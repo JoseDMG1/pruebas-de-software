@@ -26,6 +26,14 @@ class QueryRequest(BaseModel):
     query: str = Field(min_length=1, max_length=1000)
     academic_context: dict[str, JsonValue] = Field(default_factory=dict)
 
+    @field_validator("academic_context")
+    @classmethod
+    def limit_academic_context_categories(cls, value):
+        allowed_categories = {"courses", "assignments", "grades"}
+        if not set(value).issubset(allowed_categories):
+            raise ValueError("academic_context contiene una categoría no permitida.")
+        return value
+
     @field_validator("query")
     @classmethod
     def clean_query(cls, value):
