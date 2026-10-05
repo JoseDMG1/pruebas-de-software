@@ -74,7 +74,8 @@ final class academic_assistant {
         $response['context_question'] = $context['context_question'];
         $response['follow_up'] = $plan['follow_up'];
         $response['semantic_state'] = $semanticstate;
-        if (in_array($plan['intent'], ['academic', 'document', 'weekly_plan'], true)) {
+        if (in_array($plan['intent'], ['academic', 'document', 'weekly_plan'], true) ||
+                ($plan['intent'] === 'clarify' && $plan['clarification'] === 'requests')) {
             $response['semantic_state']['topic'] = $plan;
         }
         if ($plan['intent'] === 'weekly_plan' && ($plan['availability'] || $plan['availability_unknown'])) {

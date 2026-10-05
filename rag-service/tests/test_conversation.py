@@ -396,3 +396,30 @@ def test_mixed_requests_preserve_permitted_operations_and_requested_greeting(
         assert plan.social == social
     if intent == "clarify":
         assert plan.clarification == "requests" and not plan.categories
+
+
+def test_choosing_pending_plan_does_not_expand_its_course_scope():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"intents": ["weekly_plan"], "follow_up": True}
+            if data["format"]["title"] == "ScheduleOutput":
+                message = json.loads(data["messages"][-1]["content"])
+                assert "Biologia 102" in message["requested_plan"]
+                response = {"scope_question": ""}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query="El plan primero", runtime=payload()["runtime"],
+            state={"topic": {"intent": "clarify", "clarification": "requests",
+                "scope_question": "Organiza mis tareas de Biologia 102 y dime la nota mínima"}})
+    )
+    assert plan.intent == "weekly_plan" and "Biologia 102" in plan.scope_question
+    assert plan.document_question == ""

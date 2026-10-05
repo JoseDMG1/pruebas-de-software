@@ -30,6 +30,7 @@ from rag_service.conversation import (
     routing_schema,
     RoutingDecision,
     ROUTE_PROMPT,
+    ROUTE_EXAMPLES,
     WEEKDAYS,
 )
 from rag_service.local_embeddings import OllamaEmbeddingProvider
@@ -408,17 +409,23 @@ class OllamaChatProvider:
             ensure_ascii=False,
         )
 
-        def generate_plan(prompt, schema, message):
+        def generate_plan(prompt, schema, message, examples=()):
+            messages = [{"role": "system", "content": prompt}]
+            for example, intents, social in examples:
+                messages.extend([
+                    {"role": "user", "content": json.dumps({"query": example}, ensure_ascii=False)},
+                    {"role": "assistant", "content": json.dumps({
+                        "intents": intents, "social": social, "follow_up": False, "finance": False,
+                    })},
+                ])
+            messages.append({"role": "user", "content": message})
             result = self.client.request(
                 "POST",
                 "/api/chat",
                 {
                     "model": model["name"],
                     "stream": False,
-                    "messages": [
-                        {"role": "system", "content": prompt},
-                        {"role": "user", "content": message},
-                    ],
+                    "messages": messages,
                     "format": schema,
                     "options": options,
                 },
@@ -433,19 +440,21 @@ class OllamaChatProvider:
             route = RoutingDecision.model_validate_json(
                 generate_plan(ROUTE_PROMPT, schema, json.dumps({
                     **({"previous_topic": {"intent": previous.intent,
-                        "categories": previous.categories, "scope": previous.scope_question}}
+                        "categories": previous.categories, "scope": previous.scope_question,
+                        "clarification": previous.clarification}}
                         if previous else {}),
                     **({"conversation_context": [request.conversation_context[-1].model_dump()]}
                         if request.conversation_context else {}),
                     "query": request.query,
-                }, ensure_ascii=False))
+                }, ensure_ascii=False), ROUTE_EXAMPLES)
             )
             if (
                 "weekly_plan" in route.intents
                 and {"academic", "document"}.intersection(route.intents)
             ):
                 data = ConversationPlan(
-                    intent="clarify", clarification="requests", blocked_part=route.blocked_part,
+                    intent="clarify", clarification="requests", scope_question=request.query,
+                    blocked_part=route.blocked_part,
                 ).model_dump()
             elif route.intent in ("social", "capabilities", "blocked", "clarify"):
                 data = ConversationPlan(
@@ -463,6 +472,9 @@ class OllamaChatProvider:
                         json.dumps(
                             {
                                 "runtime": request.runtime.model_dump(),
+                                **({"requested_plan": previous.scope_question} if previous
+                                   and previous.intent == "clarify"
+                                   and previous.clarification == "requests" else {}),
                                 "query": request.query,
                             },
                             ensure_ascii=False,
@@ -495,6 +507,10 @@ class OllamaChatProvider:
                         and not schedule.scope_question
                     ):
                         data["scope_question"] = previous.scope_question
+                    if (previous and previous.intent == "clarify"
+                        and previous.clarification == "requests" and not schedule.scope_question):
+                        data["scope_question"] = previous.scope_question
+                        data["follow_up"] = True
                     if schedule.availability:
                         data["availability"]["days"] = [
                             WEEKDAYS.index(day) for day in schedule.availability.days
