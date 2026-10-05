@@ -20,7 +20,7 @@ def login(page, username):
     with page.expect_navigation():
         page.locator("#loginbtn").click()
     page.goto(chaturl)
-    assert page.locator("#assistant-question").count() == 1
+    assert page.locator("#assistant-question").count() == 1, page.locator("body").inner_text()
     assert page.locator("nav a[href*='/local/acadassistant/index.php']").count() >= 1
 
 

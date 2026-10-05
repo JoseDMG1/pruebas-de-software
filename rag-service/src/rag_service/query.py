@@ -376,7 +376,8 @@ class QueryService:
                 if not academic_answer:
                     raise
                 return QueryResponse(
-                    answer=academic_answer + "\nNo pude consultar la parte documental. Inténtalo de nuevo.",
+                    answer=academic_answer + ("\nNo pude consultar la parte documental. "
+                                             "Inténtalo de nuevo."),
                     sources=[], insufficient_context=False, request_id=request_id,
                 )
             if academic_answer:

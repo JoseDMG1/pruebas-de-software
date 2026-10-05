@@ -522,5 +522,6 @@ def test_document_failure_keeps_verified_academic_part_and_explains_failure():
     context = {'courses': [{'name': 'Algebra 101', 'short_name': 'ALG101'}],
                'query': {'categories': ['courses'], 'document_question': 'reglamento'}}
     result = service(chat=UnavailableChat()).ask('cursos y reglamento', academic_context=context)
-    assert 'Algebra 101' in result.answer and 'No pude consultar la parte documental' in result.answer
+    assert 'Algebra 101' in result.answer
+    assert 'No pude consultar la parte documental' in result.answer
     assert not result.insufficient_context and not result.sources
