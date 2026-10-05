@@ -72,6 +72,23 @@ final class conversation_test extends \advanced_testcase {
         $this->assertSame(['academic'], $weekly['academic_provenance']);
     }
 
+    public function test_current_named_task_overrides_a_broad_proposed_scope(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($user->id, $course->id, 'student');
+        $generator = $this->getDataGenerator()->get_plugin_generator('mod_assign');
+        foreach (['Ensayo personal', 'Informe práctico'] as $name) {
+            $generator->create_instance(['course' => $course->id, 'name' => $name]);
+        }
+        $this->setUser($user);
+        $result = (new \local_acadassistant\local\academic_context_provider())->collect_for_plan(
+            ['intent' => 'academic', 'categories' => ['assignments'], 'scope_question' => 'mis tareas'],
+            [], 0, [], 'Ensayo personal');
+        $this->assertSame(['Ensayo personal'], array_column($result['academic_context']['assignments'], 'name'));
+        $this->assertStringContainsString('Ensayo personal', $result['context_question']);
+    }
+
     public function test_current_named_course_overrides_a_broad_or_stale_proposed_scope(): void {
         $this->resetAfterTest();
         $first = $this->getDataGenerator()->create_course(['fullname' => 'Algebra 101']);

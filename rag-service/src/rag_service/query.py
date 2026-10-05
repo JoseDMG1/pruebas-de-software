@@ -420,7 +420,7 @@ class OllamaChatProvider:
                     {"role": "user", "content": json.dumps({"query": example}, ensure_ascii=False)},
                     {"role": "assistant", "content": json.dumps({
                         "rationale": rationale, "planning": "weekly_plan" in intents,
-                        "confirmation": False,
+                        "confirmation": False, "task_reference": False,
                         "intents": [item for item in intents if item != "weekly_plan"],
                         "social": social,
                         "follow_up": False, "finance": finance,
@@ -442,10 +442,11 @@ class OllamaChatProvider:
                 raise ValueError("Incomplete interpretation")
             return result["message"]["content"]
 
+        proposed_document_question = ""
         try:
             schema = RoutingDecision.model_json_schema() | {"additionalProperties": False}
             schema["required"] = [
-                "rationale", "planning", "confirmation", "intents", "social",
+                "rationale", "planning", "confirmation", "task_reference", "intents", "social",
                 "follow_up", "finance",
             ]
             route = RoutingDecision.model_validate_json(
@@ -587,6 +588,7 @@ class OllamaChatProvider:
                     schema["properties"]["teacher_reference"]["enum"] = [""]
                 scope_quotes = []
                 if "document" not in route.intents:
+                    schema["properties"]["document_question"]["enum"] = [""]
                     scope_quotes = [request.query]
                     if previous and route.follow_up and previous.scope_question:
                         scope_quotes.append(previous.scope_question)
@@ -594,6 +596,10 @@ class OllamaChatProvider:
                 data = json.loads(generate_plan(INTERPRET_PROMPT, schema, message))
                 if scope_quotes and data.get("scope_question") not in scope_quotes:
                     data["scope_question"] = request.query
+                proposed_document_question = data.get("document_question", "")
+                if "document" not in route.intents:
+                    data["document_question"] = ""
+                data["ambiguous_task"] = route.task_reference or data.get("ambiguous_task", False)
                 data["teacher_confirmation"] = route.confirmation
                 if not route.confirmation:
                     data["teacher_reference"] = ""
@@ -609,7 +615,7 @@ class OllamaChatProvider:
                 r"(revela|muestra|dame|extrae|imprime).{0,60}"
                 r"(secret|token|credencial|contraseñ|claves)|system.?prompt|"
                 r"ignora.{0,40}(reglas|instrucciones)",
-                data["document_question"],
+                data["document_question"] or proposed_document_question,
                 re.I,
             ):
                 data["document_question"] = ""

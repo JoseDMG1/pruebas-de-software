@@ -287,6 +287,7 @@ class RoutingDecision(BaseModel):
     rationale: str = Field(default="", max_length=250)
     planning: StrictBool = False
     confirmation: StrictBool = False
+    task_reference: StrictBool = False
     intents: list[Literal[
         "social", "capabilities", "courses", "teachers", "assignments", "grades", "calendar",
         "document", "clarify", "blocked"
@@ -331,6 +332,8 @@ planning=true si quiere ORGANIZAR, DISTRIBUIR o PLANIFICAR el estudio o ajustar 
 planning=false si solo pide leer una lista o un dato. No depende de los nombres de operaciones.
 confirmation=true SOLO si pide verificar una afirmación, por ejemplo si una docente es la única.
 confirmation=false al pedir nombres o cambiar de curso; mencionar un curso no es una afirmación.
+task_reference=true si query se refiere a UNA tarea sin nombrarla (esa, aquella, su fecha/hora).
+Moodle comprobará si hay varias tareas posibles. Listar tareas no es esa referencia; false.
 El plan YA incluye la lectura necesaria de pendientes; NO añadas assignments por eso.
 Registra otras operaciones SOLO si el usuario formula otra pregunta independiente del plan.
 social: saludo, gracias, despedida. Puede acompañar otra petición; nunca reemplaza esa petición.

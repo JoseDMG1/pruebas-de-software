@@ -577,3 +577,29 @@ def test_changing_teacher_course_cannot_become_a_confirmation_of_a_person():
     assert plan.categories == ["teachers"]
     assert not plan.teacher_confirmation and not plan.teacher_reference
     assert plan.scope_question == "¿Y en Biologia 102?"
+
+
+def test_unnamed_task_reference_requires_native_disambiguation_without_document_lookup():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"intents": ["assignments"], "task_reference": True, "follow_up": True}
+            if data["format"]["title"] == "ConversationPlan":
+                response = {"intent": "academic", "categories": ["assignments"],
+                            "ambiguous_task": False, "document_question": "Cómo entregar en Moodle"}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query="¿Cuándo vence esa tarea?", runtime=payload()["runtime"],
+            state={"topic": {"intent": "academic", "categories": ["assignments"],
+                             "scope_question": "mis tareas"}})
+    )
+    assert plan.categories == ["assignments"] and plan.ambiguous_task
+    assert not plan.document_question

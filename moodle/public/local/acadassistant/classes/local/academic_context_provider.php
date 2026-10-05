@@ -99,7 +99,7 @@ final class academic_context_provider {
 
         $tasknames = [];
         if (array_intersect($requested, ['assignments', 'grades'])) {
-            $tasknames = $this->selected_task_names($courses, array_merge([$question], array_reverse($previousquestions)));
+            $tasknames = $this->selected_task_names($courses, array_merge([$currentquestion, $question], array_reverse($previousquestions)));
             [$assignments, $grades] = $this->assignment_and_grade_context($courses,
                 ($plan['intent'] ?? '') === 'weekly_plan' ? 'mis tareas' : $question, $requested, $plan['assignment_filter'], $tasknames);
             if (in_array('assignments', $requested, true)) {
