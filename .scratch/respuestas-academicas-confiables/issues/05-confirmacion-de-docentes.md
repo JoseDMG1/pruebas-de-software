@@ -1,6 +1,6 @@
 # Responder confirmaciones sobre docentes sin contenido ajeno
 
-Status: in-progress
+Status: done
 
 ## Problema
 
@@ -22,3 +22,7 @@ lista, añade fechas y documentación no pedidas y llega a inventar el curso Dis
 
 Corrección solicitada tras el cierre de los cuatro tickets originales. No cambia
 la autoridad de Moodle ni crea acceso adicional a docentes o documentos.
+
+Verificado: 31 tests Moodle (139 assertions), 164 pruebas RAG y recorrido completo
+en navegador. Revisión Standards y Spec sin hallazgos pendientes. Evidencia en
+[verification.md](../verification.md#corrección-de-confirmaciones-sobre-docentes).

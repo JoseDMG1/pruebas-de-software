@@ -73,3 +73,38 @@ como parcial. La validación de rendimiento/carga continúa aplazada al Sprint 3
 El checkout de prueba es Moodle 5.3dev; no se certificó otra versión desplegada.
 
 Resultado de revisión: Standards 0 hallazgos pendientes; Spec 0 hallazgos pendientes.
+
+
+## Corrección de confirmaciones sobre docentes
+
+Implementación revisada hasta `871d857ad`, sobre la comparación autorizada `1cf28883b`.
+El reporte anterior no cubría la secuencia nueva que reportó el usuario.
+
+Se reprodujo con el proveedor público la mezcla indebida de docentes y calendario,
+y con el endpoint protegido la falta de confirmación directa. «Este ciclo» se trata
+como contexto de la consulta personal sobre docentes, no como solicitud automática
+de fechas o documentos. Preguntas explícitas sobre inicio del ciclo mantienen sus fuentes.
+«Me refería» mantiene el contexto de la reformulación. La petición de exclusividad
+produce una confirmación desde los docentes visibles de Moodle, con límites de
+completitud y visibilidad, sin invocar generación documental.
+
+La revisión detectó dos casos adicionales, corregidos con regresiones: sinónimos
+«profes» / «quiénes me enseñan» y docentes homónimos. La identidad Moodle viaja solo
+entre servidores para contar personas y paginar; no se muestra en la respuesta.
+Un mismo docente en dos cursos cuenta una sola vez; dos personas con el mismo nombre
+no producen una confirmación falsa. Sin identidad comprobable, la respuesta no afirma unicidad.
+
+Pruebas actuales: **31 tests Moodle, 139 assertions; 164 pruebas RAG**, todos pasan.
+Ruff, sintaxis PHP y `git diff --check` pasan. Revisión: Standards 0 hallazgos
+pendientes; Spec 0 hallazgos pendientes de código.
+
+El recorrido completo de navegador terminó con código **0**, con las cinco variantes
+docentes y la confirmación literal del usuario. El reporte incluye
+`teacher_confirmation_sequence`; la salida está en `.local/teacher-confirmation-browser.log`.
+No apareció calendario, contenido documental ni Diseño 204 en esos turnos.
+También pasaron las comprobaciones anteriores de documentos, permisos, tareas,
+logout, expiración y continuación.
+
+Respuesta real:
+
+> Sí, Carla Docente es la única docente visible en los cursos consultados de Moodle. No puedo asegurar que no haya otros docentes asignados: no tengo nombres visibles en Algebra 101.

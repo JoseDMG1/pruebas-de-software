@@ -130,3 +130,12 @@ Para empezar a probar las respuestas actualizadas, abre el chat y pulsa
 **New conversation**. Pregunta por tus cursos, profesores o tareas; después puedes
 seleccionar una tarea por nombre y seguir con **¿Y a qué hora?**. Los vencimientos
 respetan también las prórrogas individuales vigentes en Moodle.
+
+
+Para probar una confirmación sobre docentes, pregunta **¿Qué profesores me enseñan
+en este ciclo?** y después **¿Entonces la única docente que tengo registrada es
+Carla Docente y nadie más?**. El asistente responde directamente según los docentes
+visibles de las matrículas vigentes, sin añadir calendario ni documentos por
+mencionar «este ciclo». Si no ve docentes en otro curso, explica que no puede
+asegurar que no haya otras personas asignadas. La corrección pasó 31 tests Moodle
+(139 assertions), 164 pruebas RAG y el recorrido completo de navegador.
