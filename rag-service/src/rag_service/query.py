@@ -670,7 +670,7 @@ class OllamaChatProvider:
                 data["blocked_part"] = route.blocked_part
                 data["finance"] = route.finance or data["finance"]
             if data["intent"] not in ("social", "blocked"):
-                data["social"] = route.social if "social" in route.intents else "none"
+                data["social"] = route.social
             # A proposed retrieval must not carry secret-extraction instructions to another model.
             if re.search(
                 r"(revela|muestra|dame|extrae|imprime).{0,60}"
