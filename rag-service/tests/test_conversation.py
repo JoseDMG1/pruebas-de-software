@@ -1203,3 +1203,11 @@ def test_consistent_independent_task_request_clears_selected_scope_despite_reade
     )
     assert not plan.follow_up and plan.selected_assignment_id == 0
     assert plan.scope_question == query and plan.assignment_filter == "all"
+
+
+def test_shared_institution_modifier_is_not_a_separate_compound_request():
+    from rag_service.query import request_clauses
+
+    assert request_clauses(
+        "En Universidad Otra, ¿qué cursos tengo y cuál es la nota mínima?"
+    ) == ["En Universidad Otra, ¿qué cursos tengo", "cuál es la nota mínima"]

@@ -48,9 +48,10 @@ INSUFFICIENT_ANSWER = "No hay información suficiente en los documentos disponib
 
 def request_clauses(question):
     """Extract literal compound requests for validated argument selection."""
-    return [part.strip() for part in re.split(
-        r"\s+(?:y|además|también)\s+|[;,.?!¿¡]", question, flags=re.I
-    ) if part.strip()]
+    # Commas and opening question marks can introduce a shared modifier, not a request.
+    return [part.strip().strip("¿¡ ") for part in re.split(
+        r"\s+(?:y|además|también)\s+|[;.?!]", question, flags=re.I
+    ) if part.strip().strip("¿¡ ")]
 
 
 class ConversationTurn(BaseModel):
