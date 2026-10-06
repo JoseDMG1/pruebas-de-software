@@ -333,6 +333,9 @@ class RoutingDecision(BaseModel):
             if len(self.intents) >= 6:
                 raise ValueError("Demasiadas operaciones en una solicitud.")
             self.intents.append("document")
+        if self.social != "none" and not self.intents and not self.planning:
+            # The independent current-message classifier still verifies this label.
+            self.intents.append("social")
         if not self.planning and not self.intents:
             raise ValueError("Falta una intención reconocida.")
         return self

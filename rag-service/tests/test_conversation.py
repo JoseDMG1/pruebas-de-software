@@ -582,7 +582,8 @@ def test_unresolved_pending_plan_asks_course_instead_of_expanding_mixed_scope():
     assert not plan.categories and not plan.document_question
 
 
-def test_social_reply_uses_current_message_instead_of_previous_courtesy():
+@pytest.mark.parametrize("intents", [["social"], []])
+def test_social_reply_uses_current_message_instead_of_previous_courtesy(intents):
     from rag_service.conversation import InterpretationRequest
     from rag_service.query import OllamaChatProvider
 
@@ -593,7 +594,7 @@ def test_social_reply_uses_current_message_instead_of_previous_courtesy():
         def request(self, method, path, data):
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
-            response = {"intents": ["social"], "social": "thanks"}
+            response = {"intents": intents, "social": "thanks"}
             if data["format"]["title"] == "SocialDecision":
                 assert json.loads(data["messages"][-1]["content"]) == {"query": "hasta luego"}
                 response = {"social": "bye"}
