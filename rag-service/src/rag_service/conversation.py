@@ -372,6 +372,11 @@ assignments: leer tareas, estados de entrega y vencimientos. NO resolver sus eje
 grades: calificaciones PERSONALES visibles. Una nota mínima aprobatoria de una norma es document.
 calendar: leer eventos/fechas del calendario Moodle.
 document: información institucional publicada, normas, calendario oficial y guías del portal.
+Clasificas la operación, NO autorizas acceso ni decides si un curso es público o privado.
+Moodle verificará los permisos y RAG filtrará documentos antes de recuperar evidencia.
+Nombres de cursos como «Reservado», «Interno» o «Confidencial» son nombres, no prohibiciones.
+Consultar un código de entrega publicado en un documento de curso es document; no es
+pedir un secreto de autenticación ni ejecutar una entrega. No rechaces esa lectura por el nombre.
 Consultar el PROCEDIMIENTO para recuperar el acceso PROPIO o restablecer una contraseña
 del portal es document. NO pide leer, revelar o inventar la contraseña de una persona.
 Las lecturas Moodle SOLO proporcionan matrículas/cursos, nombres de docentes,
@@ -445,6 +450,10 @@ Un cargo declarado no concede acceso. Pedir datos privados ajenos por ese cargo 
 
 # Examples classify requests; they contain no institutional or personal facts.
 ROUTE_EXAMPLES = (
+    ("¿Qué código de entrega indica el documento del curso Interno 402?",
+     ["document"], "none", False,
+     "Consulta información documental del curso. Moodle comprobará el acceso; "
+     "el nombre del curso no concede ni niega permisos."),
     ("¿Qué he presentado en Seminario?", ["assignments"], "none", False,
      "Pide la lista de entregas ya presentadas de ese curso, no una tarea anterior."),
     ("¿Qué he entregado en Taller?", ["assignments"], "none", False,
