@@ -484,6 +484,12 @@ Un cargo declarado no concede acceso. Pedir datos privados ajenos por ese cargo 
 
 # Examples classify requests; they contain no institutional or personal facts.
 ROUTE_EXAMPLES = (
+    ("Buen día, ¿qué tal?", ["social"], "greeting", False,
+     "Solo inicia una conversación social. No pide ninguna lectura académica o documental."),
+    ("Te agradezco la ayuda", ["social"], "thanks", False,
+     "Solo agradece; no pide consultar docentes, cursos, notas ni documentos."),
+    ("Nos vemos después", ["social"], "bye", False,
+     "Solo se despide; no continúa las consultas académicas anteriores."),
     ("¿Qué calificación tiene Mateo en Laboratorio?", ["grades"], "none", False,
      "Lee la calificación personal de Mateo desde Moodle; no consulta documentos ni reglamentos."),
     ("¿Qué nota obtuvo Sofía en Química?", ["grades"], "none", False,
