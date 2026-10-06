@@ -145,5 +145,5 @@ errores; las metas de carga continúan aplazadas. No publicar ni desplegar fuera
 ## Aprobación
 
 El usuario confirmó explícitamente el entendimiento compartido y aprobó el alcance
-conjunto de esta spec y los seis tickets. Implementación pendiente, en el orden de
-dependencias registrado en los tickets.
+conjunto de esta spec y los seis tickets. Código implementado en el entorno local;
+la aceptación final sigue pendiente. Véase [verification.md](verification.md).
