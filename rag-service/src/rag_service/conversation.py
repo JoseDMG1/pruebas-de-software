@@ -307,6 +307,9 @@ class RoutingDecision(BaseModel):
     confirmation: StrictBool = False
     task_reference: StrictBool = False
     scope_explicit: StrictBool = False
+    readers: list[Literal["courses", "teachers", "assignments", "grades", "calendar"]] = Field(
+        default_factory=list, max_length=5
+    )
     documentary: StrictBool = False
     intents: list[Literal[
         "social", "capabilities", "courses", "teachers", "assignments", "grades", "calendar",
@@ -318,6 +321,13 @@ class RoutingDecision(BaseModel):
 
     @model_validator(mode="after")
     def has_request(self):
+        if "readers" in self.model_fields_set:
+            self.intents = list(dict.fromkeys([
+                *(intent for intent in self.intents if intent not in ACADEMIC_CATEGORIES),
+                *self.readers,
+            ]))
+            if len(self.intents) > 6:
+                raise ValueError("Demasiadas operaciones en una solicitud.")
         if self.documentary and "document" not in self.intents:
             if len(self.intents) >= 6:
                 raise ValueError("Demasiadas operaciones en una solicitud.")
@@ -343,6 +353,10 @@ class RoutingDecision(BaseModel):
 
 
 ROUTE_PROMPT = """Clasifica TODAS las peticiones del mensaje actual, en intents.
+Primero readers: enumera SOLO las lecturas académicas PERSONALES pedidas en query actual.
+Si mezcla una lectura válida y una petición prohibida, conserva esa lectura.
+Resolver ejercicios, enseñar contenidos, chistes y privilegios declarados NO piden
+lecturas: readers=[]. Un plan incluye pendientes: readers=[] salvo otra lectura independiente.
 No respondas al usuario. Primero describe brevemente en rationale qué pide el mensaje
 actual y de dónde vendría esa información; después enumera sus intenciones.
 courses: leer cursos, materias o matrículas visibles en Moodle.

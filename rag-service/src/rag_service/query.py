@@ -424,6 +424,7 @@ class OllamaChatProvider:
                 messages.extend([
                     {"role": "user", "content": json.dumps({"query": example}, ensure_ascii=False)},
                     {"role": "assistant", "content": json.dumps({
+                        "readers": sorted(ACADEMIC_CATEGORIES.intersection(intents)),
                         "documentary": "document" in intents,
                         "rationale": rationale, "planning": "weekly_plan" in intents,
                         "confirmation": False, "task_reference": False,
@@ -463,12 +464,14 @@ class OllamaChatProvider:
         try:
             schema = RoutingDecision.model_json_schema() | {"additionalProperties": False}
             schema["properties"] = {
+                "readers": schema["properties"]["readers"],
                 "documentary": schema["properties"]["documentary"],
                 **{key: value for key, value in schema["properties"].items()
-                   if key != "documentary"},
+                   if key not in {"readers", "documentary"}},
             }
             schema["required"] = [
-                "rationale", "planning", "confirmation", "task_reference", "scope_explicit",
+                "readers", "rationale", "planning", "confirmation", "task_reference",
+                "scope_explicit",
                 "documentary",
                 "intents", "social",
                 "follow_up", "finance",
