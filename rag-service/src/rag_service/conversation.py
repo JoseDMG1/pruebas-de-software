@@ -228,6 +228,7 @@ Operaciones:
   Si es una referencia sin nuevo curso/tarea, conserva previous_scope pertinente.
 - Referencia a una tarea entre varias: ambiguous_task=true. No adivines cuál.
 - Normas, calendario oficial y cómo usar Moodle: document_question conserva la consulta.
+  Códigos de tutoría y contactos publicados también son documentales, no campos de tareas.
   intent=document cuando no hay operación académica. No sustituye un dato personal de Moodle.
   Mensajes mixtos separan scope_question y document_question, incluso cursos diferentes.
 - Organizar trabajo o ajustar un PLAN SEMANAL activo: weekly_plan, categories=[assignments],

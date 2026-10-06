@@ -11,6 +11,44 @@ from rag_service.config import Settings
 SECRET = "a-conversation-test-secret-with-at-least-32-chars"
 
 
+@pytest.mark.parametrize("documentary,valid", [
+    ("cuál es el código de tutoría de Geometría", True),
+    ("una norma inventada en ejemplos del prompt", False),
+])
+def test_literal_documentary_subrequest_can_be_recovered_during_argument_extraction(
+    documentary, valid
+):
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"readers": ["assignments"], "intents": ["assignments"]}
+            if data["format"]["title"] == "ConversationPlan":
+                response = {"intent": "academic", "categories": ["assignments"],
+                            "scope_question": "mis trabajos",
+                            "document_question": documentary}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    interpreter = OllamaChatProvider(Settings(_env_file=None), Model())
+    request = InterpretationRequest(query=("Qué trabajos tengo en Seminario "
+                                     "y cuál es el código de tutoría de Geometría"),
+                              runtime=payload()["runtime"])
+    if not valid:
+        from rag_service.errors import AppError
+        with pytest.raises(AppError, match="No pude interpretar"):
+            interpreter.interpret(request)
+        return
+    plan = interpreter.interpret(request)
+    assert plan.scope_question == "Qué trabajos tengo en Seminario"
+    assert plan.document_question == "cuál es el código de tutoría de Geometría"
+
+
 @pytest.mark.parametrize("readers,intents,expected", [
     (["assignments"], ["blocked"], "academic"),
     ([], ["assignments", "blocked"], "blocked"),

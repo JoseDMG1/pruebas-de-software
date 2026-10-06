@@ -619,6 +619,9 @@ class OllamaChatProvider:
                     schema["properties"]["teacher_reference"]["enum"] = [""]
                 scope_quotes = []
                 mixed_document = route.intent == "academic" and "document" in route.intents
+                recover_document = (route.intent == "academic" and not mixed_document
+                    and len(clauses) > 1 and not route.confirmation and route.social == "none"
+                    and not route.blocked_part and not route.finance)
                 if mixed_document:
                     schema["properties"]["document_question"]["minLength"] = 1
                     schema["required"].extend(["document_question", "scope_question"])
@@ -627,13 +630,30 @@ class OllamaChatProvider:
                         schema["properties"]["scope_question"]["enum"] = scope_quotes
                         schema["properties"]["document_question"]["enum"] = scope_quotes
                 if "document" not in route.intents:
-                    schema["properties"]["document_question"]["enum"] = [""]
+                    schema["properties"]["document_question"]["enum"] = (
+                        ["", *dict.fromkeys(clauses)] if recover_document else [""]
+                    )
                     scope_quotes = [request.query]
                     if (previous and route.follow_up and not route.scope_explicit
                             and previous.scope_question):
                         scope_quotes.append(previous.scope_question)
                     schema["properties"]["scope_question"]["enum"] = scope_quotes
+                if recover_document:
+                    schema["properties"]["document_question"]["description"] = (
+                        "Copia SOLO una pregunta institucional independiente: norma, información "
+                        "publicada o guía del portal. Vacío para cursos/docentes/tareas/fechas/"
+                        "notas personales, saludos o solicitudes excluidas."
+                    )
+                    schema["required"].append("document_question")
+                    schema["properties"] = {
+                        "document_question": schema["properties"]["document_question"],
+                        **{key: value for key, value in schema["properties"].items()
+                           if key != "document_question"},
+                    }
                 data = json.loads(generate_plan(INTERPRET_PROMPT, schema, message))
+                if recover_document and data.get("document_question"):
+                    mixed_document = True
+                    scope_quotes = list(dict.fromkeys(clauses))
                 if (mixed_document and len(clauses) == 2 and len(scope_quotes) == 2
                         and data.get("document_question") in scope_quotes):
                     # A literal documentary clause cannot also become a course/person filter.
@@ -651,7 +671,7 @@ class OllamaChatProvider:
                         or data.get("scope_question") == data["document_question"])):
                     raise ValueError("Las solicitudes académica y documental deben separarse.")
                 proposed_document_question = data.get("document_question", "")
-                if "document" not in route.intents:
+                if "document" not in route.intents and not mixed_document:
                     data["document_question"] = ""
                 data["ambiguous_task"] = route.task_reference or data.get("ambiguous_task", False)
                 data["selected_assignment_id"] = 0
