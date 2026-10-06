@@ -11,6 +11,35 @@ from rag_service.config import Settings
 SECRET = "a-conversation-test-secret-with-at-least-32-chars"
 
 
+def test_available_courses_extracts_accessible_mode_instead_of_previous_enrolment():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"readers": ["courses"], "intents": ["courses"],
+                        "scope_explicit": True}
+            if data["format"]["title"] == "ConversationPlan":
+                response = {"intent": "academic", "categories": ["courses"],
+                            "scope_question": "Qué cursos puedo consultar"}
+                if "course_mode" in data["format"]["required"]:
+                    response["course_mode"] = "accessible"
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query="Qué cursos puedo consultar", runtime=payload()["runtime"],
+            state={"topic": {"intent": "academic", "categories": ["courses"],
+                "scope_question": "Mis materias", "course_mode": "enrolled"}})
+    )
+    assert plan.course_mode == "accessible" and not plan.follow_up
+    assert plan.scope_question == "Qué cursos puedo consultar" and not plan.document_question
+
+
 def test_current_submission_status_is_extracted_instead_of_defaulting_to_pending():
     from rag_service.conversation import InterpretationRequest
     from rag_service.query import OllamaChatProvider

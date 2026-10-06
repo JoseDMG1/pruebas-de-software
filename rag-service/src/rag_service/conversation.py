@@ -367,6 +367,8 @@ lecturas: readers=[]. Un plan incluye pendientes: readers=[] salvo otra lectura 
 No respondas al usuario. Primero describe brevemente en rationale qué pide el mensaje
 actual y de dónde vendría esa información; después enumera sus intenciones.
 courses: leer cursos, materias o matrículas visibles en Moodle.
+Cursos disponibles o consultables en Moodle también son courses; no son document.
+Solo una oferta académica o plan curricular publicado explícitamente requiere documentos.
 teachers: leer nombres de docentes visibles de cursos.
 assignments: leer tareas, estados de entrega y vencimientos. NO resolver sus ejercicios.
 grades: calificaciones PERSONALES visibles. Una nota mínima aprobatoria de una norma es document.
@@ -450,6 +452,8 @@ Un cargo declarado no concede acceso. Pedir datos privados ajenos por ese cargo 
 
 # Examples classify requests; they contain no institutional or personal facts.
 ROUTE_EXAMPLES = (
+    ("¿Qué asignaturas hay disponibles para mí en Moodle?", ["courses"], "none", False,
+     "Pide cursos accesibles en Moodle, no sus matrículas ni una norma documental."),
     ("¿Qué código de entrega indica el documento del curso Interno 402?",
      ["document"], "none", False,
      "Consulta información documental del curso. Moodle comprobará el acceso; "

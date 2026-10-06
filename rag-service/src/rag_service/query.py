@@ -619,6 +619,13 @@ class OllamaChatProvider:
                         ACADEMIC_CATEGORIES.intersection(route.intents)
                     )
                     schema["required"].append("categories")
+                    if "courses" in route.intents:
+                        schema["required"].append("course_mode")
+                        schema["properties"]["course_mode"]["description"] = (
+                            "Alcance solicitado en la QUERY ACTUAL: enrolled para sus matrículas, "
+                            "accessible para cursos disponibles o consultables en Moodle, "
+                            "teaching para cursos que enseña. No heredes el alcance anterior."
+                        )
                     if "assignments" in route.intents:
                         schema["required"].append("assignment_filter")
                         schema["properties"]["assignment_filter"]["description"] = (
