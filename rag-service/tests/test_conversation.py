@@ -135,6 +135,42 @@ def test_available_courses_extracts_accessible_mode_instead_of_previous_enrolmen
     assert plan.scope_question == "Qué cursos puedo consultar" and not plan.document_question
 
 
+@pytest.mark.parametrize("query,mode", [
+    ("Qué materias llevo", "enrolled"),
+    ("Qué cursos puedo consultar", "accessible"),
+    ("Qué cursos imparto", "teaching"),
+])
+def test_course_request_after_teachers_does_not_inherit_confirmation_or_scope(query, mode):
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"intents": ["courses"], "scope_explicit": True,
+                        "confirmation": True, "follow_up": True}
+            if data["format"]["title"] == "ConversationPlan":
+                response = {"intent": "academic", "categories": ["courses"],
+                            "course_mode": mode, "scope_question": "Docentes en Taller",
+                            "follow_up": True, "teacher_confirmation": True,
+                            "teacher_reference": "Elena"}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query=query, runtime=payload()["runtime"],
+            state={"topic": {"intent": "academic", "categories": ["teachers"],
+                "scope_question": "Docentes en Taller", "teacher_confirmation": True,
+                "teacher_reference": "Elena"}})
+    )
+    assert plan.categories == ["courses"] and plan.course_mode == mode
+    assert plan.scope_question == query and not plan.follow_up
+    assert not plan.teacher_confirmation and not plan.teacher_reference
+
+
 def test_current_submission_status_is_extracted_instead_of_defaulting_to_pending():
     from rag_service.conversation import InterpretationRequest
     from rag_service.query import OllamaChatProvider
@@ -168,8 +204,12 @@ def test_current_submission_status_is_extracted_instead_of_defaulting_to_pending
     ("cuál es el código de tutoría de Geometría", True),
     ("una norma inventada en ejemplos del prompt", False),
 ])
+@pytest.mark.parametrize("category,academic", [
+    ("assignments", "Qué trabajos tengo en Seminario"),
+    ("courses", "Qué cursos tengo en Seminario"),
+])
 def test_literal_documentary_subrequest_can_be_recovered_during_argument_extraction(
-    documentary, valid
+    documentary, valid, category, academic
 ):
     from rag_service.conversation import InterpretationRequest
     from rag_service.query import OllamaChatProvider
@@ -181,16 +221,16 @@ def test_literal_documentary_subrequest_can_be_recovered_during_argument_extract
         def request(self, method, path, data):
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
-            response = {"readers": ["assignments"], "intents": ["assignments"]}
+            response = {"readers": [category], "intents": [category]}
             if data["format"]["title"] == "ConversationPlan":
-                response = {"intent": "academic", "categories": ["assignments"],
+                response = {"intent": "academic", "categories": [category],
                             "scope_question": "mis trabajos",
                             "document_question": documentary}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
     interpreter = OllamaChatProvider(Settings(_env_file=None), Model())
-    request = InterpretationRequest(query=("Qué trabajos tengo en Seminario "
-                                     "y cuál es el código de tutoría de Geometría"),
+    request = InterpretationRequest(query=(academic +
+                                     " y cuál es el código de tutoría de Geometría"),
                               runtime=payload()["runtime"])
     if not valid:
         from rag_service.errors import AppError
@@ -198,7 +238,7 @@ def test_literal_documentary_subrequest_can_be_recovered_during_argument_extract
             interpreter.interpret(request)
         return
     plan = interpreter.interpret(request)
-    assert plan.scope_question == "Qué trabajos tengo en Seminario"
+    assert plan.scope_question == academic
     assert plan.document_question == "cuál es el código de tutoría de Geometría"
 
 

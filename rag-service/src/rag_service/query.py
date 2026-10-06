@@ -30,6 +30,7 @@ from rag_service.conversation import (
     SocialDecision,
     SOCIAL_PROMPT,
     TEACHER_PROMPT,
+    COURSE_PROMPT,
     SCHEDULE_FIELDS,
     SCHEDULE_PROMPT,
     routing_schema,
@@ -414,6 +415,8 @@ class OllamaChatProvider:
             state["previous_intent"] = previous.intent
             state["previous_categories"] = previous.categories
             state["previous_scope"] = previous.scope_question
+            if previous.categories == ["courses"]:
+                state["previous_course_mode"] = previous.course_mode
         message = json.dumps(
             {
                 "runtime": request.runtime.model_dump(),
@@ -678,6 +681,10 @@ class OllamaChatProvider:
                 data["finance"] = route.finance or data["finance"]
             else:
                 schema = routing_schema()
+                course_read = route.intents == ["courses"]
+                if course_read:
+                    # A course audience is distinct from the teachers discussed previously.
+                    route.confirmation = False
                 selected_task_read = bool(previous and previous.selected_assignment_id
                     and route.intent == "academic" and route.intents == ["assignments"]
                     and not route.finance)
@@ -753,7 +760,16 @@ class OllamaChatProvider:
                         **{key: value for key, value in schema["properties"].items()
                            if key != "document_question"},
                     }
-                data = json.loads(generate_plan(INTERPRET_PROMPT, schema, message))
+                if course_read:
+                    schema["properties"] = {
+                        "course_mode": schema["properties"]["course_mode"],
+                        "scope_question": schema["properties"]["scope_question"],
+                        **{key: value for key, value in schema["properties"].items()
+                           if key not in {"course_mode", "scope_question"}},
+                    }
+                data = json.loads(generate_plan(
+                    COURSE_PROMPT if course_read and not recover_document else INTERPRET_PROMPT,
+                    schema, message))
                 if selected_task_read:
                     scope_explicit = data.pop("scope_explicit", None)
                     if not isinstance(scope_explicit, bool):
