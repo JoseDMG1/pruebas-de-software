@@ -420,7 +420,7 @@ class OllamaChatProvider:
 
         def generate_plan(prompt, schema, message, examples=(), context=None):
             messages = [{"role": "system", "content": prompt}]
-            for example, intents, social, finance, rationale in examples:
+            for example, intents, social, finance, rationale, *overrides in examples:
                 messages.extend([
                     {"role": "user", "content": json.dumps({"query": example}, ensure_ascii=False)},
                     {"role": "assistant", "content": json.dumps({
@@ -432,6 +432,7 @@ class OllamaChatProvider:
                         "intents": [item for item in intents if item != "weekly_plan"],
                         "social": social,
                         "follow_up": False, "finance": finance,
+                        **(overrides[0] if overrides else {}),
                     })},
                 ])
             if context:
@@ -465,9 +466,10 @@ class OllamaChatProvider:
             schema = RoutingDecision.model_json_schema() | {"additionalProperties": False}
             schema["properties"] = {
                 "readers": schema["properties"]["readers"],
+                "confirmation": schema["properties"]["confirmation"],
                 "documentary": schema["properties"]["documentary"],
                 **{key: value for key, value in schema["properties"].items()
-                   if key not in {"readers", "documentary"}},
+                   if key not in {"readers", "confirmation", "documentary"}},
             }
             schema["required"] = [
                 "readers", "rationale", "planning", "confirmation", "task_reference",

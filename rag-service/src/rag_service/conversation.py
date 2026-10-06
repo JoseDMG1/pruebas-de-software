@@ -469,6 +469,10 @@ ROUTE_EXAMPLES = (
      "Pide una guía de recuperación de su acceso, no leer ni revelar credenciales."),
     ("¿Cuánto debo en pensiones este mes?", ["blocked"], "none", True,
      "Pide un saldo financiero personal, que está fuera de esta etapa."),
+    ("¿Entonces Valeria es la única profesora visible entre mis cursos?",
+     ["teachers"], "none", False,
+     "Pide verificar una afirmación sobre una docente única, no repetir una lista.",
+     {"confirmation": True}),
 )
 
 
