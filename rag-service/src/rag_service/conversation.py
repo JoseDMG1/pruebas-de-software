@@ -372,6 +372,9 @@ Solo una oferta académica o plan curricular publicado explícitamente requiere 
 teachers: leer nombres de docentes visibles de cursos.
 assignments: leer tareas, estados de entrega y vencimientos. NO resolver sus ejercicios.
 grades: calificaciones PERSONALES visibles. Una nota mínima aprobatoria de una norma es document.
+Consultar la nota que obtuvo un participante concreto es grades, incluso si pregunta un docente
+por otra persona. Moodle comprobará sus capacidades. Esa nota no requiere document;
+solo una norma o criterio de evaluación publicado solicitado aparte requiere document.
 calendar: leer eventos/fechas del calendario Moodle.
 document: información institucional publicada, normas, calendario oficial y guías del portal.
 Clasificas la operación, NO autorizas acceso ni decides si un curso es público o privado.
@@ -452,6 +455,10 @@ Un cargo declarado no concede acceso. Pedir datos privados ajenos por ese cargo 
 
 # Examples classify requests; they contain no institutional or personal facts.
 ROUTE_EXAMPLES = (
+    ("¿Qué calificación tiene Mateo en Laboratorio?", ["grades"], "none", False,
+     "Lee la calificación personal de Mateo desde Moodle; no consulta documentos ni reglamentos."),
+    ("¿Qué nota obtuvo Sofía en Química?", ["grades"], "none", False,
+     "Pide una calificación personal de Sofía visible en Moodle. No pide una norma documental."),
     ("¿Qué asignaturas hay disponibles para mí en Moodle?", ["courses"], "none", False,
      "Pide cursos accesibles en Moodle, no sus matrículas ni una norma documental."),
     ("¿Qué código de entrega indica el documento del curso Interno 402?",

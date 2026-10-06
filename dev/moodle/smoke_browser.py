@@ -258,6 +258,9 @@ with sync_playwright() as playwright:
             assert "no hay cursos" in own and "Reservado 103" not in own
         report[username] = ask(page, question)
         assert expected.lower() in report[username].lower(), report[username]
+        if username == "docente1":
+            assert "No encontré" not in report[username], report[username]
+            assert page.locator(".local-acadassistant-turn").last.locator("details").count() == 0
         if username == "estudiante2":
             assert page.locator(".local-acadassistant-turn").last.locator("details").count() > 0
             assert "Documento de prueba RES103" in page.locator(".local-acadassistant-turn").last.inner_text()
