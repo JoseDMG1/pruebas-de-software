@@ -12,6 +12,42 @@ defined('MOODLE_INTERNAL') || die();
 
 /** Tests the academic data returned for the authenticated Moodle user. */
 final class academic_context_provider_test extends \advanced_testcase {
+    public function test_named_participant_cannot_fall_back_to_own_grade(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course(['fullname' => 'Biología 101']);
+        $student = $this->getDataGenerator()->create_user(['firstname' => 'Luis', 'lastname' => 'Alumno']);
+        $other = $this->getDataGenerator()->create_user(['firstname' => 'Ana', 'lastname' => 'Alumna']);
+        foreach ([$student, $other] as $user) {
+            $this->getDataGenerator()->enrol_user($user->id, $course->id, 'student');
+        }
+        $generator = $this->getDataGenerator()->get_plugin_generator('mod_assign');
+        $assignment = $generator->create_instance(['course' => $course->id, 'grade' => 100]);
+        $item = \grade_item::fetch(['itemtype' => 'mod', 'itemmodule' => 'assign',
+            'iteminstance' => $assignment->id, 'courseid' => $course->id, 'itemnumber' => 0]);
+        $item->update_final_grade($student->id, 85, 'gradebook');
+        $item->update_final_grade($other->id, 99, 'gradebook');
+        $this->setUser($student);
+        $provider = new \local_acadassistant\local\academic_context_provider();
+        $question = 'Qué nota obtuvo Ana Alumna en Biología 101';
+        $proposal = ['intent' => 'academic', 'categories' => ['grades'], 'scope_question' => $question];
+        $denied = $provider->collect_for_plan($proposal, [], 0, [], $question);
+        $this->assertSame([], $denied['academic_context']['grades']);
+        $this->assertFalse($denied['academic_context']['query']['complete']);
+        $this->assertNotEmpty($denied['academic_context']['query']['notices']);
+        $own = $provider->collect_for_question('Qué calificaciones tengo en Biología 101');
+        $this->assertCount(1, $own['academic_context']['grades']);
+        $this->assertStringContainsString('85', $own['academic_context']['grades'][0]['grade']);
+
+        // A teacher facing two identically named participants must also avoid an own-grade fallback.
+        $duplicate = $this->getDataGenerator()->create_user(['firstname' => 'Ana', 'lastname' => 'Alumna']);
+        $this->getDataGenerator()->enrol_user($duplicate->id, $course->id, 'student');
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'editingteacher');
+        $ambiguous = $provider->collect_for_plan($proposal, [], 0, [], $question);
+        $this->assertSame([], $ambiguous['academic_context']['grades']);
+        $this->assertFalse($ambiguous['academic_context']['query']['complete']);
+        $this->assertNotEmpty($ambiguous['academic_context']['query']['notices']);
+    }
+
     public function test_student_context_contains_own_submission_but_not_another_students(): void {
         global $DB;
 

@@ -17,6 +17,7 @@ final class academic_context_provider {
     private int $recordlimit = 21;
     private bool $scopecomplete = true;
     private bool $scopeavailable = true;
+    private bool $participantunavailable = false;
     private const CALENDAR_DAYS_BACK = 30;
     private const CALENDAR_DAYS_AHEAD = 180;
 
@@ -55,6 +56,7 @@ final class academic_context_provider {
         $this->recordlimit = $offset + count($seen) + self::MAX_RECORDS_PER_CATEGORY + 1;
         $this->scopecomplete = true;
         $this->scopeavailable = true;
+        $this->participantunavailable = false;
         $previousquestions = $plan['follow_up'] ? array_column(array_slice($conversationcontext, -2), 'question') : [];
         $scopehistory = $resolvedscope ? [] : $previousquestions;
         $courses = $this->accessible_courses($plan['scope_question'], $scopehistory,
@@ -119,6 +121,9 @@ final class academic_context_provider {
         }
 
         $notices = [];
+        if ($this->participantunavailable) {
+            $notices[] = 'No puedo identificar de forma única y autorizada a la persona consultada. Precisa su nombre y curso o consulta tus propios datos.';
+        }
         if ($plan['finance']) {
             $notices[] = 'El asistente todavía no consulta cuotas, saldos ni pagos personales.';
         }
@@ -408,6 +413,11 @@ final class academic_context_provider {
                 $canviewallgrades,
                 $modinfo->get_instances_of('assign')
             );
+            if ($target === null) {
+                $this->scopecomplete = false;
+                $this->participantunavailable = true;
+                continue;
+            }
 
             if ($selectedassignmentid && (
                     ($selectedparticipantname !== '' && $target['name'] !== $selectedparticipantname) ||
@@ -476,7 +486,7 @@ final class academic_context_provider {
         string $question,
         bool $canviewallgrades,
         array $assignments
-    ): array {
+    ): ?array {
         global $USER;
 
         $current = ['id' => (int)$USER->id, 'name' => null];
@@ -489,10 +499,6 @@ final class academic_context_provider {
                 }
             }
         }
-        if (!$canviewallgrades) {
-            return $current;
-        }
-
         $question = $this->normalise_text($question);
         $matches = [];
         foreach (get_enrolled_users(
@@ -511,6 +517,11 @@ final class academic_context_provider {
             if ((int)$user->id === (int)$USER->id) {
                 continue;
             }
+            $fullname = fullname($user);
+            $normalisedname = $this->normalise_text($fullname);
+            if (strlen($normalisedname) <= 3 || !str_contains($question, $normalisedname)) {
+                continue;
+            }
             $visibleinactivity = false;
             foreach ($assignments as $cm) {
                 $assign = new \assign(\context_module::instance($cm->id), $cm, $course);
@@ -519,16 +530,15 @@ final class academic_context_provider {
                     break;
                 }
             }
-            if (!$visibleinactivity) {
-                continue;
-            }
-            $fullname = fullname($user);
-            $normalisedname = $this->normalise_text($fullname);
-            if (strlen($normalisedname) > 3 && str_contains($question, $normalisedname)) {
-                $matches[(int)$user->id] = ['id' => (int)$user->id, 'name' => $fullname];
-            }
+            // A literal subject is not replaced by the actor when access is unavailable.
+            $matches[(int)$user->id] = ['participant' => ['id' => (int)$user->id, 'name' => $fullname],
+                'visible' => $canviewallgrades && $visibleinactivity];
         }
-        return count($matches) === 1 ? reset($matches) : $current;
+        if (!$matches) {
+            return $current;
+        }
+        $match = reset($matches);
+        return count($matches) === 1 && $match['visible'] ? $match['participant'] : null;
     }
 
     /** Add visible grades for module items in a course gradebook. */

@@ -106,7 +106,7 @@ def compose_academic(context: dict, plan: AcademicPlan, question: str = "") -> s
                 + (
                     "; ".join(
                         f"{row['item_name']} — {row['course_name']}"
-                        f"{(' — ' + row['participant']) if row.get('participant') else ''}"
+                        f" — {row.get('participant') or 'tu calificación'}"
                         f": {row['grade']}"
                         for row in rows
                     )
@@ -130,7 +130,7 @@ def compose_academic(context: dict, plan: AcademicPlan, question: str = "") -> s
         parts.append("Esta lista es parcial. Escribe «continúa» para ver más resultados.")
     if not plan.complete:
         parts.append(
-            "La consulta alcanzó el límite de cursos. Acota la pregunta a un curso; "
+            "No pude completar la consulta. Precisa la persona o acota el curso; "
             "este resultado no representa todos tus datos."
         )
     return "\n".join(parts)

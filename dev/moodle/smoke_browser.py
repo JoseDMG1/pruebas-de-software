@@ -253,6 +253,16 @@ with sync_playwright() as playwright:
             assert "no tienes tareas pendientes" in empty, empty
             submitted = ask(page, "¿Qué he entregado en Biologia 102?")
             assert "Informe de laboratorio" in submitted and "entregada" in submitted
+            clear(page)
+            foreign = ask(page, "¿Qué calificación tiene Ana Prueba en Biologia 102?")
+            assert "85" not in foreign and "99" not in foreign, foreign
+            assert "persona consultada" in foreign, foreign
+            report["foreign_grade_does_not_use_own"] = foreign
+            clear(page)
+            own = ask(page, "¿Qué calificaciones tengo en Biologia 102?")
+            assert "85" in own and "tu calificación" in own, own
+            report["own_grade_identified"] = own
+            clear(page)
         if username == "autoridad1":
             own = ask(page, "¿Qué cursos tengo?")
             assert "no hay cursos" in own and "Reservado 103" not in own
