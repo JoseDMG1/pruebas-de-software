@@ -32,6 +32,7 @@ from rag_service.conversation import (
     TEACHER_PROMPT,
     COURSE_PROMPT,
     GRADE_PROMPT,
+    SELECTED_TASK_PROMPT,
     SCHEDULE_FIELDS,
     SCHEDULE_PROMPT,
     routing_schema,
@@ -691,6 +692,8 @@ class OllamaChatProvider:
                 selected_task_read = bool(previous and previous.selected_assignment_id
                     and route.intent == "academic" and route.intents == ["assignments"]
                     and not route.finance)
+                independent_task_scope = bool(selected_task_read and route.scope_explicit
+                    and not route.follow_up and not route.task_reference)
                 if selected_task_read:
                     schema["properties"] = {"scope_explicit": {"type": "boolean",
                         "description": "TRUE solo si QUERY elige una NUEVA actividad/curso "
@@ -795,7 +798,8 @@ class OllamaChatProvider:
                            if key not in {"course_mode", "scope_question"}},
                     }
                 argument_message = message
-                if route.scope_explicit and not route.follow_up and not selected_task_read:
+                if (route.scope_explicit and not route.follow_up
+                        and (not selected_task_read or independent_task_scope)):
                     # Context was already supplied for routing; a new request has no old filters.
                     argument_message = json.dumps({
                         "runtime": request.runtime.model_dump(), "query": request.query,
@@ -803,6 +807,7 @@ class OllamaChatProvider:
                     }, ensure_ascii=False)
                 data = json.loads(generate_plan(
                     GRADE_PROMPT if "grades" in route.intents else
+                    SELECTED_TASK_PROMPT if selected_task_read and not recover_document else
                     COURSE_PROMPT if course_read and not recover_document else INTERPRET_PROMPT,
                     schema, argument_message))
                 if "grades" in route.intents:
@@ -823,6 +828,7 @@ class OllamaChatProvider:
                     scope_explicit = data.pop("scope_explicit", None)
                     if not isinstance(scope_explicit, bool):
                         raise ValueError("Falta el alcance actual de la actividad.")
+                    scope_explicit = scope_explicit or independent_task_scope
                     # The focused extraction can correct a broad first-pass scope label.
                     route.scope_explicit = scope_explicit
                     route.follow_up = not scope_explicit

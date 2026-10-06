@@ -1171,3 +1171,35 @@ def test_task_followup_keeps_selected_native_identity_and_reads_changed_status(
     else:
         assert plan.follow_up and plan.selected_assignment_id == 11
         assert plan.assignment_filter == "all"
+
+
+def test_consistent_independent_task_request_clears_selected_scope_despite_reader_hint():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"readers": ["assignments"], "intents": ["assignments"],
+                        "scope_explicit": True, "task_reference": False, "follow_up": False}
+            if data["format"]["title"] == "ConversationPlan":
+                message = json.loads(data["messages"][-1]["content"])
+                assert not message["state"] and not message["conversation_context"]
+                response = {"intent": "academic", "categories": ["assignments"],
+                            "scope_explicit": False, "follow_up": True,
+                            "scope_question": "Ensayo en Seminario", "assignment_filter": "all"}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    query = "Muéstrame todas mis actividades"
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query=query, runtime=payload()["runtime"],
+            state={"topic": {"intent": "academic", "categories": ["assignments"],
+                "selected_assignment_id": 11, "scope_question": "Ensayo en Seminario"}},
+            conversation_context=[{"question": "¿Su fecha?", "answer": "Ensayo vence mañana"}])
+    )
+    assert not plan.follow_up and plan.selected_assignment_id == 0
+    assert plan.scope_question == query and plan.assignment_filter == "all"
