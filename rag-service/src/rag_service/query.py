@@ -491,6 +491,7 @@ class OllamaChatProvider:
                     **({"previous_topic": {"intent": previous.intent,
                         "categories": previous.categories, "scope": previous.scope_question,
                         "clarification": previous.clarification,
+                        "selected_task_known": bool(previous.selected_assignment_id),
                         "ambiguous_task": previous.ambiguous_task}}
                         if previous else {}),
                     **({"conversation_context": [request.conversation_context[-1].model_dump()]}

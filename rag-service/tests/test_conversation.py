@@ -1007,6 +1007,9 @@ def test_task_followup_keeps_selected_native_identity_and_reads_changed_status(
         def request(self, method, path, data):
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
+            if data["format"]["title"] == "RoutingDecision":
+                context = json.loads(data["messages"][-2]["content"])
+                assert context["previous_topic"]["selected_task_known"] is True
             response = {"intents": ["assignments"], "follow_up": routing_follow_up,
                         "task_reference": True}
             if data["format"]["title"] == "ConversationPlan":

@@ -7,6 +7,40 @@ defined('MOODLE_INTERNAL') || die();
 
 /** Public signed conversation contract tests. */
 final class conversation_test extends \advanced_testcase {
+    public function test_repeated_selected_task_followups_keep_a_stable_native_reference(): void {
+        global $CFG;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course(['fullname' => 'Seminario']);
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
+        $assignment = $this->getDataGenerator()->get_plugin_generator('mod_assign')->create_instance(
+            ['course' => $course->id, 'name' => 'Ensayo personal']);
+        $this->setUser($student);
+        $CFG->local_acadassistant_rag_url = 'https://rag.example.test';
+        $CFG->local_acadassistant_rag_shared_secret = str_repeat('a', 40);
+        $state = ['topic' => ['intent' => 'academic', 'categories' => ['assignments'],
+            'selected_assignment_id' => (int)$assignment->id,
+            'scope_question' => 'Ensayo personal en Seminario']];
+        $transport = function($url, $body) use (&$state, $assignment): array {
+            $payload = json_decode($body, true);
+            if (str_ends_with($url, '/interpret')) {
+                $result = $state['topic'] + ['follow_up' => true, 'assignment_filter' => 'all'];
+            } else {
+                $this->assertSame([(int)$assignment->id],
+                    array_column($payload['academic_context']['assignments'], 'assignment_id'));
+                $result = ['answer' => 'Respuesta válida.', 'sources' => []];
+            }
+            return ['status' => 200, 'body' => json_encode($result)];
+        };
+        $assistant = new \local_acadassistant\local\academic_assistant($transport);
+        for ($i = 0; $i < 6; $i++) {
+            $response = $assistant->ask('¿Y a qué hora?', [], 0, [], $state);
+            $state = $response['semantic_state'];
+            $this->assertSame('Ensayo personal en Seminario', $state['topic']['scope_question']);
+            $this->assertSame((int)$assignment->id, $state['topic']['selected_assignment_id']);
+        }
+    }
+
     public function test_proposed_operation_reads_only_enrolled_visible_assignments(): void {
         global $CFG;
         $this->resetAfterTest();

@@ -82,6 +82,17 @@ final class academic_assistant {
             }
             if ($plan['intent'] === 'academic') {
                 $response['semantic_state']['topic']['scope_question'] = $context['context_question'];
+                if ($plan['selected_assignment_id']) {
+                    foreach ($context['academic_context']['assignments'] ?? [] as $assignment) {
+                        if ($assignment['assignment_id'] === $plan['selected_assignment_id']) {
+                            // Keep the reauthorized native entity, not recursively expanded questions.
+                            $response['semantic_state']['topic']['scope_question'] =
+                                $assignment['name'] . ' en ' . $assignment['course_name'] .
+                                ($assignment['participant'] ? ' de ' . $assignment['participant'] : '');
+                            break;
+                        }
+                    }
+                }
             }
         }
         if ($plan['intent'] === 'weekly_plan' && ($plan['availability'] || $plan['availability_unknown'])) {

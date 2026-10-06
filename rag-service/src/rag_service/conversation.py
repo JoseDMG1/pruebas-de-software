@@ -361,6 +361,12 @@ Primero readers: enumera SOLO las lecturas académicas PERSONALES pedidas en que
 Una referencia breve RESUELVE la lectura usando previous_topic.categories: preguntar
 «¿Y en otro curso?» tras consultar docentes conserva readers=[teachers]. Tras consultar
 tareas, preguntar su hora conserva readers=[assignments]. No es pedir privilegios nuevos.
+previous_topic.selected_task_known indica una actividad nativa ya elegida. Sus fechas,
+hora de entrega y estado se leen de assignments, aunque el usuario repita el seguimiento.
+No son document: documentary=false, task_reference=true, scope_explicit=false,
+follow_up=true. Conserva esta referencia hasta una petición independiente o nuevo alcance.
+Una pregunta nueva sobre tutoría, normas o procedimientos sí es document, incluso si
+antes había una tarea elegida; no hereda automáticamente la actividad anterior.
 Si mezcla una lectura válida y una petición prohibida, conserva esa lectura.
 Resolver ejercicios, enseñar contenidos, chistes y privilegios declarados NO piden
 lecturas: readers=[]. Un plan incluye pendientes: readers=[] salvo otra lectura independiente.
