@@ -373,10 +373,11 @@ Consultar el PROCEDIMIENTO para recuperar el acceso PROPIO o restablecer una con
 del portal es document. NO pide leer, revelar o inventar la contraseña de una persona.
 Las lecturas Moodle SOLO proporcionan matrículas/cursos, nombres de docentes,
 tareas/estados/vencimientos, notas personales y eventos. Códigos de tutoría, reglas,
-contactos institucionales o instrucciones del portal NO son campos de esas lecturas;
+horarios de tutoría publicados, contactos institucionales o instrucciones del portal
+NO son campos de esas lecturas;
 requieren document incluso si la misma query pide tareas o cursos.
 documentary=true si pide una norma, requisito de aprobación, calendario oficial,
-información publicada de un curso (como un código de tutoría) o guía del portal,
+información publicada de un curso (como código u horario de tutoría) o guía del portal,
 aunque también pida datos personales. Analiza CADA petición, no solo la primera.
 documentary=false para notas personales, listas de tareas/docentes y operaciones excluidas.
 Pedir pasos o CÓMO HACER una entrega en el portal es document; no leer sus tareas.
@@ -463,6 +464,9 @@ ROUTE_EXAMPLES = (
     ("Dime mis trabajos en Química y qué clave de tutoría tiene Historia",
      ["assignments", "document"], "none", False,
      "Dos consultas: tareas personales de Química y una norma documental de Historia."),
+    ("¿En qué horario se atienden las tutorías de Historia?",
+     ["document"], "none", False,
+     "Pide un horario de tutoría publicado; no una tarea ni un evento personal de Moodle."),
     ("¿Dónde puedo adjuntar mi tarea en el portal?", ["document"], "none", False,
      "Pide un procedimiento de uso de Moodle; requiere una guía verificada del portal."),
     ("Perdí acceso a mi cuenta Moodle, ¿cuál es el procedimiento para recuperarla?",
