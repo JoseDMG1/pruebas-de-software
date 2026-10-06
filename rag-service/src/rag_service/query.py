@@ -29,6 +29,7 @@ from rag_service.conversation import (
     ScheduleOutput,
     SocialDecision,
     SOCIAL_PROMPT,
+    TEACHER_PROMPT,
     SCHEDULE_FIELDS,
     SCHEDULE_PROMPT,
     routing_schema,
@@ -603,6 +604,77 @@ class OllamaChatProvider:
                         data["availability"]["days"] = [
                             WEEKDAYS.index(day) for day in schedule.availability.days
                         ]
+            elif (ACADEMIC_CATEGORIES.intersection(route.intents) == {"teachers"}
+                    and not route.blocked_part and not route.finance):
+                # Verify teacher semantics independently instead of freezing a broad route hint.
+                schema = routing_schema()
+                schema["properties"]["intent"]["enum"] = ["academic"]
+                schema["properties"]["categories"].update(
+                    minItems=1, maxItems=1, items={"type": "string", "enum": ["teachers"]}
+                )
+                scope_quotes = list(dict.fromkeys([request.query, *clauses]))
+                if previous and previous.categories == ["teachers"] and previous.scope_question:
+                    scope_quotes.append(previous.scope_question)
+                schema["properties"]["scope_question"]["enum"] = scope_quotes
+                schema["properties"]["scope_explicit"] = {"type": "boolean"}
+                document_quotes = clauses if len(clauses) > 1 else [request.query]
+                schema["properties"]["document_question"]["enum"] = ["", *document_quotes]
+                schema["properties"]["selected_assignment_id"]["enum"] = [0]
+                schema["properties"]["selected_participant_name"]["enum"] = [""]
+                schema["required"].extend([
+                    "categories", "teacher_confirmation", "teacher_reference", "scope_question",
+                    "document_question", "course_mode", "follow_up",
+                    "scope_explicit",
+                ])
+                schema["properties"] = {
+                    key: schema["properties"][key] for key in (
+                        "teacher_confirmation", "teacher_reference", "scope_explicit",
+                        "document_question",
+                        *[key for key in schema["properties"] if key not in {
+                            "teacher_confirmation", "teacher_reference", "scope_explicit",
+                            "document_question",
+                        }],
+                    )
+                }
+                data = json.loads(generate_plan(TEACHER_PROMPT, schema, message))
+                scope_explicit = data.pop("scope_explicit", route.scope_explicit)
+                if type(scope_explicit) is not bool:
+                    raise ValueError("Falta un alcance docente explícito válido.")
+                if not data.get("teacher_confirmation") and route.scope_explicit:
+                    scope_explicit = True
+                if data.get("scope_question") not in scope_quotes:
+                    data["scope_question"] = request.query
+                document_question = data.get("document_question", "")
+                if document_question not in ["", *document_quotes]:
+                    raise ValueError("Falta una solicitud documental literal.")
+                if document_question and len(clauses) > 1:
+                    academic_clauses = [part for part in clauses if part != document_question]
+                    if data["scope_question"] in {request.query, document_question}:
+                        if len(clauses) != 2:
+                            raise ValueError("Falta un alcance docente literal separado.")
+                        data["scope_question"] = academic_clauses[0]
+                if not data.get("teacher_confirmation"):
+                    data["teacher_reference"] = ""
+                elif data.get("teacher_reference"):
+                    context = " ".join([request.query, *[
+                        turn.question + " " + turn.answer for turn in request.conversation_context
+                    ]]).casefold()
+                    if data["teacher_reference"].casefold() not in context:
+                        raise ValueError("La referencia docente no procede de la conversación.")
+                data = ConversationPlan.model_validate(data).model_dump()
+                if data["categories"] != ["teachers"]:
+                    raise ValueError("Lectura docente no permitida.")
+                if scope_explicit:
+                    if not document_question:
+                        data["scope_question"] = request.query
+                    data["follow_up"] = False
+                elif previous and previous.categories == ["teachers"] and previous.scope_question:
+                    if not document_question:
+                        data["scope_question"] = previous.scope_question
+                    data["course_mode"] = previous.course_mode
+                    data["follow_up"] = True
+                data["blocked_part"] = route.blocked_part
+                data["finance"] = route.finance or data["finance"]
             else:
                 schema = routing_schema()
                 schema["properties"]["selected_assignment_id"]["enum"] = [0]

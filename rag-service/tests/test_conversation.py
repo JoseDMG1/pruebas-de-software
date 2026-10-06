@@ -11,6 +11,101 @@ from rag_service.config import Settings
 SECRET = "a-conversation-test-secret-with-at-least-32-chars"
 
 
+def test_teacher_and_document_requests_keep_independent_literal_scopes():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    query = "Qué docentes me enseñan en Taller y cuál es el horario de tutoría de Historia"
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"readers": ["teachers"], "intents": ["teachers"],
+                        "documentary": True, "scope_explicit": True}
+            if data["format"]["title"] == "ConversationPlan":
+                response = {"intent": "academic", "categories": ["teachers"],
+                            "teacher_confirmation": False, "teacher_reference": "",
+                            "scope_explicit": True, "scope_question": query,
+                            "document_question": "cuál es el horario de tutoría de Historia"}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query=query, runtime=payload()["runtime"])
+    )
+    assert plan.scope_question == "Qué docentes me enseñan en Taller"
+    assert plan.document_question == "cuál es el horario de tutoría de Historia"
+    assert plan.categories == ["teachers"] and not plan.teacher_confirmation
+
+
+@pytest.mark.parametrize("query,explicit,expected_scope", [
+    ("Entonces ella es la única?", False, "Mis docentes en Taller"),
+    ("Elena es la única en todos mis cursos?", True, "Elena es la única en todos mis cursos?"),
+])
+def test_teacher_confirmation_retains_or_replaces_previous_course_audience(
+    query, explicit, expected_scope
+):
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"readers": ["teachers"], "intents": ["teachers"],
+                        "scope_explicit": True}
+            if data["format"]["title"] == "ConversationPlan":
+                response = {"intent": "academic", "categories": ["teachers"],
+                            "teacher_confirmation": True, "teacher_reference": "Elena",
+                            "scope_explicit": explicit,
+                            "course_mode": "enrolled" if explicit else "teaching",
+                            "scope_question": "Mis docentes en Taller"}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query=query, runtime=payload()["runtime"],
+            state={"topic": {"intent": "academic", "categories": ["teachers"],
+                "course_mode": "enrolled", "scope_question": "Mis docentes en Taller"}},
+            conversation_context=[{"question": "Quién me enseña Taller", "answer": "Elena."}])
+    )
+    assert plan.teacher_confirmation and plan.teacher_reference == "Elena"
+    assert plan.course_mode == "enrolled" and plan.scope_question == expected_scope
+    assert plan.follow_up == (not explicit) and not plan.document_question
+
+
+def test_teacher_interpretation_can_correct_general_confirmation_and_document_labels():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"readers": ["teachers"], "intents": ["teachers"],
+                        "confirmation": False, "documentary": True}
+            if data["format"]["title"] == "ConversationPlan":
+                response = {"intent": "academic", "categories": ["teachers"],
+                            "teacher_confirmation": True, "teacher_reference": "Elena",
+                            "document_question": "",
+                            "scope_question": "¿Entonces Elena es la única docente?"}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query="¿Entonces Elena es la única docente?",
+                              runtime=payload()["runtime"])
+    )
+    assert plan.teacher_confirmation and plan.teacher_reference == "Elena"
+    assert plan.categories == ["teachers"] and not plan.document_question
+
+
 def test_available_courses_extracts_accessible_mode_instead_of_previous_enrolment():
     from rag_service.conversation import InterpretationRequest
     from rag_service.query import OllamaChatProvider
@@ -761,10 +856,11 @@ def test_changing_teacher_course_cannot_become_a_confirmation_of_a_person():
         def request(self, method, path, data):
             if path == "/api/show":
                 return {"capabilities": ["completion"]}
-            response = {"intents": ["teachers"], "confirmation": False, "follow_up": True}
+            response = {"intents": ["teachers"], "confirmation": True, "follow_up": True}
             if data["format"]["title"] == "ConversationPlan":
                 response = {"intent": "academic", "categories": ["teachers"],
-                            "teacher_confirmation": True, "teacher_reference": "Biologia 102"}
+                            "teacher_confirmation": False, "teacher_reference": "",
+                            "scope_explicit": True}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
     plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(

@@ -151,8 +151,10 @@ with sync_playwright() as playwright:
     report["teacher_names"] = ask(page, "cuáles son todos los nombres de mis profesores?")
     assert "Carla Docente" in report["teacher_names"]
     assert "Carla Docente" in ask(page, "¿Quiénes me enseñan?")
-    assert "Carla Docente" in ask(page, "¿Y en Biologia 102?")
-    assert "Algebra 101" in ask(page, "¿Y en Algebra 101?")
+    biology_teachers = ask(page, "¿Y en Biologia 102?")
+    assert "Carla Docente" in biology_teachers and "Algebra 101" not in biology_teachers
+    algebra_teachers = ask(page, "¿Y en Algebra 101?")
+    assert "Algebra 101" in algebra_teachers and "Biologia 102" not in algebra_teachers
     assert "Carla Docente" in ask(page, "¿Y en Biologia 102?")
     for question in [
         "¿Qué profes tengo este ciclo?",
