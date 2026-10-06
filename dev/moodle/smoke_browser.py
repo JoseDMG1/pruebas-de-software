@@ -212,6 +212,12 @@ with sync_playwright() as playwright:
     assert "11" in report["institutional"], report["institutional"]
     assert page.locator(".local-acadassistant-turn details").count() > 0
     clear(page)
+    report["other_institution_not_inferred"] = ask(page,
+        "En Universidad Otra, ¿qué cursos tengo y cuál es la nota mínima?")
+    assert "Algebra 101" in report["other_institution_not_inferred"]
+    assert "11" not in report["other_institution_not_inferred"]
+    assert page.locator(".local-acadassistant-turn").last.locator("details").count() == 0
+    clear(page)
     report["restricted_denied"] = ask(page, "¿Cuál es el código de entrega del proyecto del curso Reservado 103?")
     assert page.locator(".local-acadassistant-turn").last.locator("details").count() == 0
     assert "ORQUIDEA-73" not in page.locator(".local-acadassistant-turn").inner_text()
@@ -223,7 +229,10 @@ with sync_playwright() as playwright:
     login(page, "estudiante1")
     assert page.locator(".local-acadassistant-turn").count() == 0
     report["actual_session_timeout_cleared"] = True
-    ask(page, "¿A qué hora es la tutoría del curso Algebra 101?")
+    report["published_tutoring_hours"] = ask(page,
+        "¿A qué hora es la tutoría del curso Algebra 101?")
+    assert "16:00" in report["published_tutoring_hours"]
+    assert "martes" in report["published_tutoring_hours"].lower()
     logout = page.locator("a[href*='/login/logout.php']").first.get_attribute("href")
     page.goto(logout)
     login(page, "estudiante1")

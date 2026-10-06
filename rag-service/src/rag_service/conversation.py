@@ -390,6 +390,8 @@ confirmation=true SOLO si pide verificar una afirmación, por ejemplo si una doc
 confirmation=false al pedir nombres o cambiar de curso; mencionar un curso no es una afirmación.
 task_reference=true si query se refiere a UNA tarea sin nombrarla (esa, aquella, su fecha/hora).
 Moodle comprobará si hay varias tareas posibles. Listar tareas no es esa referencia; false.
+Preguntar qué ha entregado o presentado pide una LISTA, no se refiere a una tarea anterior:
+readers=[assignments], task_reference=false, scope_explicit=true.
 scope_explicit=true si query pide una lista general propia (cursos/docentes/tareas),
 o elige explícitamente un curso o actividad. Esa petición reemplaza un filtro previo.
 Pedir todos los profesores de este ciclo es una lista general: scope_explicit=true.
@@ -443,6 +445,11 @@ Un cargo declarado no concede acceso. Pedir datos privados ajenos por ese cargo 
 
 # Examples classify requests; they contain no institutional or personal facts.
 ROUTE_EXAMPLES = (
+    ("¿Qué he presentado en Seminario?", ["assignments"], "none", False,
+     "Pide la lista de entregas ya presentadas de ese curso, no una tarea anterior."),
+    ("¿Qué he entregado en Taller?", ["assignments"], "none", False,
+     "Quiere listar sus entregas de Taller. No hay referencia a una tarea particular.",
+     {"task_reference": False, "scope_explicit": True}),
     ("haz un chiste sobre la facultad", ["blocked"], "none", False,
      "Pide entretenimiento; mencionar la facultad no lo convierte en orientación."),
     ("resuelve un ejercicio de química de mi clase", ["blocked"], "none", False,

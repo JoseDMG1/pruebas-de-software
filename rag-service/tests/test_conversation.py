@@ -11,6 +11,35 @@ from rag_service.config import Settings
 SECRET = "a-conversation-test-secret-with-at-least-32-chars"
 
 
+def test_current_submission_status_is_extracted_instead_of_defaulting_to_pending():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"readers": ["assignments"], "intents": ["assignments"],
+                        "scope_explicit": True}
+            if data["format"]["title"] == "ConversationPlan":
+                response = {"intent": "academic", "categories": ["assignments"],
+                            "scope_question": "Qué he presentado en Seminario"}
+                if "assignment_filter" in data["format"]["required"]:
+                    response["assignment_filter"] = "submitted"
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query="Qué he presentado en Seminario", runtime=payload()["runtime"],
+            state={"topic": {"intent": "academic", "categories": ["assignments"],
+                "assignment_filter": "pending", "scope_question": "Mis pendientes"}})
+    )
+    assert plan.assignment_filter == "submitted" and not plan.follow_up
+    assert plan.scope_question == "Qué he presentado en Seminario"
+
+
 @pytest.mark.parametrize("documentary,valid", [
     ("cuál es el código de tutoría de Geometría", True),
     ("una norma inventada en ejemplos del prompt", False),

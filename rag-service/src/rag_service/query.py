@@ -619,6 +619,13 @@ class OllamaChatProvider:
                         ACADEMIC_CATEGORIES.intersection(route.intents)
                     )
                     schema["required"].append("categories")
+                    if "assignments" in route.intents:
+                        schema["required"].append("assignment_filter")
+                        schema["properties"]["assignment_filter"]["description"] = (
+                            "Estado solicitado en la QUERY ACTUAL: submitted para lo que ya "
+                            "entregó o presentó; pending para pendientes; all si pide todas. "
+                            "No copies el estado de la consulta anterior."
+                        )
                 schema["properties"]["teacher_confirmation"]["enum"] = [route.confirmation]
                 if not route.confirmation:
                     schema["properties"]["teacher_reference"]["enum"] = [""]
