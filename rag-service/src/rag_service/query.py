@@ -31,6 +31,7 @@ from rag_service.conversation import (
     SOCIAL_PROMPT,
     TEACHER_PROMPT,
     COURSE_PROMPT,
+    GRADE_PROMPT,
     SCHEDULE_FIELDS,
     SCHEDULE_PROMPT,
     routing_schema,
@@ -474,11 +475,13 @@ class OllamaChatProvider:
         try:
             schema = RoutingDecision.model_json_schema() | {"additionalProperties": False}
             schema["properties"] = {
+                "finance": schema["properties"]["finance"],
                 "readers": schema["properties"]["readers"],
                 "confirmation": schema["properties"]["confirmation"],
                 "documentary": schema["properties"]["documentary"],
                 **{key: value for key, value in schema["properties"].items()
-                   if key not in {"readers", "confirmation", "documentary"}},
+                   if key not in {"finance", "readers", "confirmation",
+                                  "documentary"}},
             }
             schema["required"] = [
                 "readers", "rationale", "planning", "confirmation", "task_reference",
@@ -760,6 +763,30 @@ class OllamaChatProvider:
                         **{key: value for key, value in schema["properties"].items()
                            if key != "document_question"},
                     }
+                if mixed_document:
+                    schema["properties"] = {
+                        "document_question": schema["properties"]["document_question"],
+                        **{key: value for key, value in schema["properties"].items()
+                           if key != "document_question"},
+                    }
+                    schema["properties"]["document_question"]["description"] = (
+                        "Cláusula que pide una norma publicada, guía o información documental. "
+                        "Nunca la cláusula que pide sus cursos, tareas o notas obtenidas."
+                    )
+                    schema["properties"]["scope_question"]["description"] = (
+                        "Cláusula que pide sus datos académicos de Moodle. Nunca la norma."
+                    )
+                if "grades" in route.intents:
+                    schema["properties"] = {
+                        "personal_grade_read": {"type": "boolean", "description": (
+                            "TRUE si la consulta pide la nota OBTENIDA por una persona, "
+                            "incluyendo seguimientos de sus resultados. FALSE si solo pide "
+                            "una nota mínima exigida, regla aprobatoria o escala institucional. "
+                            "Una regla usa document_question y no lee notas personales."
+                        )},
+                        **schema["properties"],
+                    }
+                    schema["required"].append("personal_grade_read")
                 if course_read:
                     schema["properties"] = {
                         "course_mode": schema["properties"]["course_mode"],
@@ -767,9 +794,31 @@ class OllamaChatProvider:
                         **{key: value for key, value in schema["properties"].items()
                            if key not in {"course_mode", "scope_question"}},
                     }
+                argument_message = message
+                if route.scope_explicit and not route.follow_up and not selected_task_read:
+                    # Context was already supplied for routing; a new request has no old filters.
+                    argument_message = json.dumps({
+                        "runtime": request.runtime.model_dump(), "query": request.query,
+                        "state": {}, "conversation_context": [],
+                    }, ensure_ascii=False)
                 data = json.loads(generate_plan(
+                    GRADE_PROMPT if "grades" in route.intents else
                     COURSE_PROMPT if course_read and not recover_document else INTERPRET_PROMPT,
-                    schema, message))
+                    schema, argument_message))
+                if "grades" in route.intents:
+                    personal_grade_read = data.pop("personal_grade_read", None)
+                    if not isinstance(personal_grade_read, bool):
+                        raise ValueError("Falta distinguir resultados personales de normas.")
+                    # Recheck only the proposed grade read; retain other classified requests.
+                    data["categories"] = sorted(
+                        ACADEMIC_CATEGORIES.intersection(route.intents) - {"grades"}
+                    ) + (["grades"] if personal_grade_read else [])
+                    if not personal_grade_read:
+                        if not data["categories"] and data.get("document_question"):
+                            data["intent"] = "document"
+                            data["scope_question"] = ""
+                            mixed_document = False
+                            scope_quotes = []
                 if selected_task_read:
                     scope_explicit = data.pop("scope_explicit", None)
                     if not isinstance(scope_explicit, bool):

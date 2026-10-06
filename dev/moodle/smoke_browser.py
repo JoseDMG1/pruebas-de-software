@@ -203,6 +203,7 @@ with sync_playwright() as playwright:
     report["mixed_documentary"] = ask(page,
         "¿Qué cursos tengo y cuál es la nota mínima aprobatoria en Universidad Demo del Valle?")
     assert "Algebra 101" in report["mixed_documentary"] and "11" in report["mixed_documentary"], report["mixed_documentary"]
+    assert "Calificaciones" not in report["mixed_documentary"], report["mixed_documentary"]
     report["independent_mixed_course_scopes"] = ask(page,
         "¿Qué tareas tengo en Biologia 102 y cuál es el código de tutoría de Algebra 101?")
     assert "Informe de laboratorio" in report["independent_mixed_course_scopes"]

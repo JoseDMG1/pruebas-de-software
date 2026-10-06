@@ -171,6 +171,103 @@ def test_course_request_after_teachers_does_not_inherit_confirmation_or_scope(qu
     assert not plan.teacher_confirmation and not plan.teacher_reference
 
 
+def test_financial_flag_excludes_payments_even_when_blocked_intent_was_omitted():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"readers": ["courses"], "intents": ["courses"], "finance": True}
+            if data["format"]["title"] == "ConversationPlan":
+                response = {"intent": "academic", "categories": ["courses"],
+                            "course_mode": "enrolled", "scope_question": "mis cursos"}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query="Qué cursos tengo y cuánto debo pagar",
+            runtime=payload()["runtime"])
+    )
+    assert plan.finance and plan.blocked_part
+    assert plan.intent == "academic" and plan.categories == ["courses"]
+    assert not plan.document_question
+
+
+def test_independent_course_and_rule_request_does_not_reuse_financial_context():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    academic = "Qué cursos tengo"
+    documentary = "cuál es la nota mínima en Universidad Ejemplo"
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"readers": ["courses"], "documentary": True,
+                        "intents": ["courses", "document"], "scope_explicit": True}
+            if data["format"]["title"] == "ConversationPlan":
+                message = json.loads(data["messages"][-1]["content"])
+                response = {"intent": "academic", "categories": ["courses"],
+                            "course_mode": "enrolled", "scope_question": academic,
+                            "document_question": academic if message.get("conversation_context")
+                                else documentary}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query=academic + " y " + documentary, runtime=payload()["runtime"],
+            state={"topic": {"intent": "academic", "categories": ["courses"],
+                "scope_question": "Mis materias y mis cuotas", "finance": True}},
+            conversation_context=[{"question": "Mis materias y cuánto adeudo",
+                                   "answer": "No consulto pagos personales."}])
+    )
+    assert plan.scope_question == academic and plan.document_question == documentary
+    assert not plan.finance and not plan.follow_up
+
+
+@pytest.mark.parametrize("personal,readers,query,expected", [
+    (False, ["courses", "grades"], "Qué cursos tengo y cuál es la nota mínima", ["courses"]),
+    (True, ["grades"], "Qué calificación obtuvo Luis Prueba", ["grades"]),
+    (False, ["grades"], "cuál es la nota mínima", []),
+])
+def test_grade_result_flag_distinguishes_personal_results_from_approval_rules(
+    personal, readers, query, expected
+):
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import OllamaChatProvider
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            response = {"readers": readers, "intents": readers,
+                        "documentary": not personal}
+            if data["format"]["title"] == "ConversationPlan":
+                allowed = data["format"]["properties"]["categories"]["items"]["enum"]
+                assert set(allowed) == set(readers)
+                response = {"intent": "academic", "categories": ["grades"],
+                            "personal_grade_read": personal,
+                            "scope_question": "Qué cursos tengo" if "courses" in readers else query,
+                            "document_question": "cuál es la nota mínima" if not personal else ""}
+            return {"done": True, "message": {"content": json.dumps(response)}}
+
+    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(query=query, runtime=payload()["runtime"])
+    )
+    assert plan.categories == expected
+    assert bool(plan.document_question) == (not personal)
+
+
 def test_current_submission_status_is_extracted_instead_of_defaulting_to_pending():
     from rag_service.conversation import InterpretationRequest
     from rag_service.query import OllamaChatProvider
@@ -329,6 +426,8 @@ def test_excluded_mixed_clause_cannot_narrow_the_permitted_academic_request(perm
                 response = {"intent": "academic", "categories": [category],
                             "scope_question": permitted,
                             "document_question": "cuál es la nota mínima en Universidad Ejemplo"}
+                if category == "grades":
+                    response["personal_grade_read"] = True
             return {"done": True, "message": {"content": json.dumps(response)}}
 
     plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
