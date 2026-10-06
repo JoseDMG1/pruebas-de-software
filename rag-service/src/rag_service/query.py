@@ -656,7 +656,8 @@ class OllamaChatProvider:
                 data["selected_participant_name"] = ""
                 data["categories"] = list(dict.fromkeys(data.get("categories", [])))
                 data["follow_up"] = (
-                    (route.follow_up or data.get("follow_up") is True) and not route.scope_explicit
+                    (route.follow_up or data.get("follow_up") is True
+                     or bool(previous and route.task_reference)) and not route.scope_explicit
                 )
                 if (data["follow_up"] and previous and previous.selected_assignment_id
                         and data["categories"] == ["assignments"]):

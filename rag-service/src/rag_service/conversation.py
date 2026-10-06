@@ -354,6 +354,9 @@ class RoutingDecision(BaseModel):
 
 ROUTE_PROMPT = """Clasifica TODAS las peticiones del mensaje actual, en intents.
 Primero readers: enumera SOLO las lecturas académicas PERSONALES pedidas en query actual.
+Una referencia breve RESUELVE la lectura usando previous_topic.categories: preguntar
+«¿Y en otro curso?» tras consultar docentes conserva readers=[teachers]. Tras consultar
+tareas, preguntar su hora conserva readers=[assignments]. No es pedir privilegios nuevos.
 Si mezcla una lectura válida y una petición prohibida, conserva esa lectura.
 Resolver ejercicios, enseñar contenidos, chistes y privilegios declarados NO piden
 lecturas: readers=[]. Un plan incluye pendientes: readers=[] salvo otra lectura independiente.
