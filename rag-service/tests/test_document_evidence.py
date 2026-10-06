@@ -43,3 +43,50 @@ def test_a_guide_heading_is_not_evidence_for_an_unverified_procedure():
     assert not extract(
         Chat(heading), "cómo recuperar contraseña", [{"contenido": heading}]
     ).passages
+
+
+@pytest.mark.parametrize("original", [
+    "Qué trabajos tengo en Seminario y cuál es el código de tutoría de Geometría",
+    "En Universidad Otra, qué trabajos tengo en Seminario "
+    "y cuál es el código de tutoría de Geometría",
+])
+def test_mixed_documentary_evidence_keeps_shared_restrictions_and_authorized_course_scope(
+    original,
+):
+    from types import SimpleNamespace
+    from rag_service.config import Settings
+    from rag_service.query import QueryService
+
+    question = "cuál es el código de tutoría de Geometría"
+    quote = "Código de tutoría GEO-42."
+    row = {"id_fragmento": 1, "id_documento": 2, "clave": "geometria",
+           "titulo": "Tutorías Geometría", "nombre_archivo": "geometria.pdf", "version": 1,
+           "alcance": "course", "tipo_documento": "OTRO", "pagina_inicio": 1,
+           "pagina_fin": 1, "contenido": quote}
+
+    class Embeddings:
+        def embed_query(self, text):
+            assert text == question
+            return SimpleNamespace(space=object(), vectors=[[0.1]])
+
+    class Repository:
+        def retrieve(self, *args, **kwargs):
+            assert kwargs["course_ids"] == (2,)
+            return [row]
+
+        def sources_current(self, fragments):
+            return fragments == [row]
+
+    class ScopedChat(Chat):
+        def request(self, method, path, payload):
+            data = json.loads(payload["messages"][-1]["content"])
+            assert data["question"] == question
+            assert data["original_question"] == original
+            return super().request(method, path, payload)
+
+    service = QueryService(Settings(_env_file=None), Repository(), Embeddings(), ScopedChat(quote))
+    result = service.documentary_evidence(
+        question, [2], "test-request", original
+    )
+    assert "GEO-42" in result.answer
+    assert [source.key for source in result.sources] == ["geometria"]

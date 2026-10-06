@@ -42,6 +42,13 @@ from rag_service.local_embeddings import OllamaEmbeddingProvider
 INSUFFICIENT_ANSWER = "No hay información suficiente en los documentos disponibles para responder."
 
 
+def request_clauses(question):
+    """Extract literal compound requests for validated argument selection."""
+    return [part.strip() for part in re.split(
+        r"\s+(?:y|además|también)\s+|[;,.?!¿¡]", question, flags=re.I
+    ) if part.strip()]
+
+
 class ConversationTurn(BaseModel):
     model_config = ConfigDict(extra="forbid")
     question: str = Field(min_length=1, max_length=1000)
@@ -455,9 +462,7 @@ class OllamaChatProvider:
                 raise ValueError("Incomplete interpretation")
             return result["message"]["content"]
 
-        clauses = [part.strip() for part in re.split(
-            r"\s+(?:y|además|también)\s+|[;,.?!¿¡]", request.query, flags=re.I
-        ) if part.strip()]
+        clauses = request_clauses(request.query)
         independent_quotes = (
             {part for part in clauses if len(part) >= 10} if len(clauses) > 1 else set()
         )
@@ -810,12 +815,7 @@ class QueryService:
                 insufficient_context=True,
                 request_id=request_id,
             )
-        evidence_question = (
-            f"Consulta actual: {original_question}\nParte documental: {question}"
-            if original_question
-            else question
-        )
-        evidence = extract(self.chat, evidence_question, fragments)
+        evidence = extract(self.chat, question, fragments, original_question=original_question)
         if not self.repository.sources_current(fragments):
             raise AppError("corpus_changed", "Los documentos cambiaron; repite la consulta.")
         sources = []

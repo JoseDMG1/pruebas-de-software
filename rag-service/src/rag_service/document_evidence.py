@@ -18,7 +18,7 @@ class Evidence(BaseModel):
     passages: list[Passage] = Field(max_length=3)
 
 
-def extract(chat, question, fragments):
+def extract(chat, question, fragments, original_question=""):
     model = chat.resolve()
     result = chat.client.request(
         "POST",
@@ -34,6 +34,10 @@ def extract(chat, question, fragments):
                     "content": (
                         "Selecciona pasajes LITERALES que contesten la consulta "
                         "universitaria. Solo un pasaje que contiene la respuesta, "
+                        "Responde SOLO question, la parte documental. original_question conserva "
+                        "restricciones comunes de institución, periodo o población y la operación "
+                        "precisa si question fue reformulada. Sus lecturas académicas personales "
+                        "se atienden aparte en Moodle: no exijas documentos para responderlas. "
                         "no títulos, nombres de guía ni encabezados. "
                         "Para un procedimiento no verificado devuelve passages=[]. "
                         "No escribas respuestas libres. source_id es la posición 1..4; "
@@ -60,6 +64,10 @@ def extract(chat, question, fragments):
                     "content": __import__("json").dumps(
                         {
                             "question": question,
+                            **(
+                                {"original_question": original_question}
+                                if original_question else {}
+                            ),
                             "documents": [
                                 {"source_id": i, "text": row["contenido"]}
                                 for i, row in enumerate(fragments, 1)
