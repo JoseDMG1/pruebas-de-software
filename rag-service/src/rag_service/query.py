@@ -678,6 +678,16 @@ class OllamaChatProvider:
                 data["finance"] = route.finance or data["finance"]
             else:
                 schema = routing_schema()
+                selected_task_read = bool(previous and previous.selected_assignment_id
+                    and route.intent == "academic" and route.intents == ["assignments"]
+                    and not route.finance)
+                if selected_task_read:
+                    schema["properties"] = {"scope_explicit": {"type": "boolean",
+                        "description": "TRUE solo si QUERY elige una NUEVA actividad/curso "
+                        "o pide una LISTA general. FALSE si pregunta fecha/hora/estado de "
+                        "la actividad seleccionada antes sin cambiar de actividad."},
+                        **schema["properties"]}
+                    schema["required"].append("scope_explicit")
                 schema["properties"]["selected_assignment_id"]["enum"] = [0]
                 schema["properties"]["selected_participant_name"]["enum"] = [""]
                 schema["properties"]["intent"] = {"type": "string", "enum": [route.intent]}
@@ -726,7 +736,8 @@ class OllamaChatProvider:
                         ["", *dict.fromkeys(clauses)] if recover_document else [""]
                     )
                     scope_quotes = [request.query]
-                    if (previous and route.follow_up and not route.scope_explicit
+                    if (previous and (selected_task_read
+                            or route.follow_up and not route.scope_explicit)
                             and previous.scope_question):
                         scope_quotes.append(previous.scope_question)
                     schema["properties"]["scope_question"]["enum"] = scope_quotes
@@ -743,6 +754,16 @@ class OllamaChatProvider:
                            if key != "document_question"},
                     }
                 data = json.loads(generate_plan(INTERPRET_PROMPT, schema, message))
+                if selected_task_read:
+                    scope_explicit = data.pop("scope_explicit", None)
+                    if not isinstance(scope_explicit, bool):
+                        raise ValueError("Falta el alcance actual de la actividad.")
+                    # The focused extraction can correct a broad first-pass scope label.
+                    route.scope_explicit = scope_explicit
+                    route.follow_up = not scope_explicit
+                    route.task_reference = not scope_explicit
+                    if scope_explicit:
+                        data["scope_question"] = request.query
                 if recover_document and data.get("document_question"):
                     mixed_document = True
                     scope_quotes = list(dict.fromkeys(clauses))

@@ -991,11 +991,11 @@ def test_signed_task_selection_uses_session_identities_without_guessing_from_a_t
         assert "Algebra 101" in plan["scope_question"]
 
 
-@pytest.mark.parametrize("routing_follow_up,reader_follow_up", [
-    (True, False), (False, True), (False, False)
+@pytest.mark.parametrize("routing_follow_up,reader_follow_up,explicit", [
+    (True, False, False), (False, True, False), (False, False, False), (True, True, True)
 ])
 def test_task_followup_keeps_selected_native_identity_and_reads_changed_status(
-    routing_follow_up, reader_follow_up
+    routing_follow_up, reader_follow_up, explicit
 ):
     from rag_service.conversation import InterpretationRequest
     from rag_service.query import OllamaChatProvider
@@ -1011,16 +1011,24 @@ def test_task_followup_keeps_selected_native_identity_and_reads_changed_status(
                 context = json.loads(data["messages"][-2]["content"])
                 assert context["previous_topic"]["selected_task_known"] is True
             response = {"intents": ["assignments"], "follow_up": routing_follow_up,
-                        "task_reference": True}
+                        "task_reference": True, "scope_explicit": True}
             if data["format"]["title"] == "ConversationPlan":
                 response = {"intent": "academic", "categories": ["assignments"],
-                            "scope_question": "¿Y a qué hora?", "follow_up": reader_follow_up}
+                            "scope_question": (
+                                "Ensayo en Seminario" if explicit else "¿Y a qué hora?"),
+                            "follow_up": reader_follow_up,
+                            "scope_explicit": explicit}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
     plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
-        InterpretationRequest(query="¿Y a qué hora?", runtime=payload()["runtime"],
+        InterpretationRequest(query="Ahora todas mis tareas" if explicit else "¿Y a qué hora?",
+            runtime=payload()["runtime"],
             state={"topic": {"intent": "academic", "categories": ["assignments"],
                 "selected_assignment_id": 11, "scope_question": "Ensayo en Seminario"}})
     )
-    assert plan.follow_up and plan.selected_assignment_id == 11
-    assert plan.assignment_filter == "all"
+    if explicit:
+        assert not plan.follow_up and plan.selected_assignment_id == 0
+        assert plan.scope_question == "Ahora todas mis tareas"
+    else:
+        assert plan.follow_up and plan.selected_assignment_id == 11
+        assert plan.assignment_filter == "all"
