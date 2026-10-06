@@ -365,6 +365,8 @@ assignments: leer tareas, estados de entrega y vencimientos. NO resolver sus eje
 grades: calificaciones PERSONALES visibles. Una nota mínima aprobatoria de una norma es document.
 calendar: leer eventos/fechas del calendario Moodle.
 document: información institucional publicada, normas, calendario oficial y guías del portal.
+Consultar el PROCEDIMIENTO para recuperar el acceso PROPIO o restablecer una contraseña
+del portal es document. NO pide leer, revelar o inventar la contraseña de una persona.
 Las lecturas Moodle SOLO proporcionan matrículas/cursos, nombres de docentes,
 tareas/estados/vencimientos, notas personales y eventos. Códigos de tutoría, reglas,
 contactos institucionales o instrucciones del portal NO son campos de esas lecturas;
@@ -459,6 +461,9 @@ ROUTE_EXAMPLES = (
      "Dos consultas: tareas personales de Química y una norma documental de Historia."),
     ("¿Dónde puedo adjuntar mi tarea en el portal?", ["document"], "none", False,
      "Pide un procedimiento de uso de Moodle; requiere una guía verificada del portal."),
+    ("Perdí acceso a mi cuenta Moodle, ¿cuál es el procedimiento para recuperarla?",
+     ["document"], "none", False,
+     "Pide una guía de recuperación de su acceso, no leer ni revelar credenciales."),
     ("¿Cuánto debo en pensiones este mes?", ["blocked"], "none", True,
      "Pide un saldo financiero personal, que está fuera de esta etapa."),
 )
