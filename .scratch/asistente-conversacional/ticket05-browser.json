@@ -1,16 +1,16 @@
 {
   "complete": true,
   "latencies_seconds": [
-    5.28,
-    5.16,
-    9.36,
-    5.21
+    5.88,
+    4.83,
+    8.02,
+    4.66
   ],
   "weekly_plan": {
-    "tasks_consulted_before_availability": "Plan del 2026-10-19 al 2026-10-25 (Europe/London), según Moodle. Próximas, incluidas entregas futuras: Ejercicios de ecuaciones (Algebra 101): no entregada; vence 2026-10-26 19:48; Informe de laboratorio (Biologia 102): no entregada; vence 2026-10-26 19:48. Ya consulté tus pendientes. ¿Qué días y horas tienes disponibles para estudiar?",
-    "declared_availability": "Plan del 2026-10-19 al 2026-10-25 (Europe/London), según Moodle. Próximas, incluidas entregas futuras: Ejercicios de ecuaciones (Algebra 101): no entregada; vence 2026-10-26 19:48; Informe de laboratorio (Biologia 102): no entregada; vence 2026-10-26 19:48. Esta propuesta no garantiza terminar las tareas. Los bloques son espacios disponibles, no estimaciones de esfuerzo; conserva los vencimientos de Moodle. 2026-10-20 14:00–16:00: avanzar Ejercicios de ecuaciones (Algebra 101). 2026-10-22 14:00–16:00: avanzar Informe de laboratorio (Biologia 102).",
-    "corrected_availability": "Plan del 2026-10-19 al 2026-10-25 (Europe/London), según Moodle. Próximas, incluidas entregas futuras: Ejercicios de ecuaciones (Algebra 101): no entregada; vence 2026-10-26 19:48; Informe de laboratorio (Biologia 102): no entregada; vence 2026-10-26 19:48. Esta propuesta no garantiza terminar las tareas. Los bloques son espacios disponibles, no estimaciones de esfuerzo; conserva los vencimientos de Moodle. 2026-10-23 15:00–18:00: avanzar Ejercicios de ecuaciones (Algebra 101). Quedan pendientes sin un bloque asignado; ajusta disponibilidad o prioridad. Una tarea puede necesitar varios bloques.",
-    "unknown_availability_draft": "Plan del 2026-10-19 al 2026-10-25 (Europe/London), según Moodle. Próximas, incluidas entregas futuras: Ejercicios de ecuaciones (Algebra 101): no entregada; vence 2026-10-26 19:48; Informe de laboratorio (Biologia 102): no entregada; vence 2026-10-26 19:48. Esta propuesta no garantiza terminar las tareas. Los bloques son espacios disponibles, no estimaciones de esfuerzo; conserva los vencimientos de Moodle. Borrador provisional sin horarios: no has precisado disponibilidad. 2026-10-19: avanzar Ejercicios de ecuaciones (Algebra 101). 2026-10-20: avanzar Informe de laboratorio (Biologia 102).",
+    "tasks_consulted_before_availability": "Plan del 2026-10-19 al 2026-10-25 (Europe/London), según Moodle.\nPróximas, incluidas entregas futuras: Ejercicios de ecuaciones (Algebra 101): no entregada; vence 2026-10-26 19:48; Informe de laboratorio (Biologia 102): no entregada; vence 2026-10-26 19:48.\nYa consulté tus pendientes. ¿Qué días y horas tienes disponibles para estudiar?",
+    "declared_availability": "Plan del 2026-10-19 al 2026-10-25 (Europe/London), según Moodle.\nPróximas, incluidas entregas futuras: Ejercicios de ecuaciones (Algebra 101): no entregada; vence 2026-10-26 19:48; Informe de laboratorio (Biologia 102): no entregada; vence 2026-10-26 19:48.\nEsta propuesta no garantiza terminar las tareas. Los bloques son espacios disponibles, no estimaciones de esfuerzo; conserva los vencimientos de Moodle.\n2026-10-20 14:00–16:00: avanzar Ejercicios de ecuaciones (Algebra 101).\n2026-10-22 14:00–16:00: avanzar Informe de laboratorio (Biologia 102).",
+    "corrected_availability": "Plan del 2026-10-19 al 2026-10-25 (Europe/London), según Moodle.\nPróximas, incluidas entregas futuras: Ejercicios de ecuaciones (Algebra 101): no entregada; vence 2026-10-26 19:48; Informe de laboratorio (Biologia 102): no entregada; vence 2026-10-26 19:48.\nEsta propuesta no garantiza terminar las tareas. Los bloques son espacios disponibles, no estimaciones de esfuerzo; conserva los vencimientos de Moodle.\n2026-10-23 15:00–18:00: avanzar Ejercicios de ecuaciones (Algebra 101).\nQuedan pendientes sin un bloque asignado; ajusta disponibilidad o prioridad. Una tarea puede necesitar varios bloques.",
+    "unknown_availability_draft": "Plan del 2026-10-19 al 2026-10-25 (Europe/London), según Moodle.\nPróximas, incluidas entregas futuras: Ejercicios de ecuaciones (Algebra 101): no entregada; vence 2026-10-26 19:48; Informe de laboratorio (Biologia 102): no entregada; vence 2026-10-26 19:48.\nEsta propuesta no garantiza terminar las tareas. Los bloques son espacios disponibles, no estimaciones de esfuerzo; conserva los vencimientos de Moodle.\nBorrador provisional sin horarios: no has precisado disponibilidad.\n2026-10-19: avanzar Ejercicios de ecuaciones (Algebra 101).\n2026-10-20: avanzar Informe de laboratorio (Biologia 102).",
     "source": "live Moodle demo account estudiante1 and Gemini-backed Moodle chat",
     "gemini_model": "gemini-3.5-flash-lite",
     "chat_writes_performed": false,

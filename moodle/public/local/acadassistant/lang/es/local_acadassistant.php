@@ -10,11 +10,15 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Asistente académico';
 $string['assistant'] = 'Asistente académico';
+$string['chatheading'] = 'Chat de orientación académica';
 $string['assistantdescription'] = 'Pregunta sobre información institucional y tus datos académicos '
     . 'visibles en Moodle.';
+$string['assistantmark'] = 'IA';
+$string['assistantloading'] = 'El asistente está preparando tu respuesta…';
 $string['assistantanswer'] = 'Respuesta';
 $string['academicprovenance'] = 'Dato académico de Moodle';
 $string['calendarprovenance'] = 'Calendario Moodle';
+$string['conversationlog'] = 'Mensajes de la conversación';
 $string['conversationempty'] = 'Escribe una pregunta para iniciar una conversación. Solo se '
     . 'mantiene mientras tu sesión de Moodle esté activa.';
 $string['coursesource'] = 'Documento del curso';
@@ -25,8 +29,15 @@ $string['moodledataprovenance'] = 'Los datos académicos visibles provienen de M
 $string['newconversation'] = 'Nueva conversación';
 $string['pages'] = 'páginas {$a}';
 $string['questionlabel'] = 'Pregunta';
+$string['questionplaceholder'] = 'Escribe tu pregunta aquí…';
+$string['questionhint'] = 'Puedes hacer preguntas sobre tus cursos, tareas o guías de Moodle.';
 $string['questionrequired'] = 'Escribe una pregunta.';
 $string['questiontoolong'] = 'La pregunta supera el límite de 1000 caracteres.';
+$string['suggestions'] = 'Ideas para empezar';
+$string['suggestiontasks'] = '¿Qué tareas tengo pendientes?';
+$string['suggestioncourses'] = '¿Qué cursos tengo?';
+$string['suggestionguide'] = '¿Cómo agrego una entrega en Moodle?';
+$string['welcomeheading'] = '¿En qué te ayudo hoy?';
 $string['invalidaction'] = 'No se reconoce esta acción del chat.';
 $string['sendquestion'] = 'Enviar pregunta';
 $string['assistantunavailable'] = 'No se pudo completar la consulta. Inténtalo de nuevo más tarde.';

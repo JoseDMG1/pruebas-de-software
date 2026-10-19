@@ -27,6 +27,7 @@ Saludo, cortesía, despedida y capacidades no recuperan documentos ni datos acad
 | 04 | Saludo/exclusión: test_social_and_blocked_responses_never_retrieve_documents; confirmación: test_teacher_confirmation_is_direct_and_bounded_by_visible_data; citas: test_sources_come_from_database_and_citations_are_present y test_missing_inline_citation_is_added_from_valid_sources; ejemplos/salida inválida: test_unsupported_example_facts_and_document_instructions_are_not_published y test_invalid_citations_are_rejected y test_chat_invalid_response_is_controlled; cambio de tema: ticket04-browser.json | suites Python y recorrido integrado Moodle/Gemini |
 | 05 | Pendientes antes de disponibilidad, agregación de 25 tareas, intervalos, domingo, zona, vencidas/borradores/sin fecha, datos parciales y cero tareas | `conversation_test.php`, `test_weekly_plan.py`, pruebas nativas de prórrogas, recorrido real `ticket05-browser.json` |
 | 06 | Recorridos semánticos reales, acceso por cuenta, inyección directa/documental y borrado de sesión | `dev/moodle/smoke_browser.py`, suites de contratos/sesión y reporte local |
+| 07 | Interfaz clara, sugerencias iniciales, mensaje inmediato, estado accesible de espera, móvil y envío Moodle intacto | `dev/moodle/smoke_browser.py --ticket07`, `ticket07-browser.json` |
 
 ## Comprobaciones automáticas
 
@@ -394,3 +395,32 @@ borradores, vencidas, tareas sin fecha y límites de domingo/zona horaria conser
 pruebas unitarias Python y nativas Moodle referenciadas en la tabla. El recorrido real
 cubre el flujo positivo con tareas próximas y una corrección de disponibilidad; la
 aceptación conversacional global queda pendiente del ticket 06.
+
+### Cierre del ticket 07: interfaz inmediata del chat Moodle (2026-10-19)
+
+El ticket 07 queda `done`. El chat conserva la página y los formularios estándar de
+Moodle, con una tarjeta de conversación, mensajes de estudiante/asistente diferenciados,
+fuentes plegables y sugerencias iniciales que rellenan el campo de pregunta. El diseño
+se adapta a móvil y respeta `prefers-reduced-motion`.
+
+Al enviar, JavaScript inserta inmediatamente el mensaje usando `textContent`, muestra
+un estado accesible «El asistente está preparando tu respuesta…», desactiva el botón y
+las sugerencias, y evita un segundo envío. El texto se conserva en un campo oculto del
+POST normal de Moodle; la verificación integrada posterior confirmó que Gemini recibe
+la pregunta y devuelve el plan/respuesta como antes. El indicador describe el estado de
+espera y no expone ni simula texto de razonamiento interno. Sin JavaScript, el formulario
+original sigue enviando la pregunta; las sugerencias solo se muestran con la mejora JS
+activa.
+
+`ticket07-browser.json` registra la prueba de navegador que retiene el submit después
+del manejador visual para comprobar mensaje inmediato, estado, envío único y ajuste móvil
+sin consumir Gemini. Después pasó también el recorrido real del ticket 05 con cuatro
+respuestas de Gemini `gemini-3.5-flash-lite` (4,66–8,02 s), que confirma el POST normal,
+el renderizado final, contexto y disponibilidad. Se purgaron las cachés Moodle para
+recoger las nuevas cadenas y `styles.css`; la captura visual temporal quedó en `.local/`.
+
+Reproducir el chequeo de interfaz desde `rag-service`:
+
+```sh
+PLAYWRIGHT_BROWSERS_PATH=.cache/ms-playwright .venv/bin/python -u ../dev/moodle/smoke_browser.py --ticket07
+```

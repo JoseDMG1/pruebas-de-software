@@ -1,53 +1,168 @@
 <section class="local-acadassistant-chat" aria-labelledby="assistant-title">
-    <h2 id="assistant-title">{{#str}}assistant, local_acadassistant{{/str}}</h2>
-    <p>{{#str}}assistantdescription, local_acadassistant{{/str}}</p>
+    <header class="local-acadassistant-header">
+        <span class="local-acadassistant-avatar" aria-hidden="true">{{#str}}assistantmark, local_acadassistant{{/str}}</span>
+        <div>
+            <h2 id="assistant-title">{{#str}}chatheading, local_acadassistant{{/str}}</h2>
+            <p>{{#str}}assistantdescription, local_acadassistant{{/str}}</p>
+        </div>
+    </header>
 
     {{#error}}
         <div class="alert alert-danger" role="alert">{{error}}</div>
     {{/error}}
 
-    <div id="conversation" aria-live="polite" aria-relevant="additions text">
+    <div id="conversation" class="local-acadassistant-conversation" role="log"
+        aria-live="polite" aria-relevant="additions text" aria-label="{{#str}}conversationlog, local_acadassistant{{/str}}">
         {{#hasmessages}}
             {{#messages}}
-                <article class="local-acadassistant-turn mb-4">
-                    <h3>{{#str}}yourquestion, local_acadassistant{{/str}}</h3>
-                    <p>{{question}}</p>
-                    <h3>{{#str}}assistantanswer, local_acadassistant{{/str}}</h3>
-                    <p>{{answer}}</p>
-                    {{#academiclabels}}
-                        <p class="small text-muted">{{label}}</p>
-                    {{/academiclabels}}
-                    {{#sources}}
-                        <details>
-                            <summary>{{label}}: {{title}}</summary>
-                            <p>{{filename}} ({{pagelabel}})</p>
-                            <blockquote>{{excerpt}}</blockquote>
-                        </details>
-                    {{/sources}}
+                <article class="local-acadassistant-turn">
+                    <div class="local-acadassistant-message local-acadassistant-message--user">
+                        <div class="local-acadassistant-message__bubble">
+                            <span class="local-acadassistant-message__label">{{#str}}yourquestion, local_acadassistant{{/str}}</span>
+                            <p>{{question}}</p>
+                        </div>
+                    </div>
+                    <div class="local-acadassistant-message local-acadassistant-message--assistant">
+                        <span class="local-acadassistant-message__avatar" aria-hidden="true">{{#str}}assistantmark, local_acadassistant{{/str}}</span>
+                        <div class="local-acadassistant-message__bubble">
+                            <span class="local-acadassistant-message__label">{{#str}}assistantanswer, local_acadassistant{{/str}}</span>
+                            <p>{{answer}}</p>
+                            {{#academiclabels}}
+                                <p class="local-acadassistant-provenance">{{label}}</p>
+                            {{/academiclabels}}
+                            {{#sources}}
+                                <details class="local-acadassistant-source">
+                                    <summary>{{label}}: {{title}}</summary>
+                                    <p>{{filename}} ({{pagelabel}})</p>
+                                    <blockquote>{{excerpt}}</blockquote>
+                                </details>
+                            {{/sources}}
+                        </div>
+                    </div>
                 </article>
             {{/messages}}
         {{/hasmessages}}
         {{^hasmessages}}
-            <p>{{#str}}conversationempty, local_acadassistant{{/str}}</p>
+            <div class="local-acadassistant-empty">
+                <span class="local-acadassistant-empty__icon" aria-hidden="true">✦</span>
+                <h3>{{#str}}welcomeheading, local_acadassistant{{/str}}</h3>
+                <p>{{#str}}conversationempty, local_acadassistant{{/str}}</p>
+                <div class="local-acadassistant-suggestions" aria-label="{{#str}}suggestions, local_acadassistant{{/str}}">
+                    <button class="btn btn-outline-secondary" type="button" data-assistant-suggestion="{{#str}}suggestiontasks, local_acadassistant{{/str}}">
+                        {{#str}}suggestiontasks, local_acadassistant{{/str}}
+                    </button>
+                    <button class="btn btn-outline-secondary" type="button" data-assistant-suggestion="{{#str}}suggestioncourses, local_acadassistant{{/str}}">
+                        {{#str}}suggestioncourses, local_acadassistant{{/str}}
+                    </button>
+                    <button class="btn btn-outline-secondary" type="button" data-assistant-suggestion="{{#str}}suggestionguide, local_acadassistant{{/str}}">
+                        {{#str}}suggestionguide, local_acadassistant{{/str}}
+                    </button>
+                </div>
+            </div>
         {{/hasmessages}}
     </div>
 
-    <p class="small text-muted">{{#str}}moodledataprovenance, local_acadassistant{{/str}}</p>
+    <p class="local-acadassistant-data-note">{{#str}}moodledataprovenance, local_acadassistant{{/str}}</p>
 
-    <form method="post" action="{{pageurl}}#conversation">
+    <form id="assistant-form" class="local-acadassistant-composer" method="post"
+        action="{{pageurl}}#conversation" data-user-label="{{#str}}yourquestion, local_acadassistant{{/str}}">
         <input type="hidden" name="sesskey" value="{{sesskey}}">
         <input type="hidden" name="action" value="ask">
-        <div class="mb-3">
-            <label for="assistant-question">{{#str}}questionlabel, local_acadassistant{{/str}}</label>
-            <textarea id="assistant-question" name="question" class="form-control" rows="3"
-                maxlength="1000" required></textarea>
+        <label for="assistant-question">{{#str}}questionlabel, local_acadassistant{{/str}}</label>
+        <div class="local-acadassistant-composer__controls">
+            <textarea id="assistant-question" name="question" class="form-control" rows="2"
+                maxlength="1000" required placeholder="{{#str}}questionplaceholder, local_acadassistant{{/str}}"
+                aria-describedby="assistant-input-help"></textarea>
+            <button id="assistant-send" class="btn btn-primary" type="submit">
+                {{#str}}sendquestion, local_acadassistant{{/str}}
+            </button>
         </div>
-        <button type="submit" class="btn btn-primary">{{#str}}sendquestion, local_acadassistant{{/str}}</button>
+        <div id="assistant-input-help" class="local-acadassistant-composer__hint">
+            {{#str}}questionhint, local_acadassistant{{/str}}
+        </div>
+        <div id="assistant-status" class="local-acadassistant-status" role="status"
+            aria-live="polite" aria-atomic="true" hidden>
+            <span class="local-acadassistant-status__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span>{{#str}}assistantloading, local_acadassistant{{/str}}</span>
+        </div>
     </form>
 
-    <form method="post" action="{{pageurl}}">
-        <input type="hidden" name="sesskey" value="{{sesskey}}">
-        <input type="hidden" name="action" value="new">
-        <button type="submit" class="btn btn-secondary">{{#str}}newconversation, local_acadassistant{{/str}}</button>
-    </form>
+    <div class="local-acadassistant-actions">
+        <form method="post" action="{{pageurl}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+            <input type="hidden" name="action" value="new">
+            <button type="submit" class="btn btn-link">{{#str}}newconversation, local_acadassistant{{/str}}</button>
+        </form>
+    </div>
 </section>
+
+{{#js}}
+require(['core/first'], function() {
+    const root = document.querySelector('.local-acadassistant-chat');
+    const form = root && root.querySelector('#assistant-form');
+    if (!form) {
+        return;
+    }
+    root.classList.add('local-acadassistant-chat--enhanced');
+
+    const question = form.querySelector('#assistant-question');
+    const send = form.querySelector('#assistant-send');
+    const status = form.querySelector('#assistant-status');
+    const conversation = root.querySelector('#conversation');
+
+    root.querySelectorAll('[data-assistant-suggestion]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            question.value = button.getAttribute('data-assistant-suggestion');
+            question.focus();
+        });
+    });
+
+    form.addEventListener('submit', function(event) {
+        if (form.dataset.submitting === 'true') {
+            event.preventDefault();
+            return;
+        }
+
+        const text = question.value.trim();
+        if (!text) {
+            return;
+        }
+
+        form.dataset.submitting = 'true';
+        form.setAttribute('aria-busy', 'true');
+        send.disabled = true;
+        status.hidden = false;
+        root.querySelectorAll('[data-assistant-suggestion]').forEach(function(button) {
+            button.disabled = true;
+        });
+
+        const turn = document.createElement('article');
+        turn.className = 'local-acadassistant-turn local-acadassistant-turn--pending';
+        const message = document.createElement('div');
+        message.className = 'local-acadassistant-message local-acadassistant-message--user';
+        const bubble = document.createElement('div');
+        bubble.className = 'local-acadassistant-message__bubble';
+        const label = document.createElement('span');
+        label.className = 'local-acadassistant-message__label';
+        label.textContent = form.getAttribute('data-user-label');
+        const content = document.createElement('p');
+        content.textContent = text;
+        bubble.append(label, content);
+        message.appendChild(bubble);
+        turn.appendChild(message);
+        conversation.appendChild(turn);
+
+        const submittedQuestion = document.createElement('input');
+        submittedQuestion.type = 'hidden';
+        submittedQuestion.name = question.name;
+        submittedQuestion.value = text;
+        form.appendChild(submittedQuestion);
+        question.removeAttribute('name');
+        question.value = '';
+        question.disabled = true;
+
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        turn.scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block: 'end'});
+    });
+});
+{{/js}}

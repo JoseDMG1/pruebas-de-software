@@ -17,6 +17,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--ticket03", action="store_true", help="Check authorized reads and portal guide")
 parser.add_argument("--ticket04", action="store_true", help="Check task-to-document topic change")
 parser.add_argument("--ticket05", action="store_true", help="Check personalized weekly planning")
+parser.add_argument("--ticket07", action="store_true", help="Check immediate chat feedback in Moodle")
 args = parser.parse_args()
 
 
@@ -173,18 +174,73 @@ def check_ticket05(browser):
     context.close()
 
 
+def check_ticket07(browser):
+    context = browser.new_context()
+    page = context.new_page()
+    page.set_default_navigation_timeout(30000)
+    page.set_default_timeout(5000)
+    login(page, "estudiante1")
+    page.set_viewport_size({"width": 390, "height": 844})
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    suggestion = page.locator("[data-assistant-suggestion]").first
+    suggestion_text = suggestion.get_attribute("data-assistant-suggestion")
+    suggestion.click()
+    assert page.locator("#assistant-question").input_value() == suggestion_text
+    assert page.locator("#assistant-question").evaluate("field => document.activeElement === field")
+
+    question = "¿Qué tareas tengo pendientes?"
+    page.locator("#assistant-question").fill(question)
+    page.locator("#assistant-form").evaluate(
+        "form => form.addEventListener('submit', event => {"
+        "window.__assistantSubmittedQuestion = new FormData(form).get('question'); event.preventDefault();"
+        "})"
+    )
+    page.locator("#assistant-form").evaluate("form => form.requestSubmit()")
+
+    optimistic_message = page.locator(".local-acadassistant-message--user").filter(has_text=question)
+    optimistic_message.wait_for(state="visible")
+    status = page.locator("#assistant-status")
+    status.wait_for(state="visible")
+    assert "prepar" in status.inner_text().lower(), status.inner_text()
+    assert page.locator("#assistant-question").input_value() == ""
+    assert page.locator("#assistant-question").is_disabled()
+    assert page.evaluate("window.__assistantSubmittedQuestion") == question
+    assert page.locator("#assistant-send").is_disabled()
+    assert page.locator("#assistant-form").get_attribute("aria-busy") == "true"
+    assert page.locator("[data-assistant-suggestion]:disabled").count() == 3
+    page.locator("#assistant-form").evaluate("form => form.requestSubmit()")
+    assert page.locator(".local-acadassistant-turn--pending").count() == 1
+    report["chat_ui"] = {
+        "optimistic_message_visible": True,
+        "accessible_waiting_status_visible": status.inner_text(),
+        "duplicate_submit_prevented": True,
+        "suggestions_fill_composer": True,
+        "mobile_width_has_no_horizontal_overflow": True,
+        "submit_intercepted_after_optimistic_ui": True,
+        "submitted_question_preserved_for_moodle_post": True,
+        "model_request_made": False,
+    }
+    page.screenshot(path=str(root / ".local/moodle-chat-ui-loading.png"), full_page=True)
+    context.close()
+
+
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch()
-    if args.ticket03 or args.ticket04 or args.ticket05:
+    if args.ticket03 or args.ticket04 or args.ticket05 or args.ticket07:
         report["complete"] = False
-        ticket = "ticket03" if args.ticket03 else "ticket04" if args.ticket04 else "ticket05"
+        ticket = (
+            "ticket03" if args.ticket03 else "ticket04" if args.ticket04
+            else "ticket05" if args.ticket05 else "ticket07"
+        )
         try:
             if args.ticket03:
                 check_ticket03(browser)
             elif args.ticket04:
                 check_ticket04(browser)
-            else:
+            elif args.ticket05:
                 check_ticket05(browser)
+            else:
+                check_ticket07(browser)
             report["complete"] = True
         finally:
             browser.close()

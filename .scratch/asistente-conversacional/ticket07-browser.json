@@ -1,0 +1,13 @@
+{
+  "complete": true,
+  "chat_ui": {
+    "optimistic_message_visible": true,
+    "accessible_waiting_status_visible": "The assistant is preparing your answer…",
+    "duplicate_submit_prevented": true,
+    "suggestions_fill_composer": true,
+    "mobile_width_has_no_horizontal_overflow": true,
+    "submit_intercepted_after_optimistic_ui": true,
+    "submitted_question_preserved_for_moodle_post": true,
+    "model_request_made": false
+  }
+}
