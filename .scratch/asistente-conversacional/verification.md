@@ -24,7 +24,7 @@ Saludo, cortesía, despedida y capacidades no recuperan documentos ni datos acad
 | 01 | Contratos cerrados, firma del cuerpo, reloj y zona Moodle, rechazo de operaciones no permitidas | `test_conversation.py`, `conversation_test.php`, suites de autenticación existentes |
 | 02 | Contexto antes de interpretar, referencias, cambios de tema y estado temporal; horarios declarados separados de intención | `test_conversation.py`, `conversation_store_test.php`; ajustes de horario conservan el curso activo |
 | 03 | Lecturas con capacidades reales, matrícula, grupos, entregas, estados y prórrogas; guía local verificada | `academic_context_provider_test.php`, `conversation_test.php`, `docs/portal/moodle-5.3dev-guia.md` |
-| 04 | Confirmación directa con identidades visibles, homónimos, citas documentales independientes, discrepancias de calendario y prioridad oficial | `test_conversation.py`, `test_document_evidence.py`, suites académicas existentes |
+| 04 | Saludo/exclusión: test_social_and_blocked_responses_never_retrieve_documents; confirmación: test_teacher_confirmation_is_direct_and_bounded_by_visible_data; citas: test_sources_come_from_database_and_citations_are_present y test_missing_inline_citation_is_added_from_valid_sources; ejemplos/salida inválida: test_unsupported_example_facts_and_document_instructions_are_not_published y test_invalid_citations_are_rejected y test_chat_invalid_response_is_controlled; cambio de tema: ticket04-browser.json | suites Python y recorrido integrado Moodle/Gemini |
 | 05 | Pendientes antes de disponibilidad, agregación de 25 tareas, intervalos, domingo, zona, vencidas/borradores/sin fecha, datos parciales y cero tareas | `conversation_test.php`, `test_weekly_plan.py`, pruebas nativas de prórrogas |
 | 06 | Recorridos semánticos reales, acceso por cuenta, inyección directa/documental y borrado de sesión | `dev/moodle/smoke_browser.py`, suites de contratos/sesión y reporte local |
 
@@ -325,3 +325,22 @@ PLAYWRIGHT_BROWSERS_PATH=.cache/ms-playwright .venv/bin/python -u ../dev/moodle/
 La guía conserva su cobertura explícita de Assignment. Las comprobaciones temporales
 anteriores usan reloj y datos sintéticos. El caso de tutoría y selección de tareas
 pendiente pertenece a los siguientes tickets; no se declara aceptación integral.
+
+### Cierre del ticket 04: respuesta documental tras cambiar de tema (2026-10-19)
+
+El ticket 04 queda done. Si la primera clasificación hereda una tarea seleccionada,
+la extracción focalizada ahora puede reconocer una solicitud documental independiente.
+Ese plan elimina el identificador de tarea, filtros ambiguos y la marca de seguimiento;
+Moodle/RAG recuperan solo el documento autorizado y las citas siguen vinculadas a esa fuente.
+
+La regresión de tests/test_conversation.py primero falló porque el contrato solo permitía
+una pregunta documental vacía en ese contexto. Ahora valida el cambio a intent=document,
+sin categorías académicas, selección de tarea ni seguimiento. La prueba integrada real
+dev/moodle/smoke_browser.py --ticket04 consultó las tareas, preguntó el vencimiento de
+“Ejercicios de ecuaciones” y cambió a “¿A qué hora es la tutoría del curso Algebra 101?”.
+Gemini respondió: martes a las 16:00, con cita del “Documento de prueba ALG101”; no devolvió
+la fecha de entrega 17:19. Latencias en la última repetición: 5,21 s, 4,88 s y 8,85 s. El artefacto registra las respuestas intermedias de lista y tarea seleccionada, además de la cita final.
+
+La suite completa de Python con PostgreSQL terminó con 260 aprobadas, cero omitidas.
+Se verificó Ruff. La aceptación global sigue pendiente de los tickets 02, 05 y 06,
+además de los casos integrales que no se ejecutaron en este recorrido focalizado.

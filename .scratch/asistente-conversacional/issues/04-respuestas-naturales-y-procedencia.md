@@ -1,6 +1,6 @@
 # Respuestas naturales y procedencia verificable
 
-Status: in-progress
+Status: done
 
 ## Objetivo
 
@@ -16,8 +16,8 @@ Saludo sin búsqueda; sí/no/limitación pertinente; no repetir listas ajenas; c
 
 ## Estado
 
-Alcance conjunto aprobado explícitamente por el usuario. Listo para implementar
-cuando se cumplan las dependencias, respetando la spec y los límites acordados.
+Implementado y verificado el 2026-10-19. Evidencia y límites en
+[verification.md](../verification.md).
 
 ## Comments
 
@@ -34,3 +34,11 @@ de tutoría. Este fallo y las comprobaciones restantes están registrados en
 2026-10-19: redacción documental y académica usa Gemini `gemini-flash-latest` mediante
 el mismo cliente que la interpretación. Las respuestas JSON se validan en RAG y el modelo
 no recibe permisos ni credenciales.
+
+2026-10-19 — Cierre: las respuestas conservan evidencia documental y no arrastran
+el vencimiento de una tarea al cambiar a una consulta independiente de tutoría.
+El flujo real desde Moodle, con Gemini, devolvió el horario del martes a las 16:00
+y su cita; no repitió la fecha de entrega de la tarea seleccionada.
+Regresión automatizada: test_independent_document_question_drops_previously_selected_task.
+Evidencia real: [ticket04-browser.json](../ticket04-browser.json).
+Este cierre no declara terminados los tickets 02, 05, 06 ni la aceptación integral.

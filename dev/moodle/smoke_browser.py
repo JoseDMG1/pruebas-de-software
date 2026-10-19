@@ -15,6 +15,7 @@ password = values["MOODLE_DEMO_PASSWORD"]
 report = {}
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--ticket03", action="store_true", help="Check authorized reads and portal guide")
+parser.add_argument("--ticket04", action="store_true", help="Check task-to-document topic change")
 args = parser.parse_args()
 
 
@@ -109,16 +110,36 @@ def check_ticket03(browser):
         context.close()
 
 
+def check_ticket04(browser):
+    context = browser.new_context()
+    page = context.new_page()
+    page.set_default_navigation_timeout(180000)
+    login(page, "estudiante1")
+    task_list = ask(page, "¿Qué tareas tengo pendientes?")
+    assert "Ejercicios de ecuaciones" in task_list, task_list
+    selected = ask(page, "¿Cuándo vence Ejercicios de ecuaciones?")
+    assert "Ejercicios de ecuaciones" in selected, selected
+    tutoring = ask(page, "¿A qué hora es la tutoría del curso Algebra 101?")
+    assert "16:00" in tutoring and "martes" in tutoring.lower(), tutoring
+    assert "17:19" not in tutoring, tutoring
+    assert "Documento de prueba ALG101" in page.locator(".local-acadassistant-turn").last.inner_text()
+    report["task_list_answer"] = task_list
+    report["selected_task_answer"] = selected
+    report["task_to_independent_tutoring_question"] = tutoring
+    context.close()
+
+
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch()
-    if args.ticket03:
+    if args.ticket03 or args.ticket04:
         report["complete"] = False
+        ticket = "ticket03" if args.ticket03 else "ticket04"
         try:
-            check_ticket03(browser)
+            check_ticket03(browser) if args.ticket03 else check_ticket04(browser)
             report["complete"] = True
         finally:
             browser.close()
-            destination = root / ".scratch/asistente-conversacional/ticket03-browser.json"
+            destination = root / f".scratch/asistente-conversacional/{ticket}-browser.json"
             destination.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
         print(json.dumps(report, indent=2, ensure_ascii=False))
         raise SystemExit(0)

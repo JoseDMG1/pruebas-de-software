@@ -1,0 +1,11 @@
+{
+  "complete": true,
+  "latencies_seconds": [
+    5.21,
+    4.88,
+    8.85
+  ],
+  "task_list_answer": "Tareas pendientes de entrega: Ejercicios de ecuaciones — Algebra 101: no entregada; vence 2026-10-12 17:19; Informe de laboratorio — Biologia 102: no entregada; vence 2026-10-12 17:19. Según los datos visibles de Moodle.",
+  "selected_task_answer": "Tareas pendientes de entrega: Ejercicios de ecuaciones — Algebra 101: no entregada; vence 2026-10-12 17:19. Según los datos visibles de Moodle.",
+  "task_to_independent_tutoring_question": "La fuente indica: «Documento ficticio del curso Algebra 101. La tutoria de algebra se realiza los martes a las 16:00. Codigo de tutoria ALG-TUTOR-16.». [1]"
+}

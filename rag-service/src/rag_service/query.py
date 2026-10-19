@@ -706,7 +706,8 @@ class GeminiChatProvider:
                 scope_quotes = []
                 mixed_document = route.intent == "academic" and "document" in route.intents
                 recover_document = (route.intent == "academic" and not mixed_document
-                    and len(clauses) > 1 and not route.confirmation and route.social == "none"
+                    and (len(clauses) > 1 or selected_task_read)
+                    and not route.confirmation and route.social == "none"
                     and not route.blocked_part and not route.finance)
                 if mixed_document:
                     schema["properties"]["document_question"]["minLength"] = 1
@@ -806,7 +807,21 @@ class GeminiChatProvider:
                     route.task_reference = not scope_explicit
                     if scope_explicit:
                         data["scope_question"] = request.query
-                if recover_document and data.get("document_question"):
+                selected_task_document = bool(
+                    selected_task_read and recover_document and data.get("document_question")
+                )
+                if selected_task_document:
+                    # The current request is a new documentary question, not a follow-up
+                    # about the task selected in the earlier turn.
+                    data["intent"] = "document"
+                    data["categories"] = []
+                    data["scope_question"] = ""
+                    data["follow_up"] = False
+                    data["ambiguous_task"] = False
+                    mixed_document = False
+                    recover_document = False
+                    scope_quotes = []
+                elif recover_document and data.get("document_question"):
                     mixed_document = True
                     scope_quotes = list(dict.fromkeys(clauses))
                 if (mixed_document and len(clauses) == 2 and len(scope_quotes) == 2
@@ -826,13 +841,16 @@ class GeminiChatProvider:
                         or data.get("scope_question") == data["document_question"])):
                     raise ValueError("Las solicitudes académica y documental deben separarse.")
                 proposed_document_question = data.get("document_question", "")
-                if "document" not in route.intents and not mixed_document:
+                if ("document" not in route.intents and not mixed_document
+                        and not selected_task_document):
                     data["document_question"] = ""
-                data["ambiguous_task"] = route.task_reference or data.get("ambiguous_task", False)
+                data["ambiguous_task"] = False if selected_task_document else (
+                    route.task_reference or data.get("ambiguous_task", False)
+                )
                 data["selected_assignment_id"] = 0
                 data["selected_participant_name"] = ""
                 data["categories"] = list(dict.fromkeys(data.get("categories", [])))
-                data["follow_up"] = (
+                data["follow_up"] = False if selected_task_document else (
                     (route.follow_up or data.get("follow_up") is True
                      or bool(previous and route.task_reference)) and not route.scope_explicit
                 )

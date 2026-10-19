@@ -339,6 +339,54 @@ def test_literal_documentary_subrequest_can_be_recovered_during_argument_extract
     assert plan.document_question == "cuál es el código de tutoría de Geometría"
 
 
+def test_independent_document_question_drops_previously_selected_task():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import GeminiChatProvider
+
+    question = "¿A qué hora es la tutoría del curso Algebra 101?"
+    documentary_clause = "A qué hora es la tutoría del curso Algebra 101"
+
+    class Model:
+        def _models(self):
+            return [{"name": "qwen2.5:3b", "digest": "test"}]
+
+        def request(self, method, path, data):
+            if path == "/api/show":
+                return {"capabilities": ["completion"]}
+            if data["format"]["title"] != "ConversationPlan":
+                return {"done": True, "message": {"content": json.dumps({
+                    "readers": ["assignments"], "intents": ["assignments"],
+                    "documentary": False, "task_reference": True,
+                    "scope_explicit": False, "follow_up": True,
+                })}}
+            assert documentary_clause in data["format"]["properties"]["document_question"]["enum"]
+            return {"done": True, "message": {"content": json.dumps({
+                "intent": "academic", "categories": ["assignments"],
+                "scope_explicit": False, "follow_up": True,
+                "assignment_filter": "all", "scope_question": "Ejercicios de ecuaciones",
+                "document_question": documentary_clause,
+            })}}
+
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(
+            query=question,
+            runtime=payload()["runtime"],
+            state={"topic": {
+                "intent": "academic", "categories": ["assignments"],
+                "assignment_filter": "all", "scope_question": "Ejercicios de ecuaciones",
+                "selected_assignment_id": 17,
+            }},
+            conversation_context=[{
+                "question": "¿Cuándo vence Ejercicios de ecuaciones?",
+                "answer": "Vence el lunes.",
+            }],
+        )
+    )
+    assert plan.intent == "document"
+    assert plan.categories == [] and plan.document_question == documentary_clause
+    assert plan.selected_assignment_id == 0 and not plan.follow_up and not plan.ambiguous_task
+
+
 @pytest.mark.parametrize("readers,intents,expected", [
     (["assignments"], ["blocked"], "academic"),
     ([], ["assignments", "blocked"], "blocked"),
