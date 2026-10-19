@@ -10,7 +10,7 @@ from psycopg.types.json import Jsonb
 
 from rag_service.documents import Chunk, ExtractedPdf
 from rag_service.errors import AppError
-from rag_service.gemini import EmbeddingBatch, EmbeddingSpace
+from rag_service.embedding_types import EmbeddingBatch, EmbeddingSpace
 
 if TYPE_CHECKING:
     from rag_service.config import Settings
@@ -250,6 +250,8 @@ class Repository:
             ).fetchone() is not None
 
     def save_space(self, connection, fragment_ids, batch):
+        if len(batch.vectors) != len(fragment_ids):
+            raise AppError("invalid_embedding", "El lote de embeddings está incompleto.")
         space = batch.space
         row = connection.execute(
             """INSERT INTO espacio_embedding (proveedor, modelo, revision, dimensiones)
@@ -366,14 +368,19 @@ class Repository:
                     "index_incomplete", "El índice Gemini no cubre los documentos actuales.",
                 )
             return connection.execute(
-                f"""SELECT f.id_fragmento, f.id_documento, f.contenido, f.pagina_inicio,
+                f"""WITH visible_embeddings AS MATERIALIZED (
+                    SELECT fe.id_fragmento, fe.embedding FROM fragmento_embedding fe
+                    JOIN fragmento f USING (id_fragmento)
+                    JOIN documento d USING (id_documento)
+                    WHERE fe.id_espacio = %s AND d.vigente AND {access_filter}
+                )
+                SELECT f.id_fragmento, f.id_documento, f.contenido, f.pagina_inicio,
                 f.pagina_fin, d.clave, d.titulo, d.nombre_archivo, d.version,
                 d.alcance, t.nombre AS tipo_documento
-                FROM fragmento_embedding fe JOIN fragmento f USING (id_fragmento)
+                FROM visible_embeddings fe JOIN fragmento f USING (id_fragmento)
                 JOIN documento d USING (id_documento)
                 JOIN tipo_documento t USING (id_tipo_documento)
-                WHERE fe.id_espacio = %s AND d.vigente AND {access_filter}
-                    AND (fe.embedding <=> %s::vector) IS NOT NULL
+                WHERE (fe.embedding <=> %s::vector) IS NOT NULL
                 ORDER BY fe.embedding <=> %s::vector, f.id_fragmento LIMIT %s""",
                 (space_id, list(course_ids), json.dumps(vector), json.dumps(vector), limit),
             ).fetchall()

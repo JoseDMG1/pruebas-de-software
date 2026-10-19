@@ -202,10 +202,126 @@ los vectores desde el texto almacenado, actualiza el proveedor/modelo por docume
 reanudarse sin recalcular documentos que ya tengan cobertura Gemini completa. Las búsquedas
 fallan con índice incompleto mientras la migración del corpus no cubra todos los fragmentos.
 
-Verificación automatizada local: Ruff sin hallazgos y **235 pruebas aprobadas**, con **12
-pruebas de PostgreSQL omitidas** por falta de entorno de integración. No se hizo una llamada
-real ni reindexación: `GEMINI_API_KEY` no está configurada y no hay servicios Docker activos.
+Verificación automatizada inicial de la migración: Ruff sin hallazgos y **235 pruebas aprobadas**,
+con **12 pruebas de PostgreSQL omitidas** por falta de entorno de integración. En esa ejecución
+no se hizo una llamada real ni reindexación: aún no estaba configurada `GEMINI_API_KEY` y no había
+servicios Docker activos. Las comprobaciones posteriores se registran abajo.
 Las pruebas cubren errores de cuota, timeout y respuesta JSON inválida. La reindexación completa
 y la preservación del índice anterior ante fallo aún requieren la base PostgreSQL de prueba.
 Por ello, el recorrido Moodle + Gemini y la aceptación conversacional siguen pendientes; los
 resultados con Ollama descritos arriba son históricos y no validan este proveedor.
+
+### Prueba real de generación (2026-10-19)
+
+La clave autenticó una consulta de metadatos HTTP 200 para `gemini-flash-latest`; la API anuncia
+`generateContent` como método compatible. La prueba real de embeddings había respondido. En
+cambio, solicitudes mínimas a `generateContent` agotaron el timeout y otra recibió HTTP 503
+`UNAVAILABLE` con el mensaje de alta demanda temporal del proveedor. Una nueva solicitud desde
+el cliente RAG también agotó el timeout. Por este motivo no fue posible validar una interpretación
+ni una fecha con una respuesta real del modelo.
+
+Se corrigió localmente la conversión del esquema Pydantic para retirar campos que la API Gemini
+rechaza (`additionalProperties`, `title` y otros metadatos). La prueba enfocada del adaptador pasa
+(6 pruebas); también pasan `test_conversation.py` (63) y `test_query.py` (53), que usan modelos
+simulados y validan lógica local, incluido el reloj confiable y las fechas semanales. Estas pruebas
+no sustituyen la validación semántica con Gemini real; el ticket 02 sigue en curso.
+
+### Reintento de Gemini y revisión de lecturas autorizadas (2026-10-19)
+
+Una nueva petición mínima desde `GeminiAPI`, con un límite de 128 tokens, recibió HTTP 503 en
+1,69 segundos. El proveedor volvió a indicar alta demanda temporal para `gemini-flash-latest`.
+No hubo contenido generado: la interpretación y el contexto temporal con Gemini real siguen
+pendientes y el ticket 02 permanece en curso.
+
+Se avanzó con la revisión del ticket 03. Moodle revalida acceso a cursos, visibilidad de
+actividades, capacidades de calificaciones y grupos antes de construir el contexto. El cliente
+revalida los cursos al firmar; RAG comprueba firma, identidad, vencimiento y hash del cuerpo, y
+filtra documentos en SQL usando los cursos firmados. La guía del portal conserva su versión y
+su límite explícito a actividades Assignment; no se repitió el recorrido de navegador.
+
+Evidencia nueva:
+
+- `pytest -q tests/test_api_auth.py tests/test_conversation.py tests/test_gemini.py`:
+  **81 aprobadas**, con servicios/modelos simulados en los límites externos.
+- Contrato PHP autónomo `tests/client_contract.php`: **aprobado**.
+- PHPUnit nativo de Moodle `academic_context_provider_test.php`: **18 pruebas y 100 aserciones
+  aprobadas** contra PostgreSQL de prueba. Cubre notas propias/ajenas, capacidades efectivas,
+  grupos separados, actividades visibles, paginación y revocación de matrícula entre páginas.
+
+Solo se inició la base Moodle necesaria para PHPUnit y se detuvo al terminar. El ticket 03
+sigue en curso: faltan el recorrido integrado con Gemini y la migración/verificación del índice
+documental Gemini; estas pruebas no sustituyen esas comprobaciones.
+
+### Alternativa estable y reintentos acotados (2026-10-19)
+
+Por autorización del usuario se probaron nombres de modelos estables anunciados por la API.
+`gemini-2.5-flash` devolvió 404 (no disponible para nuevos usuarios); `gemini-3.8-flash` agotó
+20 segundos y `gemini-3.1-flash-lite` devolvió 503. `gemini-3.5-flash-lite` generó realmente
+`{"answer":"OK"}` en 1,96 segundos y repitió el resultado en 1,84 segundos con el formato
+actualizado. El `.env` local selecciona este último; el modelo de embeddings no cambió.
+
+El cliente usa ahora `generationConfig.responseFormat.text.schema` conforme al contrato REST
+actual, en lugar del esquema OpenAPI antiguo. Esto sustituye el filtrado de metadatos descrito
+en la corrección inicial: conserva `$defs`, `$ref` y restricciones originales del esquema
+Pydantic. Se añadieron hasta dos reintentos por defecto para fallos transitorios, con espera
+exponencial y variación aleatoria; no cambia el modelo durante un reintento.
+
+Una primera ejecución del intérprete todavía leyó `gemini-flash-latest` y agotó tres intentos.
+Tras detectar esa discrepancia, se repitió con `--model gemini-3.5-flash-lite` explícito y
+**pasaron los seis casos reales**. Se confirmó al terminar que el modelo efectivo de `.env`
+es Flash Lite. `gemini-live-validation.json` registra los planes, el reloj fijo y las latencias.
+
+| Caso real | Resultado | Latencia total |
+|---|---|---|
+| Cursos matriculados | `academic`, `courses`, modo `enrolled` | 15,33 s |
+| Esta semana | 2026-10-19 a 2026-10-25 en Lima | 18,43 s |
+| Próxima semana | 2026-10-26 a 2026-11-01 en Lima | 13,30 s |
+| Semana del 2026-11-02 | 2026-11-02 a 2026-11-08 | 17,42 s |
+| «¿Y quiénes más?» | conserva docentes y curso del tema anterior | 20,27 s |
+| «Ahora muéstrame mis cursos» | cambia a cursos y elimina la selección de tarea | 18,43 s |
+
+El modelo real produjo los planes; el renderizador local calculó los intervalos desde esos
+planes con reloj y datos sintéticos. No se ejecutaron consultas a datos de Moodle en estos casos
+ni se verificó la recuperación documental o la reindexación. Los seis resultados no constituyen
+aceptación integral del proyecto ni garantizan la disponibilidad futura del proveedor.
+
+Verificación local final: **244 pruebas aprobadas, 12 de PostgreSQL omitidas**; Ruff, validación
+de Compose y `git diff --check` sin hallazgos. Incluye recuperación tras 408/429/503/timeout,
+agotamiento de reintentos, errores de cliente sin reintento y conservación del esquema completo.
+Los tickets 02–06 conservan sus estados; quedan los demás criterios y el recorrido integrado.
+
+### Cierre del ticket 03 con Moodle y Gemini reales (2026-10-19)
+
+El ticket 03 queda `done`: se completan sus pendientes de índice y navegador.
+Los tickets 02, 04, 05 y 06 conservan sus pendientes.
+
+- Esquema 4, ocho documentos, veinte fragmentos Gemini de 768 dimensiones.
+  Los vectores históricos de 1024 dimensiones se preservan en otro espacio.
+  Repetir la preparación tarda 213 ms y no genera embeddings nuevos.
+  El catálogo sincronizado contiene 25 cursos activos.
+- Se corrigieron los metadatos del adaptador histórico, la validación de lotes
+  incompletos y el filtrado SQL materializado antes de calcular distancias.
+  La regresión reproduce la mezcla de dimensiones después de `ANALYZE`.
+- La extracción usa el contrato público Gemini sin inventario local de modelos.
+  El selector evalúa relevancia sobre pasajes ya autorizados por Moodle/RAG,
+  sin reinterpretar frases del documento como permisos.
+- Python con PostgreSQL: 259 pruebas aprobadas, ninguna omitida; incluye 14 de
+  repositorio, reanudación, preservación del índice y aislamiento por curso.
+- PHPUnit Moodle: 42 pruebas, 209 aserciones; contrato PHP autónomo aprobado.
+  Cubre permisos efectivos, paginación y revocación entre páginas.
+- Navegador real con `gemini-3.5-flash-lite`: ocho consultas, 4,16–12,61 s.
+  Acceso anónimo denegado, cursos matriculados, rol declarado sin privilegios,
+  notas ajenas no disponibles, guía verificada, consulta sin fuente, documento
+  autorizado, nota docente y catálogo parcial explícito: satisfactorios.
+  Add submission y Save changes se contrastaron con Moodle sin guardar entregas.
+
+Artefactos: [índice](ticket03-index.json), [navegador completo](ticket03-browser.json).
+Reproducción desde `rag-service`:
+
+```sh
+PLAYWRIGHT_BROWSERS_PATH=.cache/ms-playwright .venv/bin/python -u ../dev/moodle/smoke_browser.py --ticket03
+```
+
+La guía conserva su cobertura explícita de Assignment. Las comprobaciones temporales
+anteriores usan reloj y datos sintéticos. El caso de tutoría y selección de tareas
+pendiente pertenece a los siguientes tickets; no se declara aceptación integral.

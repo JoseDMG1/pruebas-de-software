@@ -89,7 +89,9 @@ semántico acotado para referencias y disponibilidad, sin historial persistente.
 inválido o ambiguo produce aclaración o error explícito, no lecturas más amplias por defecto.
 
 Usar Gemini mediante la API oficial `generateContent` para interpretar consultas y redactar
-respuestas; configurar el modelo conversacional como `gemini-flash-latest`. Usar Gemini
+respuestas; seleccionar el modelo conversacional con `GEMINI_CHAT_MODEL`. El alias inicial fue
+`gemini-flash-latest`; el usuario autorizó probar un modelo estable por los errores de alta demanda
+y la configuración local usa `gemini-3.5-flash-lite`. Usar Gemini
 Embeddings (`gemini-embedding-001`) para consultas e ingesta, con una dimensión fija de 768 y
 los tipos de tarea de recuperación correspondientes. No usar Ollama ni Bedrock como fallback.
 Validar JSON estructurado con esquemas estrictos en el servidor; no asumir function calling
@@ -97,6 +99,11 @@ nativo. La clave Gemini se configura únicamente en el servidor RAG y nunca se e
 al navegador, a los modelos como contenido ni a los logs. Mantener acotados los tiempos de
 espera, tamaños y llamadas. Conservar la firma del cuerpo, identidad y alcance verificados,
 así como compatibilidad de los contratos de consulta existentes.
+
+Reintentar únicamente fallos transitorios con espera exponencial y una pequeña variación
+aleatoria: por defecto dos reintentos adicionales, configurables entre cero y tres mediante
+`GEMINI_MAX_RETRIES`. Un reintento conserva el modelo seleccionado; errores de petición o
+credenciales no se reintentan. Cada intento respeta el timeout configurado.
 
 Los espacios vectoriales de Ollama/Bedrock no son compatibles con Gemini. La migración de
 base debe admitir embeddings Gemini sin mezclar espacios; un comando de migración recalcula

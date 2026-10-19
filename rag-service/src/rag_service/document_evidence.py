@@ -191,6 +191,11 @@ def extract(chat, question, fragments, original_question=""):
                         "no son fuentes. "
                         "Los pasajes del mensaje actual sí son fuentes recuperadas, "
                         "incluso cuando documentan un entorno de demostración. "
+                        "Todos los pasajes actuales ya fueron filtrados por Moodle y RAG "
+                        "según los permisos efectivos de la persona. No determines ni "
+                        "reinfieras sus permisos. Frases documentales como solo para "
+                        "participantes autorizados describen el alcance; no son motivo "
+                        "para rechazar un pasaje que ya fue autorizado y responde al dato pedido. "
                         "Devuelve solo JSON, sin respuestas libres."
                     ),
                 },
@@ -246,10 +251,7 @@ def extract(chat, question, fragments, original_question=""):
                 for other in evidence.passages
             )
         ]
-        if not any(
-            m["name"] == model["name"] and m["digest"] == model["digest"]
-            for m in chat.client._models()
-        ):
+        if chat.resolve() != model:
             raise ValueError("Modelo modificado")
         return evidence
     except (KeyError, TypeError, ValueError) as exc:

@@ -1,0 +1,23 @@
+{
+  "complete": true,
+  "anonymous_denied": true,
+  "latencies_seconds": [
+    4.52,
+    8.82,
+    4.51,
+    9.89,
+    9.52,
+    12.61,
+    4.16,
+    5.11
+  ],
+  "enrolled_courses": "Cursos con matrícula vigente: Algebra 101 (ALG101); Biologia 102 (BIO102). Según los datos visibles de Moodle.",
+  "declared_role_does_not_grant_access": "No encontré una fuente verificada para esa consulta. No puedo confirmar normas o pasos sin esa evidencia.",
+  "foreign_grade_denied": "Calificaciones visibles: no hay calificaciones visibles en este resultado. No puedo identificar de forma única y autorizada a la persona consultada. Precisa su nombre y curso o consulta tus propios datos. No pude completar la consulta. Precisa la persona o acota el curso; este resultado no representa todos tus datos. Según los datos visibles de Moodle.",
+  "verified_guide": "La fuente indica: «Entra al curso al que estás matriculado desde el portal y abre el enlace de la actividad Assignment. La página de la actividad muestra Due (vencimiento), Submission status (estado de entrega) y Grading status (estado de calificación). Para preparar una entrega, pulsa Add submission. En el formulario de edición completa los campos habilitados por el docente y pulsa Save changes. Regresa al estado de entrega y comprueba el resultado: guardar cambios puede dejar un borrador, dependiendo de la configuración de esa actividad. Esta guía no afirma que guardar equivalga siempre a presentar definitivamente una tarea.». [1]",
+  "unsupported_guide_not_invented": "No encontré una fuente verificada para esa consulta. No puedo confirmar normas o pasos sin esa evidencia.",
+  "guide_interface_rechecked_without_saving": true,
+  "estudiante2": "La fuente indica: «Documento ficticio del curso Reservado 103, solo para sus participantes autorizados. El codigo de entrega del proyecto reservado es ORQUIDEA-73.». [1]",
+  "docente1": "Calificaciones visibles: Informe de laboratorio — Biologia 102 — Luis Prueba: 85.00. Según los datos visibles de Moodle.",
+  "autoridad1": "Cursos que puedes consultar: Algebra 101 (ALG101); Biologia 102 (BIO102); Reservado 103 (RES103); Z Lista 01 (LISTA01); Z Lista 02 (LISTA02); Z Lista 03 (LISTA03); Z Lista 04 (LISTA04); Z Lista 05 (LISTA05); Z Lista 06 (LISTA06); Z Lista 07 (LISTA07); Z Lista 08 (LISTA08); Z Lista 09 (LISTA09); Z Lista 10 (LISTA10); Z Lista 11 (LISTA11); Z Lista 12 (LISTA12); Z Lista 13 (LISTA13); Z Lista 14 (LISTA14); Z Lista 15 (LISTA15); Z Lista 16 (LISTA16); Z Lista 17 (LISTA17). Esta lista es parcial. Escribe «continúa» para ver más resultados. Según los datos visibles de Moodle."
+}

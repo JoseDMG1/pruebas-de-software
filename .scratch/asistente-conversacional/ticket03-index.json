@@ -1,0 +1,146 @@
+{
+  "schema_version": 4,
+  "chat_model": "gemini-3.5-flash-lite",
+  "documents": [
+    {
+      "id_documento": 1,
+      "clave": "sprint1-demo",
+      "titulo": "sprint1-demo",
+      "version": 2,
+      "estado": "INDEXADO",
+      "alcance": null,
+      "modelo_embedding": "gemini-embedding-001",
+      "dimension_embedding": 768,
+      "proveedor_embedding": "gemini",
+      "revision_embedding": "v1beta",
+      "total_fragmentos": 1,
+      "course_ids": []
+    },
+    {
+      "id_documento": 3,
+      "clave": "demo-s1-matricula",
+      "titulo": "Matrícula — Universidad Demo del Valle (ficticio)",
+      "version": 2,
+      "estado": "INDEXADO",
+      "alcance": "institutional",
+      "modelo_embedding": "gemini-embedding-001",
+      "dimension_embedding": 768,
+      "proveedor_embedding": "gemini",
+      "revision_embedding": "v1beta",
+      "total_fragmentos": 3,
+      "course_ids": []
+    },
+    {
+      "id_documento": 4,
+      "clave": "demo-s1-reglamento",
+      "titulo": "Reglamento académico — Universidad Demo del Valle (ficticio)",
+      "version": 2,
+      "estado": "INDEXADO",
+      "alcance": "institutional",
+      "modelo_embedding": "gemini-embedding-001",
+      "dimension_embedding": 768,
+      "proveedor_embedding": "gemini",
+      "revision_embedding": "v1beta",
+      "total_fragmentos": 3,
+      "course_ids": []
+    },
+    {
+      "id_documento": 5,
+      "clave": "demo-s1-tramites",
+      "titulo": "Trámites — Universidad Demo del Valle (ficticio)",
+      "version": 2,
+      "estado": "INDEXADO",
+      "alcance": "institutional",
+      "modelo_embedding": "gemini-embedding-001",
+      "dimension_embedding": 768,
+      "proveedor_embedding": "gemini",
+      "revision_embedding": "v1beta",
+      "total_fragmentos": 3,
+      "course_ids": []
+    },
+    {
+      "id_documento": 9,
+      "clave": "sprint2-ALG101",
+      "titulo": "Documento de prueba ALG101",
+      "version": 1,
+      "estado": "INDEXADO",
+      "alcance": "course",
+      "modelo_embedding": "gemini-embedding-001",
+      "dimension_embedding": 768,
+      "proveedor_embedding": "gemini",
+      "revision_embedding": "v1beta",
+      "total_fragmentos": 1,
+      "course_ids": [
+        2
+      ]
+    },
+    {
+      "id_documento": 10,
+      "clave": "sprint2-BIO102",
+      "titulo": "Documento de prueba BIO102",
+      "version": 1,
+      "estado": "INDEXADO",
+      "alcance": "course",
+      "modelo_embedding": "gemini-embedding-001",
+      "dimension_embedding": 768,
+      "proveedor_embedding": "gemini",
+      "revision_embedding": "v1beta",
+      "total_fragmentos": 1,
+      "course_ids": [
+        3
+      ]
+    },
+    {
+      "id_documento": 11,
+      "clave": "sprint2-RES103",
+      "titulo": "Documento de prueba RES103",
+      "version": 1,
+      "estado": "INDEXADO",
+      "alcance": "course",
+      "modelo_embedding": "gemini-embedding-001",
+      "dimension_embedding": 768,
+      "proveedor_embedding": "gemini",
+      "revision_embedding": "v1beta",
+      "total_fragmentos": 1,
+      "course_ids": [
+        4
+      ]
+    },
+    {
+      "id_documento": 12,
+      "clave": "portal-moodle-5.3dev",
+      "titulo": "Guía verificada Moodle 5.3dev",
+      "version": 1,
+      "estado": "INDEXADO",
+      "alcance": "institutional",
+      "modelo_embedding": "gemini-embedding-001",
+      "dimension_embedding": 768,
+      "proveedor_embedding": "gemini",
+      "revision_embedding": "v1beta",
+      "total_fragmentos": 7,
+      "course_ids": []
+    }
+  ],
+  "spaces": [
+    {
+      "proveedor": "ollama",
+      "modelo": "qwen3-embedding:0.6b",
+      "revision": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+      "dimensiones": 1024,
+      "fragmentos_indexados": 20,
+      "fragmentos_actuales": 20,
+      "listo": true
+    },
+    {
+      "proveedor": "gemini",
+      "modelo": "gemini-embedding-001",
+      "revision": "v1beta",
+      "dimensiones": 768,
+      "fragmentos_indexados": 20,
+      "fragmentos_actuales": 20,
+      "listo": true
+    }
+  ],
+  "repeat_migration_elapsed_ms": 213,
+  "trusted_moodle_catalog_count": 25
+}

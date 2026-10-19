@@ -453,3 +453,77 @@ def test_retrieval_requires_exact_complete_space_and_rejects_stale_sources(repos
     assert len(repository.retrieve(batch.space, batch.vectors[0])) == 1
     repository.delete(sample_pdf.name)
     assert repository.retrieve(batch.space, batch.vectors[0]) == []
+
+
+def test_incomplete_gemini_reindex_preserves_previous_index(repository, sample_pdf):
+    from types import SimpleNamespace
+
+    from rag_service.embedding_types import EmbeddingBatch, EmbeddingSpace
+
+    ingest(sample_pdf, repository.settings, repository, FakeProvider(), scope="institutional")
+    before = repository.list_documents()
+    old_space = EmbeddingSpace("bedrock", repository.settings.bedrock_model_id, "", 1024)
+    target = EmbeddingSpace("gemini", "gemini-embedding-001", "v1beta", 768)
+    provider = SimpleNamespace(space=target, embed_many=lambda texts: EmbeddingBatch(target, []))
+
+    with pytest.raises(AppError) as error:
+        repository.prepare_embedding_index(provider)
+
+    assert error.value.code == "invalid_embedding"
+    assert repository.list_documents() == before
+    assert len(repository.retrieve(old_space, [1.0] + [0.0] * 1023)) == 2
+    assert {row["proveedor"] for row in repository.index_status()} == {"bedrock"}
+
+
+def test_gemini_reindex_is_resumable_and_preserves_course_permissions(repository, tmp_path):
+    from rag_service.gemini import GeminiEmbeddingProvider
+
+    repository.sync_course_catalog([18, 19])
+    for key, text, scope, courses in [
+        ("allowed", "COURSE EIGHTEEN MATERIAL", "course", (18,)),
+        ("restricted", "COURSE NINETEEN SECRET", "course", (19,)),
+        ("shared", "INSTITUTIONAL COMMON MATERIAL", "institutional", ()),
+    ]:
+        path = tmp_path / f"{key}.pdf"
+        path.write_bytes(pdf_bytes([text]))
+        ingest(path, repository.settings, repository, FakeProvider(), key=key, scope=scope,
+               course_ids=courses)
+    original_versions = {doc["clave"]: doc["version"] for doc in repository.list_documents()}
+
+    def interrupted(model, payload):
+        if "NINETEEN" in payload["content"]["parts"][0]["text"]:
+            raise AppError("gemini_unavailable", "Interrupción del proveedor.")
+        return {"embedding": {"values": [1.0] + [0.0] * 767}}
+
+    provider = GeminiEmbeddingProvider(repository.settings, post=interrupted)
+    with pytest.raises(AppError):
+        repository.prepare_embedding_index(provider)
+    assert not next(s for s in repository.index_status() if s["proveedor"] == "gemini")["listo"]
+    with pytest.raises(AppError) as error:
+        repository.retrieve(provider.space, [1.0] + [0.0] * 767, course_ids=(18, 19))
+    assert error.value.code == "index_incomplete"
+
+    def resumed(model, payload):
+        assert "EIGHTEEN" not in payload["content"]["parts"][0]["text"]
+        return {"embedding": {"values": [1.0] + [0.0] * 767}}
+
+    provider = GeminiEmbeddingProvider(repository.settings, post=resumed)
+    status = repository.prepare_embedding_index(provider)
+    assert all(row["listo"] for row in status)
+    versions = {doc["clave"]: doc["version"] for doc in repository.list_documents()}
+    assert versions == original_versions
+    # Production-sized statistics can move distance evaluation before join filters.
+    with repository.connect() as connection:
+        for table in ("fragmento_embedding", "fragmento", "documento", "espacio_embedding"):
+            connection.execute(f"ANALYZE {table}")
+    allowed = repository.retrieve(provider.space, [1.0] + [0.0] * 767, course_ids=(18,))
+    assert {row["clave"] for row in allowed} == {"allowed", "shared"}
+    common = repository.retrieve(provider.space, [1.0] + [0.0] * 767)
+    assert {row["clave"] for row in common} == {"shared"}
+
+    def already_complete(model, payload):
+        raise AssertionError("No debe volver a facturar un índice completo.")
+
+    assert repository.prepare_embedding_index(
+        GeminiEmbeddingProvider(repository.settings, post=already_complete),
+    ) == status

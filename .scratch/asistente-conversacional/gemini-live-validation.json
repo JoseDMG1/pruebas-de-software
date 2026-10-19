@@ -1,0 +1,224 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "runtime": {
+    "now": 1792422000,
+    "timezone": "America/Lima"
+  },
+  "cases": [
+    {
+      "name": "courses",
+      "query": "¿En qué cursos estoy matriculado?",
+      "plan": {
+        "intent": "academic",
+        "social": "none",
+        "categories": [
+          "courses"
+        ],
+        "course_mode": "enrolled",
+        "assignment_filter": "pending",
+        "scope_question": "¿En qué cursos estoy matriculado?",
+        "document_question": "",
+        "follow_up": false,
+        "teacher_confirmation": false,
+        "teacher_reference": "",
+        "ambiguous_task": false,
+        "selected_assignment_id": 0,
+        "selected_participant_name": "",
+        "finance": false,
+        "blocked_part": false,
+        "availability": null,
+        "availability_unknown": false,
+        "week_offset": 0,
+        "week_explicit": false,
+        "week_start": "",
+        "priority": [],
+        "clarification": "intent"
+      },
+      "ok": true,
+      "elapsed_seconds": 15.33
+    },
+    {
+      "name": "this_week",
+      "query": "Organiza mis tareas para esta semana",
+      "plan": {
+        "intent": "weekly_plan",
+        "social": "none",
+        "categories": [
+          "assignments"
+        ],
+        "course_mode": "enrolled",
+        "assignment_filter": "pending",
+        "scope_question": "Organiza mis tareas para esta semana",
+        "document_question": "",
+        "follow_up": false,
+        "teacher_confirmation": false,
+        "teacher_reference": "",
+        "ambiguous_task": false,
+        "selected_assignment_id": 0,
+        "selected_participant_name": "",
+        "finance": false,
+        "blocked_part": false,
+        "availability": null,
+        "availability_unknown": false,
+        "week_offset": 0,
+        "week_explicit": true,
+        "week_start": "",
+        "priority": [],
+        "clarification": "intent"
+      },
+      "interval": "Plan del 2026-10-19 al 2026-10-25 (America/Lima), según Moodle.",
+      "ok": true,
+      "elapsed_seconds": 18.43
+    },
+    {
+      "name": "next_week",
+      "query": "Organiza mis tareas para la próxima semana",
+      "plan": {
+        "intent": "weekly_plan",
+        "social": "none",
+        "categories": [
+          "assignments"
+        ],
+        "course_mode": "enrolled",
+        "assignment_filter": "pending",
+        "scope_question": "Organiza mis tareas para la próxima semana",
+        "document_question": "",
+        "follow_up": false,
+        "teacher_confirmation": false,
+        "teacher_reference": "",
+        "ambiguous_task": false,
+        "selected_assignment_id": 0,
+        "selected_participant_name": "",
+        "finance": false,
+        "blocked_part": false,
+        "availability": null,
+        "availability_unknown": false,
+        "week_offset": 1,
+        "week_explicit": true,
+        "week_start": "",
+        "priority": [],
+        "clarification": "intent"
+      },
+      "interval": "Plan del 2026-10-26 al 2026-11-01 (America/Lima), según Moodle.",
+      "ok": true,
+      "elapsed_seconds": 13.3
+    },
+    {
+      "name": "explicit_week",
+      "query": "Organiza mis tareas para la semana del 2026-11-02",
+      "plan": {
+        "intent": "weekly_plan",
+        "social": "none",
+        "categories": [
+          "assignments"
+        ],
+        "course_mode": "enrolled",
+        "assignment_filter": "pending",
+        "scope_question": "Organiza mis tareas para la semana del 2026-11-02",
+        "document_question": "",
+        "follow_up": false,
+        "teacher_confirmation": false,
+        "teacher_reference": "",
+        "ambiguous_task": false,
+        "selected_assignment_id": 0,
+        "selected_participant_name": "",
+        "finance": false,
+        "blocked_part": false,
+        "availability": null,
+        "availability_unknown": false,
+        "week_offset": 0,
+        "week_explicit": true,
+        "week_start": "2026-11-02",
+        "priority": [],
+        "clarification": "intent"
+      },
+      "interval": "Plan del 2026-11-02 al 2026-11-08 (America/Lima), según Moodle.",
+      "ok": true,
+      "elapsed_seconds": 17.42
+    },
+    {
+      "name": "follow_up",
+      "query": "¿Y quiénes más?",
+      "plan": {
+        "intent": "academic",
+        "social": "none",
+        "categories": [
+          "teachers"
+        ],
+        "course_mode": "enrolled",
+        "assignment_filter": "pending",
+        "scope_question": "Mis docentes en Álgebra 101",
+        "document_question": "",
+        "follow_up": true,
+        "teacher_confirmation": false,
+        "teacher_reference": "",
+        "ambiguous_task": false,
+        "selected_assignment_id": 0,
+        "selected_participant_name": "",
+        "finance": false,
+        "blocked_part": false,
+        "availability": null,
+        "availability_unknown": false,
+        "week_offset": 0,
+        "week_explicit": false,
+        "week_start": "",
+        "priority": [],
+        "clarification": "intent"
+      },
+      "ok": true,
+      "elapsed_seconds": 20.27
+    },
+    {
+      "name": "topic_change",
+      "query": "Ahora muéstrame mis cursos",
+      "plan": {
+        "intent": "academic",
+        "social": "none",
+        "categories": [
+          "courses"
+        ],
+        "course_mode": "enrolled",
+        "assignment_filter": "pending",
+        "scope_question": "Ahora muéstrame mis cursos",
+        "document_question": "",
+        "follow_up": false,
+        "teacher_confirmation": false,
+        "teacher_reference": "",
+        "ambiguous_task": false,
+        "selected_assignment_id": 0,
+        "selected_participant_name": "",
+        "finance": false,
+        "blocked_part": false,
+        "availability": null,
+        "availability_unknown": false,
+        "week_offset": 0,
+        "week_explicit": false,
+        "week_start": "",
+        "priority": [],
+        "clarification": "intent"
+      },
+      "ok": true,
+      "elapsed_seconds": 18.43
+    }
+  ],
+  "complete": true,
+  "pending_cases": [],
+  "minimal_generation_checks": [
+    {
+      "model": "gemini-3.5-flash-lite",
+      "response": {
+        "answer": "OK"
+      },
+      "elapsed_seconds": 1.96,
+      "format": "responseSchema"
+    },
+    {
+      "model": "gemini-3.5-flash-lite",
+      "response": {
+        "answer": "OK"
+      },
+      "elapsed_seconds": 1.84,
+      "format": "responseFormat.text.schema"
+    }
+  ]
+}

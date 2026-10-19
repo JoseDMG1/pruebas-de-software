@@ -2,6 +2,8 @@
 
 import json
 import re
+from random import uniform
+from time import sleep
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
@@ -22,6 +24,18 @@ def _api_key(settings):
 
 
 def _post_json(settings, url, payload):
+    for attempt in range(settings.gemini_max_retries + 1):
+        try:
+            return _post_json_once(settings, url, payload)
+        except AppError as exc:
+            if exc.code not in {"gemini_throttled", "gemini_unavailable", "gemini_timeout"}:
+                raise
+            if attempt == settings.gemini_max_retries:
+                raise
+        sleep(2 ** attempt + uniform(0, 0.25))
+
+
+def _post_json_once(settings, url, payload):
     request = Request(
         url,
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
@@ -37,6 +51,8 @@ def _post_json(settings, url, payload):
     except HTTPError as exc:
         if exc.code == 429:
             code, message = "gemini_throttled", "Gemini rechazó la solicitud por límite de uso."
+        elif exc.code == 408:
+            code, message = "gemini_timeout", "Gemini agotó el tiempo de espera."
         elif exc.code in (401, 403):
             code, message = "gemini_configuration", "Gemini rechazó la credencial o el acceso."
         elif exc.code >= 500:
@@ -86,8 +102,9 @@ class GeminiAPI:
             "generationConfig": {
                 "temperature": options.get("temperature", 0),
                 "maxOutputTokens": options.get("num_predict", 1200),
-                "responseMimeType": "application/json",
-                "responseSchema": payload.get("format"),
+                "responseFormat": {"text": {
+                    "mimeType": "APPLICATION_JSON", "schema": payload.get("format"),
+                }},
             },
         }
         if system:

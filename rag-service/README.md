@@ -170,7 +170,32 @@ generados están excluidos de Git. Los contenidos ficticios y las preguntas de e
 | `GEMINI_EMBEDDING_MODEL` | `gemini-embedding-001` |
 | `GEMINI_EMBEDDING_DIMENSIONS` | 768 |
 | `GEMINI_TIMEOUT` | 120 segundos por llamada |
+| `GEMINI_MAX_RETRIES` | 2 reintentos adicionales para errores transitorios (0–3) |
 | `CHUNK_SIZE_CHARS` / `CHUNK_OVERLAP_CHARS` | 2000 / 200 |
+
+El cliente reintenta errores HTTP 408, 429 y 5xx, además de errores de conexión y timeout.
+Espera aproximadamente 1 y 2 segundos, con una pequeña variación aleatoria. Los errores de
+credenciales o petición inválida no se reintentan. Cada intento usa `GEMINI_TIMEOUT`; con dos
+reintentos la espera total puede acercarse a tres veces ese límite. No cambia de modelo durante
+los reintentos. `GEMINI_CHAT_MODEL` permite elegir explícitamente otro modelo Gemini accesible.
+
+En la prueba local del 2026-10-19 se configuró `gemini-3.5-flash-lite` en `.env`: devolvió
+una respuesta JSON real, mientras el alias `gemini-flash-latest` presentaba alta demanda.
+La selección explícita del modelo conversacional no requiere cambiar el índice de embeddings.
+El cliente envía los esquemas Pydantic mediante `generationConfig.responseFormat.text.schema`,
+el formato JSON Schema documentado por Gemini, conservando referencias y restricciones.
+
+Para repetir la validación real con datos sintéticos y un reloj fijo de Lima:
+
+```bash
+.venv/bin/python scripts/check_gemini_conversation.py --model gemini-3.5-flash-lite \
+  --timeout 15 --retries 2 \
+  --report ../.scratch/asistente-conversacional/gemini-live-validation.json
+```
+
+El comando realiza llamadas reales y se detiene cuando
+el proveedor sigue indisponible tras los reintentos. El informe distingue casos aprobados,
+fallidos y no ejecutados mediante `complete`, `cases` y `pending_cases`.
 
 ## Pruebas y evaluación
 

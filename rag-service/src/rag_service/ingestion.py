@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from rag_service.constants import EMBEDDING_DIMENSIONS
 from rag_service.documents import chunk_pages, extract_pdf
+from rag_service.embedding_types import EmbeddingBatch, EmbeddingSpace
 from rag_service.embeddings import EmbeddingProvider, validate_embedding
 from rag_service.errors import AppError
 from rag_service.gemini import EmbeddingRouter
@@ -90,6 +91,9 @@ def ingest(
             repository.save(
                 connection, key, title, kind, pdf, chunks, vectors, started_at,
                 scope=scope, course_ids=course_ids,
+                batches=[EmbeddingBatch(EmbeddingSpace(
+                    "bedrock", settings.bedrock_model_id, "", EMBEDDING_DIMENSIONS,
+                ), vectors)],
             ),
             status="indexed",
         )

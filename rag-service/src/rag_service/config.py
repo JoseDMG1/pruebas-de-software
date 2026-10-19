@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     gemini_embedding_model: str = "gemini-embedding-001"
     gemini_embedding_dimensions: int = Field(default=768, ge=128, le=3072)
     gemini_timeout: int = Field(default=120, ge=1, le=600)
+    gemini_max_retries: int = Field(default=2, ge=0, le=3)
     aws_profile: str | None = None
     aws_region: str = "us-east-1"
     bedrock_model_id: str = "amazon.titan-embed-text-v2:0"
