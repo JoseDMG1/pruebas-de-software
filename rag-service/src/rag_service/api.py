@@ -70,15 +70,26 @@ def create_app(settings: Settings | None = None, repository=None, query_service=
         authorization = (f"{credentials.scheme} {credentials.credentials}"
                          if credentials is not None else None)
         verify_moodle_assertion(authorization, await request.body(), settings.moodle_service_secret)
+        start = time.monotonic()
+        request_id = str(uuid.uuid4())
+        status, code = "ok", None
         try:
             proposed = await run_in_threadpool(service.interpret, body)
             return ConversationPlan.model_validate(proposed)
         except (ValidationError, AppError) as exc:
+            status = "error"
+            code = exc.code if isinstance(exc, AppError) else "invalid_interpretation"
             raise HTTPException(status_code=503, detail={
                 "code": "interpretation_unavailable",
                 "message": ("No pude interpretar la consulta. "
                             "Inténtalo de nuevo o precisa tu pregunta."),
             }) from exc
+        except Exception:
+            status, code = "error", "internal_error"
+            raise
+        finally:
+            log_event("interpretation", status, round((time.monotonic() - start) * 1000),
+                      request_id, code)
 
     @application.post("/api/v1/chat/query", response_model=QueryResponse)
     async def query(

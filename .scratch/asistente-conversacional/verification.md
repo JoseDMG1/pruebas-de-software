@@ -459,3 +459,15 @@ de `generateContent` para `gemini-3.5-flash-lite` alcanzó 500 solicitudes y pid
 reintentar en 10 h 12 min. La API de Moodle/RAG permanece accesible; no se cambió
 el modelo ni la configuración de credenciales. Se retomará la aceptación integral
 cuando la cuota vuelva a permitir generación.
+
+En la continuación del 2026-10-19 se añadió telemetría al endpoint firmado de
+interpretación: registra operación, estado, código interno seguro, latencia y un
+identificador de solicitud, sin incluir la pregunta, la clave ni el token. La
+respuesta HTTP al usuario sigue siendo genérica ante fallos del proveedor. El
+caso de éxito y el de cuota agotada están cubiertos por una prueba unitaria.
+La API fue reconstruida; `/health` respondió HTTP 200 con PostgreSQL sano.
+Con `TEST_DATABASE_URL` y `--require-complete`, RAG pasó **261 pruebas sin
+omisiones**; Ruff y `git diff --check` también pasaron. Una ejecución sin la
+variable de base de pruebas detectó 14 pruebas omitidas, por lo que no cuenta
+como aceptación completa. La cuota indicada sigue en cooldown y el recorrido
+real Moodle + Gemini continúa pendiente.

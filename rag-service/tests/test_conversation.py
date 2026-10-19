@@ -543,6 +543,33 @@ def test_invalid_interpretation_does_not_become_a_read_operation():
     assert response.json()["detail"]["code"] == "interpretation_unavailable"
 
 
+def test_interpretation_records_latency_and_safe_provider_failure(caplog):
+    from rag_service.errors import AppError
+
+    with caplog.at_level("INFO", logger="rag_service"):
+        response = post(client(), payload())
+    assert response.status_code == 200
+    event = json.loads(caplog.records[-1].message)
+    assert event["operation"] == "interpretation"
+    assert event["status"] == "ok" and event["code"] is None
+    assert isinstance(event["elapsed_ms"], int) and event["elapsed_ms"] >= 0
+    assert "hola como estás" not in caplog.records[-1].message
+
+    class Throttled(Interpreter):
+        def interpret(self, request):
+            raise AppError("gemini_throttled", "Gemini rechazó la solicitud por límite de uso.")
+
+    caplog.clear()
+    with caplog.at_level("INFO", logger="rag_service"):
+        response = post(client(Throttled()), payload())
+    assert response.status_code == 503
+    assert response.json()["detail"]["code"] == "interpretation_unavailable"
+    event = json.loads(caplog.records[-1].message)
+    assert event["operation"] == "interpretation"
+    assert event["status"] == "error" and event["code"] == "gemini_throttled"
+    assert "hola como estás" not in caplog.records[-1].message
+
+
 def test_model_receives_reformulation_context_before_any_moodle_read():
     from rag_service.query import GeminiChatProvider, QueryService
 

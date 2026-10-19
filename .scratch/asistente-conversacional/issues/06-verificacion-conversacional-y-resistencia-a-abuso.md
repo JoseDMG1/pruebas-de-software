@@ -55,3 +55,10 @@ de 500 solicitudes de generación para `gemini-3.5-flash-lite` y sugirió reinte
 en 10 h 12 min. No se modificó proveedor, clave ni facturación. La aceptación queda
 pendiente del restablecimiento de cuota; el último detalle está en
 [ticket06-browser.json](../ticket06-browser.json).
+
+2026-10-19: se agregó telemetría segura al endpoint firmado de interpretación
+(latencia, estado, código interno e ID de solicitud, sin prompt ni credenciales).
+La API reconstruida responde `/health` con HTTP 200 y PostgreSQL sano. RAG pasó
+261 pruebas sin omisiones con `TEST_DATABASE_URL` y `--require-complete`; Ruff y
+`git diff --check` pasaron. La cuota Gemini aún no permite ejecutar el recorrido
+integral, así que el ticket permanece `in-progress`.
