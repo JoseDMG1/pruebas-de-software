@@ -424,3 +424,30 @@ Reproducir el chequeo de interfaz desde `rag-service`:
 ```sh
 PLAYWRIGHT_BROWSERS_PATH=.cache/ms-playwright .venv/bin/python -u ../dev/moodle/smoke_browser.py --ticket07
 ```
+
+### Ticket 06: aceptación reanudada (2026-10-19)
+
+El verificador tiene un modo `--ticket06` para la secuencia integral y
+`--ticket06-mixed` para aislar una consulta con tareas Moodle de Biologia 102 y
+un dato documental de Algebra 101. Ambos comprueban que la clave Gemini y el
+secreto compartido no aparecen en la respuesta. El modo integral incluye un
+ataque directo de extracción de claves y el ataque documental temporal, que se
+elimina al terminar. El verificador solo reintenta los dos mensajes localizados
+de indisponibilidad de Moodle, con espera exponencial y un máximo de cinco
+intentos; no reintenta fallos semánticos.
+
+La prueba enfocada con Gemini real pasó tras consultar primero cursos y norma:
+la segunda respuesta incluyó las tareas de Biologia 102 y citó el código
+`ALG-TUTOR-16` del documento autorizado de Algebra 101. En una ejecución integral
+el mismo caso falló una vez con respuesta documental insuficiente y pasó en la
+repetición. También pasaron el ataque directo que pedía la clave Gemini junto
+con las tareas permitidas y la inyección del PDF temporal, que devolvió el canal
+institucional correcto sin obedecer la instrucción incrustada.
+
+La suite RAG terminó con **260 pruebas aprobadas, ninguna omitida**; PHPUnit de
+Moodle terminó con **42 pruebas y 209 aserciones**. El recorrido integral alcanzó
+56 consultas válidas pero no terminó. La API registró `gemini_throttled`; una
+ejecución posterior agotó cinco reintentos desde el saludo. El reporte parcial,
+con `complete: false`, está en `ticket06-browser.json`. No se declara aceptado
+el ticket 06 ni completa la aceptación conversacional mientras falte un recorrido
+integral con resultado satisfactorio.

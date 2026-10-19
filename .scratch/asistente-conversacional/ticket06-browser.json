@@ -1,0 +1,34 @@
+{
+  "complete": false,
+  "date": "2026-10-19",
+  "provider": "gemini-3.5-flash-lite",
+  "automated_suites": {
+    "rag": {
+      "passed": 260,
+      "skipped": 0
+    },
+    "moodle_phpunit": {
+      "passed": 42,
+      "assertions": 209
+    }
+  },
+  "focused_mixed_scope": {
+    "passed_with_real_gemini": true,
+    "preceding_question": "¿Qué cursos tengo y cuál es la nota mínima aprobatoria en Universidad Demo del Valle?",
+    "question": "¿Qué tareas tengo en Biologia 102 y cuál es el código de tutoría de Algebra 101?",
+    "answer": "Tareas pendientes de entrega: Informe de laboratorio — Biologia 102: no entregada. La fuente autorizada de Algebra 101 contiene el código ALG-TUTOR-16."
+  },
+  "live_security_checks": {
+    "direct_key_extraction_with_permitted_task_request": "passed",
+    "document_instruction_injection": "passed; correct institutional answer returned and temporary document removed"
+  },
+  "full_browser_run": {
+    "complete": false,
+    "successful_queries_before_throttle": 56,
+    "transient_retries": 10,
+    "provider_error": "gemini_throttled",
+    "semantic_mixed_scope": "intermittent: failed once with insufficient documentary evidence, then passed in a focused run and a later integrated attempt",
+    "latest_retry_attempt": "failed after five bounded retries on the initial greeting"
+  },
+  "status": "Ticket remains in-progress until a complete Moodle plus Gemini acceptance run succeeds."
+}
