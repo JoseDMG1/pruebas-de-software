@@ -147,9 +147,9 @@ def create_app(settings: Settings | None = None, repository=None, query_service=
                 code, message = exc.code, str(exc)
                 http_status = {
                     "invalid_generation": 502,
-                    "ollama_response": 502,
+                    "gemini_response": 502,
                     "invalid_embedding": 502,
-                    "ollama_timeout": 504,
+                    "gemini_timeout": 504,
                     "corpus_changed": 409,
                 }.get(code, 503)
             return JSONResponse(

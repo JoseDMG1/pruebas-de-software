@@ -10,13 +10,12 @@ import psycopg
 from pydantic import ValidationError
 
 from rag_service.config import Settings
-from rag_service.embeddings import BedrockEmbeddingProvider
 from rag_service.errors import AppError
-from rag_service.local_embeddings import EmbeddingRouter, OllamaEmbeddingProvider
+from rag_service.gemini import EmbeddingRouter, GeminiEmbeddingProvider
 from rag_service.ingestion import DOCUMENT_KINDS, ingest
 from rag_service.observability import log_event
 from rag_service.repository import Repository
-from rag_service.query import QueryService, OllamaChatProvider
+from rag_service.query import QueryService, GeminiChatProvider
 from rag_service.demo_setup import prepare_demo
 
 
@@ -26,11 +25,6 @@ def parser() -> argparse.ArgumentParser:
     commands.add_parser("init-db", help="Inicializar el esquema versionado con pgvector")
     upload = commands.add_parser("ingest", help="Procesar y guardar un PDF")
     upload.add_argument("pdf", type=Path)
-    upload.add_argument(
-        "--backend",
-        choices=("auto", "bedrock", "ollama"),
-        help="Proveedor; auto usa Ollama si Bedrock no está disponible",
-    )
     upload.add_argument("--key", help="Clave estable; por defecto, el nombre del archivo")
     upload.add_argument("--title", help="Título; por defecto, el nombre sin extensión")
     upload.add_argument("--kind", choices=DOCUMENT_KINDS, default="OTRO")
@@ -44,23 +38,15 @@ def parser() -> argparse.ArgumentParser:
     commands.add_parser("list", help="Listar documentos indexados y número de fragmentos")
     remove = commands.add_parser("delete", help="Eliminar un documento y todos sus fragmentos")
     remove.add_argument("key", help="Clave exacta del documento")
-    smoke = commands.add_parser(
-        "check-bedrock",
-        help="Probar una inferencia real mínima con Bedrock",
-    )
+    smoke = commands.add_parser("check-gemini", help="Probar chat y embeddings Gemini")
     smoke.add_argument("--text", default="Reglamento académico universitario.")
-    commands.add_parser(
-        "prepare-ollama",
-        help="Reutilizar o descargar un modelo local de embeddings",
-    )
-    commands.add_parser("check-ollama", help="Probar el modelo local sin descargar")
-    commands.add_parser("prepare-local-index", help="Crear copia local del corpus ya almacenado")
+    commands.add_parser("prepare-gemini", help="Validar conexión y salida JSON de Gemini")
+    commands.add_parser("prepare-gemini-index", help="Indexar el corpus con embeddings Gemini")
     commands.add_parser("index-status", help="Ver cobertura por proveedor/modelo/revisión")
     question = commands.add_parser("ask", help="Preguntar al prototipo RAG local")
     question.add_argument("query")
-    commands.add_parser("prepare-chat", help="Preparar y probar el modelo local de respuestas")
     demo = commands.add_parser(
-        "prepare-demo", help="Preparar modelos y corpus ficticio del Sprint 1"
+        "prepare-demo", help="Preparar Gemini y el corpus ficticio del Sprint 1"
     )
     demo.add_argument("--directory", type=Path, default=Path("data/inbox"))
     return root
@@ -75,12 +61,10 @@ def main(argv=None) -> int:
     code = None
     try:
         settings = Settings()
-        if args.command == "ingest" and args.backend:
-            settings = settings.model_copy(update={"embedding_backend": args.backend})
         repository = Repository(settings)
         if args.command == "init-db":
             repository.initialize()
-            result = {"status": "ok", "schema_version": 3}
+            result = {"status": "ok", "schema_version": 4}
         elif args.command == "sync-courses":
             try:
                 catalog = json.loads(args.catalog.read_text())
@@ -113,24 +97,23 @@ def main(argv=None) -> int:
             )
         elif args.command == "ask":
             result = QueryService(settings, repository).ask(args.query, request_id).model_dump()
-        elif args.command == "prepare-chat":
-            result = dict(OllamaChatProvider(settings).prepare(), status="ok")
-        elif args.command == "prepare-demo":
-            result = prepare_demo(settings, repository, args.directory)
-        elif args.command in {"prepare-ollama", "check-ollama"}:
+        elif args.command in {"prepare-gemini", "check-gemini"}:
             from dataclasses import asdict
 
-            local = OllamaEmbeddingProvider(settings)
-            space = (
-                local.prepare()
-                if args.command == "prepare-ollama"
-                else local.embed_many(
-                    ["Reglamento académico universitario."],
-                ).space
+            embeddings = GeminiEmbeddingProvider(settings).embed_query(
+                getattr(args, "text", "Reglamento académico universitario.")
             )
-            result = dict(asdict(space), status="ok")
-        elif args.command == "prepare-local-index":
-            result = {"spaces": repository.prepare_local_index(OllamaEmbeddingProvider(settings))}
+            chat = GeminiChatProvider(settings).prepare()
+            result = {
+                "status": "ok", "provider": "gemini", "chat_model": chat["model"],
+                "embedding": asdict(embeddings.space),
+            }
+        elif args.command == "prepare-demo":
+            result = prepare_demo(settings, repository, args.directory)
+        elif args.command == "prepare-gemini-index":
+            result = {"spaces": repository.prepare_embedding_index(
+                GeminiEmbeddingProvider(settings),
+            )}
         elif args.command == "index-status":
             result = {"spaces": repository.index_status()}
         elif args.command == "list":
@@ -142,13 +125,7 @@ def main(argv=None) -> int:
                 raise AppError("not_found", "No existe un documento con esa clave.")
             result = {"status": "deleted", "clave": args.key}
         else:
-            vector = BedrockEmbeddingProvider(settings).embed(args.text)
-            result = {
-                "status": "ok",
-                "model_id": settings.bedrock_model_id,
-                "region": settings.aws_region,
-                "dimensions": len(vector),
-            }
+            raise AppError("invalid_command", "El comando no está disponible.")
         print(json.dumps(result, ensure_ascii=False))
         return 0
     except (AppError, psycopg.Error, ValidationError) as exc:

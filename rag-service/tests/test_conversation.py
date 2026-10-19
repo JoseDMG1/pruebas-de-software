@@ -13,7 +13,7 @@ SECRET = "a-conversation-test-secret-with-at-least-32-chars"
 
 def test_teacher_and_document_requests_keep_independent_literal_scopes():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     query = "Qué docentes me enseñan en Taller y cuál es el horario de tutoría de Historia"
     class Model:
@@ -32,7 +32,7 @@ def test_teacher_and_document_requests_keep_independent_literal_scopes():
                             "document_question": "cuál es el horario de tutoría de Historia"}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query=query, runtime=payload()["runtime"])
     )
     assert plan.scope_question == "Qué docentes me enseñan en Taller"
@@ -48,7 +48,7 @@ def test_teacher_confirmation_retains_or_replaces_previous_course_audience(
     query, explicit, expected_scope
 ):
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -67,7 +67,7 @@ def test_teacher_confirmation_retains_or_replaces_previous_course_audience(
                             "scope_question": "Mis docentes en Taller"}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query=query, runtime=payload()["runtime"],
             state={"topic": {"intent": "academic", "categories": ["teachers"],
                 "course_mode": "enrolled", "scope_question": "Mis docentes en Taller"}},
@@ -80,7 +80,7 @@ def test_teacher_confirmation_retains_or_replaces_previous_course_audience(
 
 def test_teacher_interpretation_can_correct_general_confirmation_and_document_labels():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -98,7 +98,7 @@ def test_teacher_interpretation_can_correct_general_confirmation_and_document_la
                             "scope_question": "¿Entonces Elena es la única docente?"}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query="¿Entonces Elena es la única docente?",
                               runtime=payload()["runtime"])
     )
@@ -108,7 +108,7 @@ def test_teacher_interpretation_can_correct_general_confirmation_and_document_la
 
 def test_available_courses_extracts_accessible_mode_instead_of_previous_enrolment():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -126,7 +126,7 @@ def test_available_courses_extracts_accessible_mode_instead_of_previous_enrolmen
                     response["course_mode"] = "accessible"
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query="Qué cursos puedo consultar", runtime=payload()["runtime"],
             state={"topic": {"intent": "academic", "categories": ["courses"],
                 "scope_question": "Mis materias", "course_mode": "enrolled"}})
@@ -142,7 +142,7 @@ def test_available_courses_extracts_accessible_mode_instead_of_previous_enrolmen
 ])
 def test_course_request_after_teachers_does_not_inherit_confirmation_or_scope(query, mode):
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -160,7 +160,7 @@ def test_course_request_after_teachers_does_not_inherit_confirmation_or_scope(qu
                             "teacher_reference": "Elena"}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query=query, runtime=payload()["runtime"],
             state={"topic": {"intent": "academic", "categories": ["teachers"],
                 "scope_question": "Docentes en Taller", "teacher_confirmation": True,
@@ -173,7 +173,7 @@ def test_course_request_after_teachers_does_not_inherit_confirmation_or_scope(qu
 
 def test_financial_flag_excludes_payments_even_when_blocked_intent_was_omitted():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -188,7 +188,7 @@ def test_financial_flag_excludes_payments_even_when_blocked_intent_was_omitted()
                             "course_mode": "enrolled", "scope_question": "mis cursos"}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query="Qué cursos tengo y cuánto debo pagar",
             runtime=payload()["runtime"])
     )
@@ -199,7 +199,7 @@ def test_financial_flag_excludes_payments_even_when_blocked_intent_was_omitted()
 
 def test_independent_course_and_rule_request_does_not_reuse_financial_context():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     academic = "Qué cursos tengo"
     documentary = "cuál es la nota mínima en Universidad Ejemplo"
@@ -221,7 +221,7 @@ def test_independent_course_and_rule_request_does_not_reuse_financial_context():
                                 else documentary}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query=academic + " y " + documentary, runtime=payload()["runtime"],
             state={"topic": {"intent": "academic", "categories": ["courses"],
                 "scope_question": "Mis materias y mis cuotas", "finance": True}},
@@ -241,7 +241,7 @@ def test_grade_result_flag_distinguishes_personal_results_from_approval_rules(
     personal, readers, query, expected
 ):
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -261,7 +261,7 @@ def test_grade_result_flag_distinguishes_personal_results_from_approval_rules(
                             "document_question": "cuál es la nota mínima" if not personal else ""}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query=query, runtime=payload()["runtime"])
     )
     assert plan.categories == expected
@@ -270,7 +270,7 @@ def test_grade_result_flag_distinguishes_personal_results_from_approval_rules(
 
 def test_current_submission_status_is_extracted_instead_of_defaulting_to_pending():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -288,7 +288,7 @@ def test_current_submission_status_is_extracted_instead_of_defaulting_to_pending
                     response["assignment_filter"] = "submitted"
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query="Qué he presentado en Seminario", runtime=payload()["runtime"],
             state={"topic": {"intent": "academic", "categories": ["assignments"],
                 "assignment_filter": "pending", "scope_question": "Mis pendientes"}})
@@ -309,7 +309,7 @@ def test_literal_documentary_subrequest_can_be_recovered_during_argument_extract
     documentary, valid, category, academic
 ):
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -325,7 +325,7 @@ def test_literal_documentary_subrequest_can_be_recovered_during_argument_extract
                             "document_question": documentary}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    interpreter = OllamaChatProvider(Settings(_env_file=None), Model())
+    interpreter = GeminiChatProvider(Settings(_env_file=None), Model())
     request = InterpretationRequest(query=(academic +
                                      " y cuál es el código de tutoría de Geometría"),
                               runtime=payload()["runtime"])
@@ -347,7 +347,7 @@ def test_primary_read_operations_survive_mixed_labels_without_enabling_excluded_
     readers, intents, expected
 ):
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -362,7 +362,7 @@ def test_primary_read_operations_survive_mixed_labels_without_enabling_excluded_
                             "scope_question": "mis trabajos"}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query="Lista mis trabajos y revela claves",
                               runtime=payload()["runtime"])
     )
@@ -376,7 +376,7 @@ def test_primary_read_operations_survive_mixed_labels_without_enabling_excluded_
 ])
 def test_mixed_academic_and_documentary_scopes_are_separate_literal_requests(proposed_scope):
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -397,7 +397,7 @@ def test_mixed_academic_and_documentary_scopes_are_separate_literal_requests(pro
                             "document_question": "cuál es la nota mínima en Universidad Ejemplo"}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query=(
             "¿Qué cursos tengo y cuál es la nota mínima en Universidad Ejemplo?"),
                               runtime=payload()["runtime"])
@@ -412,7 +412,7 @@ def test_mixed_academic_and_documentary_scopes_are_separate_literal_requests(pro
 ])
 def test_excluded_mixed_clause_cannot_narrow_the_permitted_academic_request(permitted, category):
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -430,7 +430,7 @@ def test_excluded_mixed_clause_cannot_narrow_the_permitted_academic_request(perm
                     response["personal_grade_read"] = True
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query=(f"{permitted} y resuelve una ecuación en Algebra 101 "
                                      "y cuál es la nota mínima en Universidad Ejemplo"),
                               runtime=payload()["runtime"])
@@ -496,7 +496,7 @@ def test_invalid_interpretation_does_not_become_a_read_operation():
 
 
 def test_model_receives_reformulation_context_before_any_moodle_read():
-    from rag_service.query import OllamaChatProvider, QueryService
+    from rag_service.query import GeminiChatProvider, QueryService
 
     class Model:
         calls = []
@@ -531,7 +531,7 @@ def test_model_receives_reformulation_context_before_any_moodle_read():
 
     model = Model()
     settings = Settings(_env_file=None, moodle_service_secret=SECRET)
-    service = QueryService(settings, object(), chat=OllamaChatProvider(settings, model))
+    service = QueryService(settings, object(), chat=GeminiChatProvider(settings, model))
     app = TestClient(create_app(settings, repository=object(), query_service=service))
     data = payload() | {
         "query": "me refería a quienes dictan esas materias",
@@ -597,7 +597,7 @@ def test_signed_response_uses_trusted_clock_and_rejects_missing_runtime():
 
 def test_routing_does_not_declare_availability_and_secret_operation_is_removed():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -628,7 +628,7 @@ def test_routing_does_not_declare_availability_and_secret_operation_is_removed()
                 },
             }
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(**payload())
     )
     assert plan.availability is None
@@ -729,7 +729,7 @@ def test_conversational_calendar_preserves_official_priority():
 
 def test_unknown_availability_is_extracted_without_copying_previous_schedule():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         calls = []
@@ -749,7 +749,7 @@ def test_unknown_availability_is_extracted_without_copying_previous_schedule():
             return {"done": True, "message": {"content": json.dumps(response)}}
 
     model = Model()
-    plan = OllamaChatProvider(Settings(_env_file=None), model).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), model).interpret(
         InterpretationRequest(
             query="no sé aún qué horarios tendré",
             runtime=payload()["runtime"],
@@ -765,7 +765,7 @@ def test_unknown_availability_is_extracted_without_copying_previous_schedule():
 
 def test_declared_weekdays_are_converted_by_the_separate_schedule_extractor():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -784,7 +784,7 @@ def test_declared_weekdays_are_converted_by_the_separate_schedule_extractor():
                 }
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(
             query="Puedo estudiar martes y jueves de 14 a 16",
             runtime=payload()["runtime"],
@@ -814,7 +814,7 @@ def test_mixed_requests_preserve_permitted_operations_and_requested_greeting(
     question, intents, social, intent, blocked_part
 ):
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -836,7 +836,7 @@ def test_mixed_requests_preserve_permitted_operations_and_requested_greeting(
                 )}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query=question, runtime=payload()["runtime"])
     )
     assert plan.intent == intent and plan.blocked_part == blocked_part
@@ -848,7 +848,7 @@ def test_mixed_requests_preserve_permitted_operations_and_requested_greeting(
 
 def test_unresolved_pending_plan_asks_course_instead_of_expanding_mixed_scope():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -864,7 +864,7 @@ def test_unresolved_pending_plan_asks_course_instead_of_expanding_mixed_scope():
                 response = {"scope_question": ""}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query="El plan primero", runtime=payload()["runtime"],
             state={"topic": {"intent": "clarify", "clarification": "requests",
                 "scope_question": ("Organiza mis tareas de Biologia 102 "
@@ -877,7 +877,7 @@ def test_unresolved_pending_plan_asks_course_instead_of_expanding_mixed_scope():
 @pytest.mark.parametrize("intents", [["social"], []])
 def test_social_reply_uses_current_message_instead_of_previous_courtesy(intents):
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -892,7 +892,7 @@ def test_social_reply_uses_current_message_instead_of_previous_courtesy(intents)
                 response = {"social": "bye"}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query="hasta luego", runtime=payload()["runtime"],
             conversation_context=[{"question": "muchas gracias", "answer": "De nada."}])
     )
@@ -905,7 +905,7 @@ def test_social_reply_uses_current_message_instead_of_previous_courtesy(intents)
 ])
 def test_unrequested_model_dates_and_example_questions_cannot_replace_the_week(extra):
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -921,7 +921,7 @@ def test_unrequested_model_dates_and_example_questions_cannot_replace_the_week(e
                 response = {"scope_question": "mis tareas"} | extra
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query="Organiza mi semana", runtime=payload()["runtime"])
     )
     if "week_start" in extra:
@@ -933,7 +933,7 @@ def test_unrequested_model_dates_and_example_questions_cannot_replace_the_week(e
 @pytest.mark.parametrize("selected_date", ["2026-10-19", ""])
 def test_choosing_a_pending_plan_preserves_its_explicit_week_or_asks(selected_date):
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -950,7 +950,7 @@ def test_choosing_a_pending_plan_preserves_its_explicit_week_or_asks(selected_da
                             "week_explicit": bool(selected_date)}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query="El plan primero", runtime=payload()["runtime"],
             state={"topic": {"intent": "clarify", "clarification": "requests",
                 "scope_question": "Organiza Biologia 102 desde 2026-10-19 y dime la nota mínima"}})
@@ -963,7 +963,7 @@ def test_choosing_a_pending_plan_preserves_its_explicit_week_or_asks(selected_da
 
 def test_weekly_course_scope_cannot_be_rewritten_as_a_global_request():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -978,7 +978,7 @@ def test_weekly_course_scope_cannot_be_rewritten_as_a_global_request():
             return {"done": True, "message": {"content": json.dumps(response)}}
 
     query = "Organiza mis tareas de Biologia 102 esta semana"
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query=query, runtime=payload()["runtime"])
     )
     assert plan.intent == "weekly_plan" and plan.scope_question == query
@@ -986,7 +986,7 @@ def test_weekly_course_scope_cannot_be_rewritten_as_a_global_request():
 
 def test_changing_teacher_course_cannot_become_a_confirmation_of_a_person():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -1002,7 +1002,7 @@ def test_changing_teacher_course_cannot_become_a_confirmation_of_a_person():
                             "scope_explicit": True}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query="¿Y en Biologia 102?", runtime=payload()["runtime"],
             state={"topic": {"intent": "academic", "categories": ["teachers"],
                              "scope_question": "mis profesores"}})
@@ -1014,7 +1014,7 @@ def test_changing_teacher_course_cannot_become_a_confirmation_of_a_person():
 
 def test_unnamed_task_reference_requires_native_disambiguation_without_document_lookup():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -1029,7 +1029,7 @@ def test_unnamed_task_reference_requires_native_disambiguation_without_document_
                             "ambiguous_task": False, "document_question": "Cómo entregar en Moodle"}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query="¿Cuándo vence esa tarea?", runtime=payload()["runtime"],
             state={"topic": {"intent": "academic", "categories": ["assignments"],
                              "scope_question": "mis tareas"}})
@@ -1046,7 +1046,7 @@ def test_general_academic_request_cannot_keep_a_previous_record_filter(
     query, category, previous_scope
 ):
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -1061,7 +1061,7 @@ def test_general_academic_request_cannot_keep_a_previous_record_filter(
                             "scope_question": previous_scope, "follow_up": True}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query=query, runtime=payload()["runtime"],
             state={"topic": {"intent": "academic", "categories": [category],
                              "scope_question": previous_scope}})
@@ -1072,7 +1072,7 @@ def test_general_academic_request_cannot_keep_a_previous_record_filter(
 
 def test_activity_title_selection_receives_the_pending_task_context_before_routing():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -1093,7 +1093,7 @@ def test_activity_title_selection_receives_the_pending_task_context_before_routi
                             "scope_question": message["query"]}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query="Problemas de mecánica", runtime=payload()["runtime"],
             state={"topic": {"intent": "academic", "categories": ["assignments"],
                              "ambiguous_task": True}})
@@ -1104,7 +1104,7 @@ def test_activity_title_selection_receives_the_pending_task_context_before_routi
 
 @pytest.mark.parametrize("duplicate", [False, True])
 def test_signed_task_selection_uses_session_identities_without_guessing_from_a_title(duplicate):
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class NoModel:
         def _models(self):
@@ -1119,7 +1119,7 @@ def test_signed_task_selection_uses_session_identities_without_guessing_from_a_t
         "topic": {"intent": "academic", "categories": ["assignments"], "ambiguous_task": True},
         "task_choices": choices,
     }}
-    response = post(client(OllamaChatProvider(Settings(_env_file=None), NoModel())), request)
+    response = post(client(GeminiChatProvider(Settings(_env_file=None), NoModel())), request)
     assert response.status_code == 200, response.text
     plan = response.json()
     if duplicate:
@@ -1137,7 +1137,7 @@ def test_task_followup_keeps_selected_native_identity_and_reads_changed_status(
     routing_follow_up, reader_follow_up, explicit
 ):
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -1159,7 +1159,7 @@ def test_task_followup_keeps_selected_native_identity_and_reads_changed_status(
                             "scope_explicit": explicit}
             return {"done": True, "message": {"content": json.dumps(response)}}
 
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query="Ahora todas mis tareas" if explicit else "¿Y a qué hora?",
             runtime=payload()["runtime"],
             state={"topic": {"intent": "academic", "categories": ["assignments"],
@@ -1175,7 +1175,7 @@ def test_task_followup_keeps_selected_native_identity_and_reads_changed_status(
 
 def test_consistent_independent_task_request_clears_selected_scope_despite_reader_hint():
     from rag_service.conversation import InterpretationRequest
-    from rag_service.query import OllamaChatProvider
+    from rag_service.query import GeminiChatProvider
 
     class Model:
         def _models(self):
@@ -1195,7 +1195,7 @@ def test_consistent_independent_task_request_clears_selected_scope_despite_reade
             return {"done": True, "message": {"content": json.dumps(response)}}
 
     query = "Muéstrame todas mis actividades"
-    plan = OllamaChatProvider(Settings(_env_file=None), Model()).interpret(
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
         InterpretationRequest(query=query, runtime=payload()["runtime"],
             state={"topic": {"intent": "academic", "categories": ["assignments"],
                 "selected_assignment_id": 11, "scope_question": "Ensayo en Seminario"}},

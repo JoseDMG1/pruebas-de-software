@@ -4,7 +4,7 @@ Status: in-progress
 
 ## Objetivo
 
-Interpretar intención y referencias con el modelo local y JSON validado antes de filtrar contexto o consultar fuentes.
+Interpretar intención y referencias con Gemini y JSON validado antes de filtrar contexto o consultar fuentes.
 
 ## Criterios de aceptación
 
@@ -30,3 +30,7 @@ La ejecución se cerró a petición del usuario. La aceptación final sigue pend
 el tramo documental responde con calendario de tareas a una consulta de horario
 de tutoría. Este fallo y las comprobaciones restantes están registrados en
 [verification.md](../verification.md). No se declara aceptación integral satisfactoria.
+
+2026-10-19: proveedor conversacional migrado a Gemini `gemini-flash-latest` mediante
+`v1beta/models/gemini-flash-latest:generateContent`. La clave queda en el servidor RAG;
+la verificación con API real queda pendiente porque no hay una clave configurada en este entorno.

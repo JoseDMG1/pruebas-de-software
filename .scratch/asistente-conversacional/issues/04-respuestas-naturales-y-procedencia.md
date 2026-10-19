@@ -30,3 +30,7 @@ La ejecución se cerró a petición del usuario. La aceptación final sigue pend
 el tramo documental responde con calendario de tareas a una consulta de horario
 de tutoría. Este fallo y las comprobaciones restantes están registrados en
 [verification.md](../verification.md). No se declara aceptación integral satisfactoria.
+
+2026-10-19: redacción documental y académica usa Gemini `gemini-flash-latest` mediante
+el mismo cliente que la interpretación. Las respuestas JSON se validan en RAG y el modelo
+no recibe permisos ni credenciales.

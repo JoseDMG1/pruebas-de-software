@@ -30,3 +30,6 @@ La ejecución se cerró a petición del usuario. La aceptación final sigue pend
 el tramo documental responde con calendario de tareas a una consulta de horario
 de tutoría. Este fallo y las comprobaciones restantes están registrados en
 [verification.md](../verification.md). No se declara aceptación integral satisfactoria.
+
+2026-10-19: el plan continúa usando el flujo de consulta existente; interpretación y
+respuesta se ejecutan con Gemini. Falta validar este recorrido con la API real.

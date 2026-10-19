@@ -8,10 +8,9 @@ import psycopg
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
-from rag_service.constants import EMBEDDING_DIMENSIONS
 from rag_service.documents import Chunk, ExtractedPdf
 from rag_service.errors import AppError
-from rag_service.local_embeddings import EmbeddingBatch, EmbeddingSpace
+from rag_service.gemini import EmbeddingBatch, EmbeddingSpace
 
 if TYPE_CHECKING:
     from rag_service.config import Settings
@@ -39,6 +38,7 @@ class Repository:
             for version, filename in (
                 (2, "002_embedding_spaces.sql"),
                 (3, "003_document_scopes.sql"),
+                (4, "004_gemini_embeddings.sql"),
             ):
                 if not connection.execute(
                     "SELECT 1 FROM schema_version WHERE version = %s", (version,),
@@ -51,13 +51,13 @@ class Repository:
         with self.connect() as connection:
             row = connection.execute(
                 "SELECT EXISTS(SELECT 1 FROM pg_extension WHERE extname = 'vector') AS vector, "
-                "EXISTS(SELECT 1 FROM schema_version WHERE version = 3) AS schema"
+                "EXISTS(SELECT 1 FROM schema_version WHERE version = 4) AS schema"
             ).fetchone()
             return bool(row["vector"] and row["schema"])
 
     @contextmanager
     def locked(self, key: str):
-        # Bloqueo de sesión: las llamadas a Bedrock no mantienen una transacción abierta.
+        # No mantener transacciones abiertas durante llamadas externas de inferencia.
         # Cerrar la conexión libera el bloqueo, incluso ante un error del proveedor.
         with self.connect() as connection:
             connection.execute("SELECT pg_advisory_lock(hashtextextended(%s, 0))", (key,))
@@ -133,7 +133,8 @@ class Repository:
         batches: list[EmbeddingBatch] | None = None,
     ) -> dict:
         batches = batches or [EmbeddingBatch(EmbeddingSpace(
-            "bedrock", self.settings.bedrock_model_id, "", EMBEDDING_DIMENSIONS,
+            "gemini", self.settings.gemini_embedding_model, "v1beta",
+            self.settings.gemini_embedding_dimensions,
         ), vectors)]
         primary = batches[0].space
         vectors = batches[0].vectors
@@ -224,7 +225,7 @@ class Repository:
                 row, total_fragmentos=len(chunks), paginas_sin_texto=list(pdf.skipped_pages),
                 proveedor_embedding=primary.provider, modelo_embedding=primary.model,
                 revision_embedding=primary.revision, dimension_embedding=primary.dimensions,
-                copia_local=any(batch.space.provider == "ollama" for batch in batches),
+                copia_local=False,
                 course_ids=list(course_ids),
             )
 
@@ -266,8 +267,8 @@ class Repository:
                  for fragment_id, vector in zip(fragment_ids, batch.vectors, strict=True)],
             )
 
-    def prepare_local_index(self, provider):
-        # Una transacción corta por documento; no mantiene transacciones durante inferencia.
+    def prepare_embedding_index(self, provider):
+        """Rebuild embeddings from stored fragments without holding DB locks during inference."""
         for document in self.list_documents():
             with self.locked(document["clave"]) as connection:
                 fragments = connection.execute(
@@ -276,10 +277,40 @@ class Repository:
                 ).fetchall()
                 if not fragments:  # Puede haberse eliminado mientras esperaba el bloqueo.
                     continue
+                target = getattr(provider, "space", None)
+                fragment_ids = [fragment["id_fragmento"] for fragment in fragments]
+                if target is not None:
+                    indexed = connection.execute(
+                        """SELECT count(*) AS n FROM fragmento_embedding fe
+                        JOIN espacio_embedding e USING (id_espacio)
+                        WHERE fe.id_fragmento = ANY(%s) AND e.proveedor = %s
+                            AND e.modelo = %s AND e.revision = %s AND e.dimensiones = %s""",
+                        (fragment_ids, target.provider, target.model,
+                         target.revision, target.dimensions),
+                    ).fetchone()["n"]
+                    document_current = all((
+                        document["proveedor_embedding"] == target.provider,
+                        document["modelo_embedding"] == target.model,
+                        document["revision_embedding"] == target.revision,
+                        document["dimension_embedding"] == target.dimensions,
+                    ))
+                    if indexed == len(fragments) and document_current:
+                        continue
                 batch = provider.embed_many([fragment["contenido"] for fragment in fragments])
                 with connection.transaction():
-                    self.save_space(connection, [f["id_fragmento"] for f in fragments], batch)
+                    self.save_space(connection, fragment_ids, batch)
+                    connection.execute(
+                        """UPDATE documento SET proveedor_embedding = %s, modelo_embedding = %s,
+                        revision_embedding = %s, dimension_embedding = %s,
+                        fecha_actualizacion = now() WHERE id_documento = %s""",
+                        (batch.space.provider, batch.space.model, batch.space.revision,
+                         batch.space.dimensions, document["id_documento"]),
+                    )
         return self.index_status()
+
+    def prepare_local_index(self, provider):
+        """Deprecated compatibility wrapper; use prepare_embedding_index."""
+        return self.prepare_embedding_index(provider)
 
     def index_status(self):
         with self.connect() as connection:
@@ -321,7 +352,7 @@ class Repository:
                 return []
             if embedding_space is None:
                 raise AppError(
-                    "index_incomplete", "Prepare el índice local con rag prepare-local-index.",
+                    "index_incomplete", "Prepare el índice Gemini con rag prepare-gemini-index.",
                 )
             space_id = embedding_space["id_espacio"]
             coverage = connection.execute(
@@ -332,7 +363,7 @@ class Repository:
             ).fetchone()["n"]
             if coverage != total:
                 raise AppError(
-                    "index_incomplete", "El índice local no cubre los documentos actuales.",
+                    "index_incomplete", "El índice Gemini no cubre los documentos actuales.",
                 )
             return connection.execute(
                 f"""SELECT f.id_fragmento, f.id_documento, f.contenido, f.pagina_inicio,

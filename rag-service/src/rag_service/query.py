@@ -1,4 +1,4 @@
-"""Consulta RAG local: un único espacio vectorial y referencias verificadas."""
+"""Consulta académica con Gemini, recuperación vectorial y referencias verificadas."""
 
 import json
 from datetime import date
@@ -41,7 +41,7 @@ from rag_service.conversation import (
     ROUTE_EXAMPLES,
     WEEKDAYS,
 )
-from rag_service.local_embeddings import OllamaEmbeddingProvider
+from rag_service.gemini import GeminiAPI, GeminiEmbeddingProvider
 
 INSUFFICIENT_ANSWER = "No hay información suficiente en los documentos disponibles para responder."
 
@@ -347,44 +347,15 @@ ACADEMIC_EXAMPLE_MESSAGES = [
 ]
 
 
-class OllamaChatProvider:
+class GeminiChatProvider:
     def __init__(self, settings, client=None):
         self.settings = settings
-        self.client = client or OllamaEmbeddingProvider(settings)
+        self.client = client or GeminiAPI(settings)
 
     def resolve(self):
-        name = self.settings.ollama_chat_model
-        name = name if ":" in name.rsplit("/", 1)[-1] else name + ":latest"
-        model = next((m for m in self.client._models() if m["name"] == name), None)
-        if model is None:
-            raise AppError(
-                "ollama_chat_missing", "Falta el modelo de respuestas. Ejecute rag prepare-chat."
-            )
-        info = self.client.request("POST", "/api/show", {"model": name})
-        capabilities = info.get("capabilities")
-        if not isinstance(capabilities, list) or "completion" not in capabilities:
-            raise AppError("ollama_chat_incompatible", "El modelo elegido no genera respuestas.")
-        return model
+        return {"name": self.settings.gemini_chat_model, "digest": "v1beta"}
 
     def prepare(self):
-        try:
-            model = self.resolve()
-        except AppError as exc:
-            if exc.code != "ollama_chat_missing":
-                raise
-            result = self.client.request(
-                "POST",
-                "/api/pull",
-                {
-                    "model": self.settings.ollama_chat_model,
-                    "stream": False,
-                },
-            )
-            if result.get("status") != "success":
-                raise AppError(
-                    "ollama_pull_failed", "No se pudo preparar el modelo de respuestas."
-                ) from None
-            model = self.resolve()
         self.generate(
             "¿Qué es este documento?",
             [
@@ -396,7 +367,8 @@ class OllamaChatProvider:
                 }
             ],
         )
-        return {"provider": "ollama", "model": model["name"], "revision": model["digest"]}
+        return {"provider": "gemini", "model": self.settings.gemini_chat_model,
+                "revision": "v1beta"}
 
     def interpret(self, request):
         from rag_service.conversation import resolve_task_choice
@@ -405,9 +377,7 @@ class OllamaChatProvider:
         if choice is not None:
             return choice
         model = self.resolve()
-        options = {"temperature": 0, "num_ctx": 8192, "num_predict": 900}
-        if self.settings.ollama_chat_num_gpu >= 0:
-            options["num_gpu"] = self.settings.ollama_chat_num_gpu
+        options = {"temperature": 0, "num_predict": 900}
         previous = request.state.topic
         state = request.state.model_dump(exclude_defaults=True, exclude={"topic", "task_choices"})
         if request.state.availability:
@@ -897,9 +867,6 @@ class OllamaChatProvider:
             plan = ConversationPlan.model_validate(data)
         except (KeyError, TypeError, ValueError, ValidationError) as exc:
             raise AppError("invalid_interpretation", "No pude interpretar la consulta.") from exc
-        current = next((m for m in self.client._models() if m["name"] == model["name"]), None)
-        if current is None or current["digest"] != model["digest"]:
-            raise AppError("ollama_model_changed", "El modelo cambió; repita la consulta.")
         return plan
 
     def generate(
@@ -921,9 +888,7 @@ class OllamaChatProvider:
             }
             for i, row in enumerate(fragments, 1)
         ]
-        options = {"temperature": 0, "num_ctx": 8192, "num_predict": 800}
-        if self.settings.ollama_chat_num_gpu >= 0:
-            options["num_gpu"] = self.settings.ollama_chat_num_gpu
+        options = {"temperature": 0, "num_predict": 800}
         result = self.client.request(
             "POST",
             "/api/chat",
@@ -964,19 +929,16 @@ class OllamaChatProvider:
             output = GenerationOutput.model_validate_json(result["message"]["content"])
         except (KeyError, TypeError, ValueError, ValidationError) as exc:
             raise AppError(
-                "invalid_generation", "Ollama devolvió una respuesta no válida."
+                "invalid_generation", "Gemini devolvió una respuesta no válida."
             ) from exc
-        current = next((m for m in self.client._models() if m["name"] == model["name"]), None)
-        if current is None or current["digest"] != model["digest"]:
-            raise AppError("ollama_model_changed", "El modelo cambió; repita la consulta.")
         return output
 
 
 class QueryService:
     def __init__(self, settings, repository, embeddings=None, chat=None):
         self.repository = repository
-        self.embeddings = embeddings or OllamaEmbeddingProvider(settings)
-        self.chat = chat or OllamaChatProvider(settings)
+        self.embeddings = embeddings or GeminiEmbeddingProvider(settings)
+        self.chat = chat or GeminiChatProvider(settings)
 
     def interpret(self, request):
         return self.chat.interpret(request)

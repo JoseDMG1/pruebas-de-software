@@ -11,7 +11,7 @@ from rag_service.local_embeddings import EmbeddingBatch, EmbeddingSpace
 from rag_service.query import (
     GenerationOutput,
     INSUFFICIENT_ANSWER,
-    OllamaChatProvider,
+    GeminiChatProvider,
     QueryRequest,
     QueryService,
 )
@@ -201,10 +201,10 @@ def test_corpus_change_prevents_stale_response(insufficient):
 @pytest.mark.parametrize(
     "code,status",
     [
-        ("ollama_unavailable", 503),
+        ("gemini_unavailable", 503),
         ("index_incomplete", 503),
         ("invalid_generation", 502),
-        ("ollama_timeout", 504),
+        ("gemini_timeout", 504),
         ("corpus_changed", 409),
     ],
 )
@@ -271,11 +271,12 @@ class ChatAPI:
 
 def test_chat_contract_uses_document_as_data():
     api = ChatAPI()
-    settings = Settings(_env_file=None, ollama_chat_num_gpu=0)
-    result = OllamaChatProvider(settings, api).generate("Pregunta", [fragment()])
+    settings = Settings(_env_file=None)
+    result = GeminiChatProvider(settings, api).generate("Pregunta", [fragment()])
     assert result.source_ids == [1]
     payload = next(payload for path, payload in api.calls if path == "/api/chat")
-    assert payload["options"]["num_gpu"] == 0
+    assert payload["model"] == "gemini-flash-latest"
+    assert payload["options"]["num_predict"] == 800
     context = json.loads(payload["messages"][-1]["content"])
     assert context["document_context"][0]["text"] == fragment()["contenido"]
     assert context["document_context"][0]["scope"] == "institutional"
@@ -293,7 +294,7 @@ def test_chat_contract_includes_authorized_moodle_context_separately_from_docume
                       "source": "Calendario Moodle"}]
     }
 
-    OllamaChatProvider(Settings(_env_file=None), api).generate(
+    GeminiChatProvider(Settings(_env_file=None), api).generate(
         "¿Cuándo inicia el ciclo?", [fragment()], academic_context=academic_context,
         conversation_context=[{
             "question": "¿Cuál es la fecha oficial?",
@@ -317,23 +318,23 @@ def test_chat_contract_includes_authorized_moodle_context_separately_from_docume
 )
 def test_chat_invalid_response_is_controlled(content):
     with pytest.raises(AppError) as error:
-        OllamaChatProvider(Settings(_env_file=None), ChatAPI(content)).generate(
+        GeminiChatProvider(Settings(_env_file=None), ChatAPI(content)).generate(
             "Pregunta", [fragment()]
         )
     assert error.value.code == "invalid_generation"
 
 
-def test_chat_never_downloads_during_query():
+def test_chat_never_checks_or_downloads_a_local_model_during_query():
     api = ChatAPI()
-    api._models = lambda: []
-    with pytest.raises(AppError) as error:
-        OllamaChatProvider(Settings(_env_file=None), api).generate("Pregunta", [fragment()])
-    assert error.value.code == "ollama_chat_missing" and not api.calls
+    api._models = lambda: (_ for _ in ()).throw(AssertionError("local model inventory used"))
+    GeminiChatProvider(Settings(_env_file=None), api).generate("Pregunta", [fragment()])
+    assert all(path == "/api/chat" for path, _ in api.calls)
 
 
-def test_default_backend_is_local():
+def test_default_models_are_gemini():
     settings = Settings(_env_file=None)
-    assert settings.embedding_backend == "ollama"
+    assert settings.gemini_chat_model == "gemini-flash-latest"
+    assert settings.gemini_embedding_model == "gemini-embedding-001"
 
 
 def test_cli_ask_uses_same_service(monkeypatch, capsys):
@@ -344,42 +345,18 @@ def test_cli_ask_uses_same_service(monkeypatch, capsys):
     assert json.loads(capsys.readouterr().out)["sources"][0]["fragment_id"] == 1
 
 
-def test_prepare_chat_reuses_installed_model_without_pulling():
+def test_prepare_chat_reports_gemini_provider_without_local_model_operations():
     api = ChatAPI()
-    result = OllamaChatProvider(Settings(_env_file=None), api).prepare()
-    assert result["model"] == "qwen2.5:3b" and result["revision"] == "a"
-    assert all(path != "/api/pull" for path, _ in api.calls)
+    result = GeminiChatProvider(Settings(_env_file=None), api).prepare()
+    assert result == {"provider": "gemini", "model": "gemini-flash-latest", "revision": "v1beta"}
+    assert all(path == "/api/chat" for path, _ in api.calls)
 
 
-def test_prepare_chat_pulls_only_after_successful_inventory_proves_absence():
-    class Missing(ChatAPI):
-        installed = False
-
-        def _models(self):
-            return super()._models() if self.installed else []
-
-        def request(self, method, path, payload):
-            if path == "/api/pull":
-                self.installed = True
-                self.calls.append((path, payload))
-                return {"status": "success"}
-            return super().request(method, path, payload)
-
-    api = Missing()
-    assert OllamaChatProvider(Settings(_env_file=None), api).prepare()["model"] == "qwen2.5:3b"
-    assert sum(path == "/api/pull" for path, _ in api.calls) == 1
-
-
-def test_prepare_chat_inventory_failure_does_not_download():
+def test_prepare_chat_does_not_call_local_model_inventory_or_download():
     api = ChatAPI()
-
-    def fail():
-        raise AppError("ollama_unavailable", "No disponible.")
-
-    api._models = fail
-    with pytest.raises(AppError):
-        OllamaChatProvider(Settings(_env_file=None), api).prepare()
-    assert not api.calls
+    api._models = lambda: (_ for _ in ()).throw(AssertionError("local model inventory used"))
+    GeminiChatProvider(Settings(_env_file=None), api).prepare()
+    assert all(path == "/api/chat" for path, _ in api.calls)
 
 
 @pytest.mark.parametrize("done,reason", [(False, "stop"), (True, "length")])
@@ -395,11 +372,11 @@ def test_chat_incomplete_response_is_rejected(done, reason):
 
     api.request = truncated
     with pytest.raises(AppError) as error:
-        OllamaChatProvider(Settings(_env_file=None), api).generate("Pregunta", [fragment()])
+        GeminiChatProvider(Settings(_env_file=None), api).generate("Pregunta", [fragment()])
     assert error.value.code == "invalid_generation"
 
 
-def test_chat_digest_change_is_rejected():
+def test_chat_uses_fixed_configured_model_without_local_revision_checks():
     api = ChatAPI()
     request = api.request
 
@@ -410,9 +387,9 @@ def test_chat_digest_change_is_rejected():
         return result
 
     api.request = changed
-    with pytest.raises(AppError) as error:
-        OllamaChatProvider(Settings(_env_file=None), api).generate("Pregunta", [fragment()])
-    assert error.value.code == "ollama_model_changed"
+    GeminiChatProvider(Settings(_env_file=None), api).generate("Pregunta", [fragment()])
+    assert any(payload["model"] == "gemini-flash-latest" for path, payload in api.calls
+               if path == "/api/chat")
 
 
 def test_zero_query_vector_is_rejected_before_retrieval():

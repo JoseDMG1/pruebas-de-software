@@ -187,3 +187,25 @@ local, sin afirmar una capacidad de producción. Los ataques cubiertos comprueba
 las fronteras y el tratamiento de contenido no confiable, sin garantizar protección
 absoluta contra toda inyección. Pagos personales, tutoría de contenidos, escrituras
 y conversaciones persistentes permanecen fuera del alcance acordado.
+
+## Migración de modelos a Gemini (2026-10-19)
+
+La API RAG usa `v1beta/models/gemini-flash-latest:generateContent` para interpretación,
+selección de evidencia y respuestas. `GEMINI_API_KEY` se lee como secreto del servidor;
+las solicitudes verifican salida JSON estructurada y no habilitan fallback a modelos locales.
+Las preguntas y los fragmentos usan `gemini-embedding-001` con tareas `RETRIEVAL_QUERY` y
+`RETRIEVAL_DOCUMENT`, respectivamente, y 768 dimensiones.
+
+La migración SQL 004 convierte la columna vectorial histórica a dimensión variable y admite
+el nuevo proveedor. `rag init-db` aplica la migración; `rag prepare-gemini-index` recalcula
+los vectores desde el texto almacenado, actualiza el proveedor/modelo por documento y puede
+reanudarse sin recalcular documentos que ya tengan cobertura Gemini completa. Las búsquedas
+fallan con índice incompleto mientras la migración del corpus no cubra todos los fragmentos.
+
+Verificación automatizada local: Ruff sin hallazgos y **235 pruebas aprobadas**, con **12
+pruebas de PostgreSQL omitidas** por falta de entorno de integración. No se hizo una llamada
+real ni reindexación: `GEMINI_API_KEY` no está configurada y no hay servicios Docker activos.
+Las pruebas cubren errores de cuota, timeout y respuesta JSON inválida. La reindexación completa
+y la preservación del índice anterior ante fallo aún requieren la base PostgreSQL de prueba.
+Por ello, el recorrido Moodle + Gemini y la aceptación conversacional siguen pendientes; los
+resultados con Ollama descritos arriba son históricos y no validan este proveedor.

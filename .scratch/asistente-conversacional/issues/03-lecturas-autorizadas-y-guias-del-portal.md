@@ -30,3 +30,7 @@ La ejecución se cerró a petición del usuario. La aceptación final sigue pend
 el tramo documental responde con calendario de tareas a una consulta de horario
 de tutoría. Este fallo y las comprobaciones restantes están registrados en
 [verification.md](../verification.md). No se declara aceptación integral satisfactoria.
+
+2026-10-19: el índice de consulta migra a Gemini Embeddings `gemini-embedding-001` con
+768 dimensiones. Ejecutar `rag init-db` y `rag prepare-gemini-index` para crear el nuevo
+espacio a partir de los fragmentos almacenados; los espacios antiguos no se mezclan.

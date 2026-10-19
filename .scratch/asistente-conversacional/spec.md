@@ -88,10 +88,21 @@ es seguimiento; el filtro actual por frases no puede impedir ese acceso. Mantene
 semántico acotado para referencias y disponibilidad, sin historial persistente. Un plan
 inválido o ambiguo produce aclaración o error explícito, no lecturas más amplias por defecto.
 
-Usar el proveedor local y validar JSON estructurado con esquemas estrictos. No asumir
-function calling nativo. El detalle de endpoints y ciclos es una elección de implementación,
-con número de llamadas y tamaños acotados. Conservar la firma del cuerpo, identidad y alcance
-verificados, secretos en servidores y compatibilidad de las consultas existentes.
+Usar Gemini mediante la API oficial `generateContent` para interpretar consultas y redactar
+respuestas; configurar el modelo conversacional como `gemini-flash-latest`. Usar Gemini
+Embeddings (`gemini-embedding-001`) para consultas e ingesta, con una dimensión fija de 768 y
+los tipos de tarea de recuperación correspondientes. No usar Ollama ni Bedrock como fallback.
+Validar JSON estructurado con esquemas estrictos en el servidor; no asumir function calling
+nativo. La clave Gemini se configura únicamente en el servidor RAG y nunca se envía a Moodle,
+al navegador, a los modelos como contenido ni a los logs. Mantener acotados los tiempos de
+espera, tamaños y llamadas. Conservar la firma del cuerpo, identidad y alcance verificados,
+así como compatibilidad de los contratos de consulta existentes.
+
+Los espacios vectoriales de Ollama/Bedrock no son compatibles con Gemini. La migración de
+base debe admitir embeddings Gemini sin mezclar espacios; un comando de migración recalcula
+los embeddings desde los fragmentos almacenados antes de habilitar búsquedas sobre el corpus.
+La ingesta debe seguir siendo transaccional por documento y preservar la versión anterior si
+Gemini falla.
 
 ## Límites y resistencia a abuso
 
@@ -127,16 +138,18 @@ para una consulta, conservar el comportamiento de evidencia insuficiente pertine
 - Diferencias de permisos estudiante/docente/autoridad, homónimos y revalidación durante continuación.
 - Datos ficticios del prompt no aparecen como hechos; las citas solo respaldan documentos usados.
 - Ataques de instrucción directos y documentales; mensajes mixtos atienden la parte autorizada.
+- Proveedor Gemini único para interpretación, respuestas y embeddings; clave ausente, timeout,
+  límite de cuota, respuesta JSON inválida y reindexación sin mezcla de espacios.
 - Nueva conversación, logout y expiración borran referencias, disponibilidad y cursores.
-- Recorrido real Moodle + modelo local con comprobaciones semánticas, además de pruebas de contratos.
+- Recorrido real Moodle + Gemini con comprobaciones semánticas, además de pruebas de contratos.
 
 ## Verificación y despliegue
 
-Proponer TDD en los seams públicos ya usados: servicios Moodle con usuarios y capacidades
-nativas, cliente servidor, endpoints protegidos RAG, store temporal y navegador real.
-Conservar las suites existentes y ampliar pruebas que detecten respuestas incorrectas,
-no solo transporte HTTP exitoso. Verificar que el modelo local cumpla los nuevos esquemas;
-si no lo hace, registrar el bloqueo y evaluar alternativas antes de cambiar proveedor o modelo.
+Usar TDD en los seams públicos ya usados: cliente Gemini, proveedor de embeddings, servicios
+Moodle con usuarios y capacidades nativas, endpoints protegidos RAG, store temporal y
+navegador real. Conservar las suites existentes y ampliar pruebas que detecten respuestas
+incorrectas, no solo transporte HTTP exitoso. Probar contratos JSON, errores del proveedor,
+ausencia de fallback local y reindexación completa en un entorno de prueba.
 
 Aplicar sobre el entorno local Moodle 5.3dev de prueba, sin afirmar compatibilidad con una
 versión desplegada aún no confirmada. Registrar latencia observada del flujo completo y

@@ -30,3 +30,8 @@ La ejecución se cerró a petición del usuario. La aceptación final sigue pend
 el tramo documental responde con calendario de tareas a una consulta de horario
 de tutoría. Este fallo y las comprobaciones restantes están registrados en
 [verification.md](../verification.md). No se declara aceptación integral satisfactoria.
+
+2026-10-19: las pruebas simuladas cubren el contrato REST de Gemini, el uso del endpoint
+`generateContent`, la separación de tipos de embedding y la ausencia de clave. Para cerrar
+este ticket falta configurar la clave del entorno local y recorrer Moodle + Gemini, incluida
+la consulta de horario de tutoría y la migración del índice completo.

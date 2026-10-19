@@ -6,7 +6,7 @@ from rag_service.constants import EMBEDDING_DIMENSIONS
 from rag_service.documents import chunk_pages, extract_pdf
 from rag_service.embeddings import EmbeddingProvider, validate_embedding
 from rag_service.errors import AppError
-from rag_service.local_embeddings import EmbeddingRouter
+from rag_service.gemini import EmbeddingRouter
 
 if TYPE_CHECKING:
     from rag_service.config import Settings
@@ -56,7 +56,7 @@ def ingest(
     with repository.locked(key) as connection:
         existing = repository.find(connection, key)
         matches = not force and existing and (
-            provider.matches(existing) if isinstance(provider, EmbeddingRouter) else (
+            provider.matches(existing) if hasattr(provider, "matches") else (
                 existing["modelo_embedding"] == settings.bedrock_model_id
                 and existing["dimension_embedding"] == EMBEDDING_DIMENSIONS
             )
@@ -78,7 +78,7 @@ def ingest(
                 "total_fragmentos": len(chunks), "paginas_sin_texto": list(pdf.skipped_pages),
             }
         # Ningún dato persistente cambia hasta obtener todos los embeddings válidos.
-        if isinstance(provider, EmbeddingRouter):
+        if isinstance(provider, EmbeddingRouter) or hasattr(provider, "embed_document"):
             batches, fallback = provider.embed_document([chunk.text for chunk in chunks])
             result = repository.save(
                 connection, key, title, kind, pdf, chunks, batches[0].vectors, started_at,

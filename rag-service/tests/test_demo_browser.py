@@ -71,7 +71,7 @@ def test_error_recovers_and_insufficient_response_has_no_sources():
             lambda route: route.fulfill(
                 status=503,
                 content_type="application/json",
-                body='{"message":"Ollama no disponible."}',
+                body='{"message":"Gemini no disponible."}',
             ),
         )
         page.locator("#question").fill("Pregunta")

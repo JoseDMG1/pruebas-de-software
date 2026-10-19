@@ -1,4 +1,4 @@
-"""Evaluación real reproducible; no cambia las preguntas ni llama a AWS."""
+"""Evaluación real reproducible con Gemini; no cambia las preguntas."""
 
 import argparse
 import json
@@ -100,9 +100,9 @@ def main():
     output = {
         "complete": True,
         "timestamp_utc": datetime.now(UTC).isoformat(),
-        "provider": "ollama",
-        "embedding_model": settings.ollama_embedding_model,
-        "chat_model": settings.ollama_chat_model,
+        "provider": "gemini",
+        "embedding_model": settings.gemini_embedding_model,
+        "chat_model": settings.gemini_chat_model,
         "summary": summary,
         "results": results,
     }

@@ -3,28 +3,14 @@
 import json
 import logging
 import time
-from dataclasses import dataclass
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 from rag_service.constants import EMBEDDING_DIMENSIONS
+from rag_service.embedding_types import EmbeddingBatch, EmbeddingSpace
 from rag_service.embeddings import BedrockEmbeddingProvider, validate_embedding
 from rag_service.errors import AppError
-
-
-@dataclass(frozen=True)
-class EmbeddingSpace:
-    provider: str
-    model: str
-    revision: str
-    dimensions: int
-
-
-@dataclass
-class EmbeddingBatch:
-    space: EmbeddingSpace
-    vectors: list[list[float]]
 
 
 class OllamaEmbeddingProvider:

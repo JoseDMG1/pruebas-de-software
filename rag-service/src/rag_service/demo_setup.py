@@ -1,4 +1,4 @@
-"""Corpus ficticio reproducible; nunca carga documentos ajenos ni llama a AWS."""
+"""Corpus ficticio reproducible; nunca carga documentos ajenos."""
 
 import json
 import textwrap
@@ -7,8 +7,8 @@ from pathlib import Path
 
 from rag_service.errors import AppError
 from rag_service.ingestion import ingest
-from rag_service.local_embeddings import EmbeddingRouter, OllamaEmbeddingProvider
-from rag_service.query import OllamaChatProvider
+from rag_service.gemini import EmbeddingRouter, GeminiEmbeddingProvider
+from rag_service.query import GeminiChatProvider
 
 
 def corpus():
@@ -52,10 +52,9 @@ def make_pdf(pages):
 
 
 def prepare_demo(settings, repository, directory=Path("data/inbox")):
-    settings = settings.model_copy(update={"embedding_backend": "ollama"})
-    local = OllamaEmbeddingProvider(settings)
-    embeddings = local.prepare()
-    chat = OllamaChatProvider(settings).prepare()
+    local = GeminiEmbeddingProvider(settings)
+    embeddings = local.embed_many(["Reglamento académico universitario."]).space
+    chat = GeminiChatProvider(settings).prepare()
     repository.initialize()
     directory.mkdir(parents=True, exist_ok=True)
     documents = []
@@ -87,5 +86,5 @@ def prepare_demo(settings, repository, directory=Path("data/inbox")):
         "embedding_model": embeddings.model,
         "chat_model": chat["model"],
         "documents": documents,
-        "spaces": repository.prepare_local_index(local),
+        "spaces": repository.prepare_embedding_index(local),
     }

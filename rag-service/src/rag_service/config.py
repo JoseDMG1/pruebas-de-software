@@ -11,10 +11,15 @@ class Settings(BaseSettings):
     database_url: str = "postgresql://rag:rag_local_dev@localhost:55432/rag"
     moodle_service_secret: SecretStr | None = None
     local_demo_query_enabled: bool = False
+    gemini_api_key: SecretStr | None = None
+    gemini_chat_model: str = "gemini-flash-latest"
+    gemini_embedding_model: str = "gemini-embedding-001"
+    gemini_embedding_dimensions: int = Field(default=768, ge=128, le=3072)
+    gemini_timeout: int = Field(default=120, ge=1, le=600)
     aws_profile: str | None = None
     aws_region: str = "us-east-1"
     bedrock_model_id: str = "amazon.titan-embed-text-v2:0"
-    embedding_backend: Literal["auto", "bedrock", "ollama"] = "ollama"
+    embedding_backend: Literal["auto", "bedrock", "ollama", "gemini"] = "gemini"
     ollama_base_url: str = "http://localhost:11434"
     ollama_embedding_model: str | None = "qwen3-embedding:0.6b"
     ollama_embedding_context_length: int = Field(default=2048, ge=512, le=32768)
