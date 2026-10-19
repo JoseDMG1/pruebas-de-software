@@ -16,6 +16,7 @@ report = {}
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--ticket03", action="store_true", help="Check authorized reads and portal guide")
 parser.add_argument("--ticket04", action="store_true", help="Check task-to-document topic change")
+parser.add_argument("--ticket05", action="store_true", help="Check personalized weekly planning")
 args = parser.parse_args()
 
 
@@ -129,13 +130,61 @@ def check_ticket04(browser):
     context.close()
 
 
+def check_ticket05(browser):
+    context = browser.new_context()
+    page = context.new_page()
+    page.set_default_navigation_timeout(180000)
+    login(page, "estudiante1")
+
+    initial = ask(page, "Me ayudas a distribuir el trabajo pendiente esta semana?")
+    assert "Ejercicios de ecuaciones" in initial and "Informe de laboratorio" in initial, initial
+    assert "días y horas" in initial, initial
+    assert "Plan del " in initial and "), según Moodle." in initial, initial
+    interval = initial.split("Plan del ", 1)[1].split(" (", 1)[0]
+    first_day, last_day = interval.split(" al ", 1)
+    assert len(first_day) == 10 and len(last_day) == 10, initial
+
+    scheduled = ask(page, "Puedo estudiar martes y jueves de 14 a 16")
+    assert "14:00–16:00" in scheduled, scheduled
+    assert "no garantiza" in scheduled and "vence" in scheduled, scheduled
+
+    adjusted = ask(page, "mejor el viernes de 15 a 18")
+    assert "15:00–18:00" in adjusted and "14:00–16:00" not in adjusted, adjusted
+    assert "Ejercicios de ecuaciones" in adjusted and "Informe de laboratorio" in adjusted, adjusted
+
+    provisional = ask(page, "no sé aún qué horarios tendré")
+    assert "provisional" in provisional and "sin horarios" in provisional, provisional
+    assert "Ejercicios de ecuaciones" in provisional or "Informe de laboratorio" in provisional
+
+    report["weekly_plan"] = {
+        "tasks_consulted_before_availability": initial,
+        "declared_availability": scheduled,
+        "corrected_availability": adjusted,
+        "unknown_availability_draft": provisional,
+        "source": "live Moodle demo account estudiante1 and Gemini-backed Moodle chat",
+        "gemini_model": next(
+            (line.partition("=")[2] for line in (root / "rag-service/.env").read_text().splitlines()
+             if line.startswith("GEMINI_CHAT_MODEL=")),
+            "unspecified",
+        ),
+        "chat_writes_performed": False,
+        "demo_fixture_deadlines_refreshed_before_test": True,
+    }
+    context.close()
+
+
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch()
-    if args.ticket03 or args.ticket04:
+    if args.ticket03 or args.ticket04 or args.ticket05:
         report["complete"] = False
-        ticket = "ticket03" if args.ticket03 else "ticket04"
+        ticket = "ticket03" if args.ticket03 else "ticket04" if args.ticket04 else "ticket05"
         try:
-            check_ticket03(browser) if args.ticket03 else check_ticket04(browser)
+            if args.ticket03:
+                check_ticket03(browser)
+            elif args.ticket04:
+                check_ticket04(browser)
+            else:
+                check_ticket05(browser)
             report["complete"] = True
         finally:
             browser.close()

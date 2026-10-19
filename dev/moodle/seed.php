@@ -53,6 +53,9 @@ foreach (['ALG101' => 'Ejercicios de ecuaciones', 'BIO102' => 'Informe de labora
             'assignsubmission_onlinetext_enabled' => 1,
         ]);
     }
+    // Keep browser fixtures current when the seed is rerun; old deadlines make every
+    // personalized weekly-plan example overdue and prevent testing future study blocks.
+    $DB->set_field('assign', 'duedate', time() + 7 * DAYSECS, ['id' => $assignment->id]);
     if ($short === 'BIO102') {
         $cm = get_coursemodule_from_instance('assign', $assignment->id, $course->id);
         if (!$DB->record_exists('assign_submission', ['assignment' => $assignment->id,

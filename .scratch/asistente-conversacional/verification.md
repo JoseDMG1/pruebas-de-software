@@ -25,7 +25,7 @@ Saludo, cortesía, despedida y capacidades no recuperan documentos ni datos acad
 | 02 | Reformulación/contexto: test_model_receives_reformulation_context_before_any_moodle_read; referencia ambigua: test_unnamed_task_reference_requires_native_disambiguation_without_document_lookup; disponibilidad: test_unknown_availability_is_extracted_without_copying_previous_schedule y test_semantic_availability_is_session_scoped_and_cleared; llamadas y errores: conteo de hasta 2 en la regresión y validador real, test_gemini_maps_timeout_and_invalid_json; Gemini real: ticket02-live-validation.json | suites Python/Moodle y ocho interpretaciones reales con datos sintéticos |
 | 03 | Lecturas con capacidades reales, matrícula, grupos, entregas, estados y prórrogas; guía local verificada | `academic_context_provider_test.php`, `conversation_test.php`, `docs/portal/moodle-5.3dev-guia.md` |
 | 04 | Saludo/exclusión: test_social_and_blocked_responses_never_retrieve_documents; confirmación: test_teacher_confirmation_is_direct_and_bounded_by_visible_data; citas: test_sources_come_from_database_and_citations_are_present y test_missing_inline_citation_is_added_from_valid_sources; ejemplos/salida inválida: test_unsupported_example_facts_and_document_instructions_are_not_published y test_invalid_citations_are_rejected y test_chat_invalid_response_is_controlled; cambio de tema: ticket04-browser.json | suites Python y recorrido integrado Moodle/Gemini |
-| 05 | Pendientes antes de disponibilidad, agregación de 25 tareas, intervalos, domingo, zona, vencidas/borradores/sin fecha, datos parciales y cero tareas | `conversation_test.php`, `test_weekly_plan.py`, pruebas nativas de prórrogas |
+| 05 | Pendientes antes de disponibilidad, agregación de 25 tareas, intervalos, domingo, zona, vencidas/borradores/sin fecha, datos parciales y cero tareas | `conversation_test.php`, `test_weekly_plan.py`, pruebas nativas de prórrogas, recorrido real `ticket05-browser.json` |
 | 06 | Recorridos semánticos reales, acceso por cuenta, inyección directa/documental y borrado de sesión | `dev/moodle/smoke_browser.py`, suites de contratos/sesión y reporte local |
 
 ## Comprobaciones automáticas
@@ -365,3 +365,32 @@ El validador real se reproduce con .venv/bin/python scripts/check_gemini_convers
 --retries 1 --report ../.scratch/asistente-conversacional/ticket02-live-validation.json.
 Usa contextos y datos sintéticos y verifica los planes sin consultar registros Moodle. El recorrido integrado completo y los casos de aceptación finales
 corresponden al ticket 06; la aceptación general sigue pendiente.
+
+### Cierre del ticket 05: plan semanal con Moodle y Gemini reales (2026-10-19)
+
+El ticket 05 queda `done`. El recorrido dedicado de navegador inicia sesión como
+`estudiante1`, consulta los pendientes nativos de Moodle antes de pedir disponibilidad,
+propone bloques con el horario declarado, reemplaza el horario anterior al corregirlo y
+produce un borrador explícitamente provisional si el estudiante aún no conoce sus horas.
+Las fechas, zona horaria, estados y vencimientos se toman de Moodle; la respuesta aclara
+que los bloques no estiman el esfuerzo ni garantizan completar las tareas.
+
+Con Gemini `gemini-3.5-flash-lite`, el recorrido terminó en cuatro turnos, con latencias
+de 5,21 a 9,36 segundos. Se verificaron los bloques 2026-10-20 y 2026-10-22 de 14:00 a
+16:00; tras la corrección, viernes 2026-10-23 de 15:00 a 18:00 y sin bloques del horario
+anterior. Moodle entregó la zona `Europe/London` configurada para la cuenta de prueba.
+La cuenta es ficticia y local; no se escribió ni modificó ningún registro desde el chat.
+Antes del recorrido se actualizaron los vencimientos ficticios con el sembrador local,
+que ahora los renueva en cada ejecución para que no queden permanentemente vencidos.
+
+La evidencia está en `ticket05-browser.json`; reproducir desde `rag-service`:
+
+```sh
+PLAYWRIGHT_BROWSERS_PATH=.cache/ms-playwright .venv/bin/python -u ../dev/moodle/smoke_browser.py --ticket05
+```
+
+Los criterios de cero tareas, lecturas parciales, paginación de 25 tareas, prórrogas,
+borradores, vencidas, tareas sin fecha y límites de domingo/zona horaria conservan las
+pruebas unitarias Python y nativas Moodle referenciadas en la tabla. El recorrido real
+cubre el flujo positivo con tareas próximas y una corrección de disponibilidad; la
+aceptación conversacional global queda pendiente del ticket 06.

@@ -1,6 +1,6 @@
 # Plan semanal académico personalizado
 
-Status: in-progress
+Status: done
 
 ## Objetivo
 
@@ -32,4 +32,6 @@ de tutoría. Este fallo y las comprobaciones restantes están registrados en
 [verification.md](../verification.md). No se declara aceptación integral satisfactoria.
 
 2026-10-19: el plan continúa usando el flujo de consulta existente; interpretación y
-respuesta se ejecutan con Gemini. Falta validar este recorrido con la API real.
+respuesta se ejecutan con Gemini. Recorrido real Moodle + Gemini aprobado en
+[ticket05-browser.json](../ticket05-browser.json); cierre y límites registrados en
+[verification.md](../verification.md).
