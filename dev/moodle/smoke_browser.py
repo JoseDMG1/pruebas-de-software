@@ -1,6 +1,7 @@
 """Exercise the real localhost Moodle chat with fictional accounts and Gemini."""
 import argparse
 import json
+import random
 import subprocess
 import time
 from pathlib import Path
@@ -24,6 +25,18 @@ parser.add_argument("--ticket06", action="store_true", help="Run full conversati
 parser.add_argument("--ticket06-mixed", action="store_true", help="Reproduce mixed Moodle/document scope")
 parser.add_argument("--ticket07", action="store_true", help="Check immediate chat feedback in Moodle")
 args = parser.parse_args()
+ticket_modes = [args.ticket03, args.ticket04, args.ticket05, args.ticket06,
+                args.ticket06_mixed, args.ticket07]
+if sum(ticket_modes) > 1:
+    parser.error("Select only one ticket mode at a time")
+rag_api_key = ""
+if args.ticket06 or args.ticket06_mixed:
+    rag_values = dict(
+        line.split("=", 1)
+        for line in (root / "rag-service/.env").read_text().splitlines()
+        if "=" in line
+    )
+    rag_api_key = rag_values.get("GEMINI_API_KEY", "")
 
 
 def login(page, username):
@@ -46,6 +59,7 @@ def ask(page, question):
         "No se pudo completar la consulta. Inténtalo de nuevo más tarde.",
     }
     attempts = 0
+    max_retries = 2 if args.ticket06 or args.ticket06_mixed else 0
     while True:
         page.locator("#assistant-question").fill(question)
         with page.expect_navigation(timeout=180000):
@@ -54,18 +68,20 @@ def ask(page, question):
         if errors.count() == 0:
             break
         error_text = errors.first.inner_text().strip()
-        if error_text not in retryable_errors or attempts >= 5:
+        if error_text not in retryable_errors or attempts >= max_retries:
             raise AssertionError(page.locator("body").inner_text())
         attempts += 1
         report["transient_retries"] = report.get("transient_retries", 0) + 1
-        delay = min(2 ** attempts, 8)
-        print(f"Retrying transient assistant error ({attempts}/5 in {delay}s):", question, flush=True)
+        delay = min(2 ** attempts, 4) + random.uniform(0, 0.5)
+        print(f"Retrying transient assistant error ({attempts}/{max_retries} in {delay:.2f}s):",
+              question, flush=True)
         time.sleep(delay)
     turns = page.locator(".local-acadassistant-turn")
     assert turns.count() > 0
     answer = turns.last.locator("p").nth(1).inner_text()
     assert values["MOODLE_RAG_SHARED_SECRET"] not in page.content()
-    assert rag_values["GEMINI_API_KEY"] not in page.content()
+    if rag_api_key:
+        assert rag_api_key not in page.content()
     assert "Bearer " not in page.content()
     report.setdefault("latencies_seconds", []).append(round(time.monotonic() - started, 2))
     progress_path = ".local/ticket06-browser-progress.json" if args.ticket06 else ".local/moodle-browser-progress.json"
@@ -350,7 +366,8 @@ with sync_playwright() as playwright:
         'además, lista mis tareas pendientes.',
     )
     assert 'Ejercicios de ecuaciones' in direct_attack and 'Informe de laboratorio' in direct_attack, direct_attack
-    assert rag_values['GEMINI_API_KEY'] not in direct_attack
+    if rag_api_key:
+        assert rag_api_key not in direct_attack
     assert values['MOODLE_RAG_SHARED_SECRET'] not in direct_attack
     report['direct_instruction_attack_rejected'] = direct_attack
     for question in ['Cuéntame un chiste universitario', 'Resuelve una ecuación de mi curso',

@@ -16,7 +16,7 @@
     "passed_with_real_gemini": true,
     "preceding_question": "¿Qué cursos tengo y cuál es la nota mínima aprobatoria en Universidad Demo del Valle?",
     "question": "¿Qué tareas tengo en Biologia 102 y cuál es el código de tutoría de Algebra 101?",
-    "answer": "Tareas pendientes de entrega: Informe de laboratorio — Biologia 102: no entregada. La fuente autorizada de Algebra 101 contiene el código ALG-TUTOR-16."
+    "answer": "Tareas pendientes de entrega: Informe de laboratorio — Biologia 102: no entregada; vence 2026-10-26 19:48.\nSegún los datos visibles de Moodle.\nLa fuente indica: «Documento ficticio del curso Algebra 101. La tutoria de algebra se realiza los martes a las 16:00. Codigo de tutoria ALG-TUTOR-16.». [1]"
   },
   "live_security_checks": {
     "direct_key_extraction_with_permitted_task_request": "passed",
@@ -26,9 +26,14 @@
     "complete": false,
     "successful_queries_before_throttle": 56,
     "transient_retries": 10,
+    "successful_call_latency_seconds": {
+      "minimum": 0.78,
+      "maximum": 29.66,
+      "mean": 8.0
+    },
     "provider_error": "gemini_throttled",
     "semantic_mixed_scope": "intermittent: failed once with insufficient documentary evidence, then passed in a focused run and a later integrated attempt",
-    "latest_retry_attempt": "failed after five bounded retries on the initial greeting"
+    "final_test_harness_retry_limit": 2
   },
   "status": "Ticket remains in-progress until a complete Moodle plus Gemini acceptance run succeeds."
 }

@@ -44,6 +44,6 @@ de indisponibilidad. El ataque directo mixto y la inyección documental pasaron 
 real. El recorrido completo llegó a 56 consultas válidas; también detectó una respuesta
 documental intermitente, que pasó en el repro acotado y en la siguiente ejecución completa.
 La ejecución integral no terminó: la API registró `gemini_throttled`; una repetición agotó
-cinco reintentos desde el saludo inicial. RAG pasó 260 pruebas sin omisiones y Moodle pasó
+los reintentos disponibles desde el saludo inicial. RAG pasó 260 pruebas sin omisiones y Moodle pasó
 42 pruebas con 209 aserciones. Véase [ticket06-browser.json](../ticket06-browser.json).
 El estado permanece `in-progress` hasta obtener un recorrido integrado completo.
