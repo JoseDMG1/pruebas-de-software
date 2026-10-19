@@ -595,6 +595,8 @@ def test_model_receives_reformulation_context_before_any_moodle_read():
     assert "academic_context" not in message
     current = json.loads(model.calls[0]["messages"][-1]["content"])
     assert current == {"query": data["query"]}
+    # Routing and focused extraction each make one bounded generation request.
+    assert len(model.calls) == 2
 
 
 def test_social_and_blocked_responses_never_retrieve_documents():

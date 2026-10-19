@@ -22,7 +22,7 @@ Saludo, cortesía, despedida y capacidades no recuperan documentos ni datos acad
 | Ticket | Comprobación | Evidencia |
 | --- | --- | --- |
 | 01 | Contratos cerrados, firma del cuerpo, reloj y zona Moodle, rechazo de operaciones no permitidas | `test_conversation.py`, `conversation_test.php`, suites de autenticación existentes |
-| 02 | Contexto antes de interpretar, referencias, cambios de tema y estado temporal; horarios declarados separados de intención | `test_conversation.py`, `conversation_store_test.php`; ajustes de horario conservan el curso activo |
+| 02 | Reformulación/contexto: test_model_receives_reformulation_context_before_any_moodle_read; referencia ambigua: test_unnamed_task_reference_requires_native_disambiguation_without_document_lookup; disponibilidad: test_unknown_availability_is_extracted_without_copying_previous_schedule y test_semantic_availability_is_session_scoped_and_cleared; llamadas y errores: conteo de hasta 2 en la regresión y validador real, test_gemini_maps_timeout_and_invalid_json; Gemini real: ticket02-live-validation.json | suites Python/Moodle y ocho interpretaciones reales con datos sintéticos |
 | 03 | Lecturas con capacidades reales, matrícula, grupos, entregas, estados y prórrogas; guía local verificada | `academic_context_provider_test.php`, `conversation_test.php`, `docs/portal/moodle-5.3dev-guia.md` |
 | 04 | Saludo/exclusión: test_social_and_blocked_responses_never_retrieve_documents; confirmación: test_teacher_confirmation_is_direct_and_bounded_by_visible_data; citas: test_sources_come_from_database_and_citations_are_present y test_missing_inline_citation_is_added_from_valid_sources; ejemplos/salida inválida: test_unsupported_example_facts_and_document_instructions_are_not_published y test_invalid_citations_are_rejected y test_chat_invalid_response_is_controlled; cambio de tema: ticket04-browser.json | suites Python y recorrido integrado Moodle/Gemini |
 | 05 | Pendientes antes de disponibilidad, agregación de 25 tareas, intervalos, domingo, zona, vencidas/borradores/sin fecha, datos parciales y cero tareas | `conversation_test.php`, `test_weekly_plan.py`, pruebas nativas de prórrogas |
@@ -344,3 +344,24 @@ la fecha de entrega 17:19. Latencias en la última repetición: 5,21 s, 4,88 s y
 La suite completa de Python con PostgreSQL terminó con 260 aprobadas, cero omitidas.
 Se verificó Ruff. La aceptación global sigue pendiente de los tickets 02, 05 y 06,
 además de los casos integrales que no se ejecutaron en este recorrido focalizado.
+
+### Cierre del ticket 02: interpretación y contexto temporal (2026-10-19)
+
+El ticket 02 queda done. Se amplió el verificador reproducible para probar ocho
+interpretaciones reales de Gemini y registrar el número de solicitudes del modelo por caso;
+el presupuesto es de dos o menos llamadas por interpretación. Con Gemini 3.5 Flash Lite
+y reloj fijo 2026-10-19 en America/Lima, pasaron cursos, semana actual, próxima semana,
+semana ISO explícita, seguimiento “¿Y quiénes más?”, cambio de tarea a cursos, referencia
+ambigua a una tarea y corrección de disponibilidad a viernes de 15:00 a 18:00. La semana
+actual se resolvió al 19–25 de octubre, la siguiente al 26 de octubre–1 de noviembre y
+la explícita al 2–8 de noviembre.
+
+El test de reformulación también afirma el límite de dos llamadas en el seam público.
+Las pruebas existentes cubren disponibilidad desconocida, estado de sesión que se limpia,
+reloj confiable, errores explícitos y planes inválidos que no activan lecturas. Moodle
+conserva referencias y disponibilidad en la sesión; no hay almacenamiento persistente.
+
+El validador real se reproduce con .venv/bin/python scripts/check_gemini_conversation.py
+--retries 1 --report ../.scratch/asistente-conversacional/ticket02-live-validation.json.
+Usa contextos y datos sintéticos y verifica los planes sin consultar registros Moodle. El recorrido integrado completo y los casos de aceptación finales
+corresponden al ticket 06; la aceptación general sigue pendiente.

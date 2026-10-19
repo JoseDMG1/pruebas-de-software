@@ -1,6 +1,6 @@
 # Interpretación natural y contexto temporal
 
-Status: in-progress
+Status: done
 
 ## Objetivo
 
@@ -16,8 +16,8 @@ Variantes nuevas, reformulaciones, cambios de tema y ambigüedad; disponibilidad
 
 ## Estado
 
-Alcance conjunto aprobado explícitamente por el usuario. Listo para implementar
-cuando se cumplan las dependencias, respetando la spec y los límites acordados.
+Implementado y verificado el 2026-10-19. Evidencia y límites en
+[verification.md](../verification.md).
 
 ## Comments
 
@@ -51,3 +51,12 @@ Se comprobaron los intervalos con el reloj de Lima y que el cambio de tema elimi
 la tarea anterior. Se confirmó al terminar el modelo efectivo en `.env`. El ticket sigue en
 curso hasta completar los demás criterios y el recorrido Moodle integrado. Informe reproducible en
 `../gemini-live-validation.json` y script `rag-service/scripts/check_gemini_conversation.py`.
+
+2026-10-19 — Cierre: el validador Gemini cubre ocho casos reales con reloj fijo
+de Lima, incluido seguimiento docente, cambio de tema, referencia ambigua a una tarea
+y corrección de disponibilidad. Cada interpretación usó dos solicitudes de generación
+y dos intentos HTTP; con --retries 1 el máximo verificado es cuatro intentos HTTP.
+Las pruebas de contrato comprueban contexto previo, estado de sesión, errores del proveedor
+y rechazo de planes inválidos. El artefacto de datos es sintético; no lee Moodle.
+Evidencia: [ticket02-live-validation.json](../ticket02-live-validation.json).
+La aceptación integral permanece pendiente de los tickets 05 y 06.
