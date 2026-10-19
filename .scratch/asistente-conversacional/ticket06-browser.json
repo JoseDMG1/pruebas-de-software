@@ -4,7 +4,7 @@
   "provider": "gemini-3.5-flash-lite",
   "automated_suites": {
     "rag": {
-      "passed": 260,
+      "passed": 261,
       "skipped": 0
     },
     "moodle_phpunit": {
@@ -45,5 +45,13 @@
     "model": "gemini-3.5-flash-lite",
     "provider_retry_after": "10h12m17s",
     "credential_or_connection_issue": false
+  },
+  "continuation_checks": {
+    "rag_pytest_database_backed": "261 passed, 0 skipped",
+    "moodle_phpunit": "42 tests, 209 assertions",
+    "ruff": "passed",
+    "diff_check": "passed",
+    "interpretation_telemetry": "success and gemini_throttled events tested; no prompt or credential data logged",
+    "api_health": "200; database healthy"
   }
 }
