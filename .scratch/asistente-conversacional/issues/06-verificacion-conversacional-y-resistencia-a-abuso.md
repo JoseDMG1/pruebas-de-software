@@ -47,3 +47,11 @@ La ejecución integral no terminó: la API registró `gemini_throttled`; una rep
 los reintentos disponibles desde el saludo inicial. RAG pasó 260 pruebas sin omisiones y Moodle pasó
 42 pruebas con 209 aserciones. Véase [ticket06-browser.json](../ticket06-browser.json).
 El estado permanece `in-progress` hasta obtener un recorrido integrado completo.
+
+2026-10-19, continuación solicitada por el usuario: el servicio local de RAG responde
+200 desde Moodle y la API, pero una prueba directa del adaptador de interpretación
+recibió HTTP 429 `RESOURCE_EXHAUSTED`. Google indicó que se agotó la cuota gratuita
+de 500 solicitudes de generación para `gemini-3.5-flash-lite` y sugirió reintentar
+en 10 h 12 min. No se modificó proveedor, clave ni facturación. La aceptación queda
+pendiente del restablecimiento de cuota; el último detalle está en
+[ticket06-browser.json](../ticket06-browser.json).

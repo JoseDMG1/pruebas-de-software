@@ -35,5 +35,15 @@
     "semantic_mixed_scope": "intermittent: failed once with insufficient documentary evidence, then passed in a focused run and a later integrated attempt",
     "final_test_harness_retry_limit": 2
   },
-  "status": "Ticket remains in-progress until a complete Moodle plus Gemini acceptance run succeeds."
+  "status": "Ticket remains in-progress; resume real acceptance after the provider quota reset.",
+  "latest_probe": {
+    "status": "blocked_by_provider_quota",
+    "http_status": 429,
+    "provider_status": "RESOURCE_EXHAUSTED",
+    "quota_metric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+    "quota_limit": 500,
+    "model": "gemini-3.5-flash-lite",
+    "provider_retry_after": "10h12m17s",
+    "credential_or_connection_issue": false
+  }
 }

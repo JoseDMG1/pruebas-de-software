@@ -452,3 +452,10 @@ ejecución posterior agotó los dos reintentos adicionales desde el saludo. El r
 con `complete: false`, está en `ticket06-browser.json`. No se declara aceptado
 el ticket 06 ni completa la aceptación conversacional mientras falte un recorrido
 integral con resultado satisfactorio.
+
+Tras la solicitud de continuar las pruebas, un probe directo de interpretación
+recibió HTTP 429 `RESOURCE_EXHAUSTED`. La respuesta indicó que la cuota gratuita
+de `generateContent` para `gemini-3.5-flash-lite` alcanzó 500 solicitudes y pidió
+reintentar en 10 h 12 min. La API de Moodle/RAG permanece accesible; no se cambió
+el modelo ni la configuración de credenciales. Se retomará la aceptación integral
+cuando la cuota vuelva a permitir generación.
