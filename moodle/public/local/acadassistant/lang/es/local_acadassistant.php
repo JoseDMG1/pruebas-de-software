@@ -23,6 +23,7 @@ $string['conversationempty'] = 'Escribe una pregunta para iniciar una conversaci
     . 'mantiene mientras tu sesión de Moodle esté activa.';
 $string['coursesource'] = 'Documento del curso';
 $string['guestnotallowed'] = 'Inicia sesión con una cuenta personal para usar el asistente.';
+$string['gotolatest'] = 'Ir al mensaje nuevo';
 $string['institutionalsource'] = 'Documento institucional';
 $string['moodledataprovenance'] = 'Los datos académicos visibles provienen de Moodle y dependen '
     . 'de tus permisos efectivos.';

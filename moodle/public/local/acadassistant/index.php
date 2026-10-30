@@ -58,7 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     !($response['follow_up'] ?? false),
                     $response['continuation'] ?? null,
                     $response['context_question'] ?? null,
-                    $response['semantic_state'] ?? null
+                    $response['semantic_state'] ?? null,
+                    $response['navigation_links'] ?? []
                 );
             } catch (\Throwable) {
                 $store->set_error(get_string('assistantunavailable', 'local_acadassistant'));
@@ -67,11 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $store->set_error(get_string('invalidaction', 'local_acadassistant'));
     }
-    redirect(new moodle_url($pageurl, [], 'conversation'));
+    redirect($pageurl);
 }
 
 $messages = $store->messages();
 foreach ($messages as &$message) {
+    $message['answer_html'] = \local_acadassistant\local\answer_presenter::render($message['answer']);
     foreach ($message['sources'] as &$source) {
         $source['label'] = $source['scope'] === 'institutional'
             ? get_string('institutionalsource', 'local_acadassistant')

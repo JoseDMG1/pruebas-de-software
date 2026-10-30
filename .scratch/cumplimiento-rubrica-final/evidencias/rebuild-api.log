@@ -1,0 +1,175 @@
+ Image rag-service-api Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 604B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 304B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12-slim
+#3 ...
+
+#4 [auth] library/python:pull token for registry-1.docker.io
+#4 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12-slim
+#3 DONE 2.2s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 124B done
+#5 DONE 0.0s
+
+#6 [1/5] FROM docker.io/library/python:3.12-slim@sha256:aa943ce411423c7582288f18707ff66eddcbaeb510502d747a72aeb34f30d159
+#6 resolve docker.io/library/python:3.12-slim@sha256:aa943ce411423c7582288f18707ff66eddcbaeb510502d747a72aeb34f30d159 0.0s done
+#6 DONE 0.1s
+
+#7 [internal] load build context
+#7 transferring context: 42.11kB 0.0s done
+#7 DONE 0.0s
+
+#8 [2/5] WORKDIR /app
+#8 CACHED
+
+#9 [3/5] COPY pyproject.toml ./
+#9 DONE 0.1s
+
+#10 [4/5] COPY src ./src
+#10 DONE 0.1s
+
+#11 [5/5] RUN pip install --no-cache-dir . && useradd --create-home --uid 10001 app
+#11 2.087 Processing /app
+#11 2.092   Installing build dependencies: started
+#11 3.991   Installing build dependencies: finished with status 'done'
+#11 3.991   Getting requirements to build wheel: started
+#11 4.385   Getting requirements to build wheel: finished with status 'done'
+#11 4.386   Preparing metadata (pyproject.toml): started
+#11 4.746   Preparing metadata (pyproject.toml): finished with status 'done'
+#11 5.009 Collecting fastapi<1,>=0.115 (from rag-service==0.1.0)
+#11 5.095   Downloading fastapi-0.162.0-py3-none-any.whl.metadata (26 kB)
+#11 5.201 Collecting uvicorn<1,>=0.30 (from rag-service==0.1.0)
+#11 5.221   Downloading uvicorn-0.54.0-py3-none-any.whl.metadata (6.6 kB)
+#11 5.268 Collecting pydantic-settings<3,>=2.6 (from rag-service==0.1.0)
+#11 5.287   Downloading pydantic_settings-2.16.2-py3-none-any.whl.metadata (4.0 kB)
+#11 5.340 Collecting psycopg<4,>=3.2 (from psycopg[binary]<4,>=3.2->rag-service==0.1.0)
+#11 5.360   Downloading psycopg-3.3.6-py3-none-any.whl.metadata (4.4 kB)
+#11 5.445 Collecting pypdf<7,>=5 (from rag-service==0.1.0)
+#11 5.464   Downloading pypdf-6.21.4-py3-none-any.whl.metadata (7.6 kB)
+#11 6.096 Collecting boto3<2,>=1.35 (from rag-service==0.1.0)
+#11 6.113   Downloading boto3-1.43.121-py3-none-any.whl.metadata (6.6 kB)
+#11 6.163 Collecting httpx<1,>=0.27 (from rag-service==0.1.0)
+#11 6.182   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+#11 6.743 Collecting botocore<1.44.0,>=1.43.121 (from boto3<2,>=1.35->rag-service==0.1.0)
+#11 6.761   Downloading botocore-1.43.121-py3-none-any.whl.metadata (5.6 kB)
+#11 6.788 Collecting jmespath<2.0.0,>=0.7.1 (from boto3<2,>=1.35->rag-service==0.1.0)
+#11 6.807   Downloading jmespath-1.1.0-py3-none-any.whl.metadata (7.6 kB)
+#11 6.853 Collecting s3transfer<0.20.0,>=0.19.0 (from boto3<2,>=1.35->rag-service==0.1.0)
+#11 6.872   Downloading s3transfer-0.19.3-py3-none-any.whl.metadata (1.7 kB)
+#11 6.948 Collecting starlette>=0.46.0 (from fastapi<1,>=0.115->rag-service==0.1.0)
+#11 6.967   Downloading starlette-1.10.0-py3-none-any.whl.metadata (6.6 kB)
+#11 7.208 Collecting pydantic>=2.9.0 (from fastapi<1,>=0.115->rag-service==0.1.0)
+#11 7.227   Downloading pydantic-2.14.1-py3-none-any.whl.metadata (133 kB)
+#11 7.308 Collecting typing-extensions>=4.8.0 (from fastapi<1,>=0.115->rag-service==0.1.0)
+#11 7.328   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+#11 7.357 Collecting typing-inspection>=0.4.2 (from fastapi<1,>=0.115->rag-service==0.1.0)
+#11 7.380   Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+#11 7.433 Collecting annotated-doc>=0.0.2 (from fastapi<1,>=0.115->rag-service==0.1.0)
+#11 7.452   Downloading annotated_doc-0.0.5-py3-none-any.whl.metadata (6.5 kB)
+#11 7.504 Collecting opentelemetry-api>=1.44.0 (from fastapi<1,>=0.115->rag-service==0.1.0)
+#11 7.523   Downloading opentelemetry_api-1.45.1-py3-none-any.whl.metadata (1.4 kB)
+#11 7.571 Collecting anyio (from httpx<1,>=0.27->rag-service==0.1.0)
+#11 7.590   Downloading anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+#11 7.640 Collecting certifi (from httpx<1,>=0.27->rag-service==0.1.0)
+#11 7.658   Downloading certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+#11 7.709 Collecting httpcore==1.* (from httpx<1,>=0.27->rag-service==0.1.0)
+#11 7.729   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+#11 7.771 Collecting idna (from httpx<1,>=0.27->rag-service==0.1.0)
+#11 7.790   Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+#11 7.822 Collecting h11>=0.16 (from httpcore==1.*->httpx<1,>=0.27->rag-service==0.1.0)
+#11 7.842   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+#11 8.165 Collecting psycopg-binary==3.3.6 (from psycopg[binary]<4,>=3.2->rag-service==0.1.0)
+#11 8.184   Downloading psycopg_binary-3.3.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.7 kB)
+#11 8.234 Collecting python-dotenv>=1.2.2 (from pydantic-settings<3,>=2.6->rag-service==0.1.0)
+#11 8.254   Downloading python_dotenv-1.2.4-py3-none-any.whl.metadata (29 kB)
+#11 8.326 Collecting click>=7.0 (from uvicorn<1,>=0.30->rag-service==0.1.0)
+#11 8.345   Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+#11 8.392 Collecting python-dateutil<3.0.0,>=2.1 (from botocore<1.44.0,>=1.43.121->boto3<2,>=1.35->rag-service==0.1.0)
+#11 8.412   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+#11 8.492 Collecting urllib3!=2.2.0,<3,>=1.25.4 (from botocore<1.44.0,>=1.43.121->boto3<2,>=1.35->rag-service==0.1.0)
+#11 8.511   Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+#11 8.566 Collecting annotated-types>=0.6.0 (from pydantic>=2.9.0->fastapi<1,>=0.115->rag-service==0.1.0)
+#11 8.585   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+#11 9.493 Collecting pydantic-core==2.50.1 (from pydantic>=2.9.0->fastapi<1,>=0.115->rag-service==0.1.0)
+#11 9.511   Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.5 kB)
+#11 9.732 Collecting six>=1.5 (from python-dateutil<3.0.0,>=2.1->botocore<1.44.0,>=1.43.121->boto3<2,>=1.35->rag-service==0.1.0)
+#11 9.750   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+#11 9.779 Downloading boto3-1.43.121-py3-none-any.whl (140 kB)
+#11 9.805 Downloading fastapi-0.162.0-py3-none-any.whl (148 kB)
+#11 9.826 Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+#11 9.848 Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+#11 9.869 Downloading psycopg-3.3.6-py3-none-any.whl (215 kB)
+#11 9.892 Downloading psycopg_binary-3.3.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (5.2 MB)
+#11 9.994    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.2/5.2 MB 53.5 MB/s eta 0:00:00
+#11 10.01 Downloading pydantic_settings-2.16.2-py3-none-any.whl (81 kB)
+#11 10.03 Downloading pypdf-6.21.4-py3-none-any.whl (410 kB)
+#11 10.06 Downloading uvicorn-0.54.0-py3-none-any.whl (87 kB)
+#11 10.07 Downloading annotated_doc-0.0.5-py3-none-any.whl (5.3 kB)
+#11 10.12 Downloading botocore-1.43.121-py3-none-any.whl (16.2 MB)
+#11 10.34    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.2/16.2 MB 73.8 MB/s eta 0:00:00
+#11 10.36 Downloading click-8.5.0-py3-none-any.whl (125 kB)
+#11 10.38 Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+#11 10.40 Downloading jmespath-1.1.0-py3-none-any.whl (20 kB)
+#11 10.42 Downloading opentelemetry_api-1.45.1-py3-none-any.whl (60 kB)
+#11 10.44 Downloading pydantic-2.14.1-py3-none-any.whl (488 kB)
+#11 10.47 Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.2 MB)
+#11 10.50    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 75.1 MB/s eta 0:00:00
+#11 10.52 Downloading python_dotenv-1.2.4-py3-none-any.whl (23 kB)
+#11 10.54 Downloading s3transfer-0.19.3-py3-none-any.whl (90 kB)
+#11 10.56 Downloading starlette-1.10.0-py3-none-any.whl (80 kB)
+#11 10.58 Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+#11 10.61 Downloading idna-3.20-py3-none-any.whl (69 kB)
+#11 10.63 Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+#11 10.64 Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+#11 10.67 Downloading certifi-2026.10.23-py3-none-any.whl (135 kB)
+#11 10.69 Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+#11 10.70 Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+#11 10.73 Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+#11 10.75 Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+#11 10.96 Building wheels for collected packages: rag-service
+#11 10.96   Building wheel for rag-service (pyproject.toml): started
+#11 11.39   Building wheel for rag-service (pyproject.toml): finished with status 'done'
+#11 11.39   Created wheel for rag-service: filename=rag_service-0.1.0-py3-none-any.whl size=82559 sha256=aea6739073507545beb81fd2b875f1baec73b9be36a4f3319abfe60f945860dd
+#11 11.39   Stored in directory: /tmp/pip-ephem-wheel-cache-28bs_9vt/wheels/54/1b/b7/aa63e25c8f14f4f2ae7b04e6097bdecb770e455c5c1ee0a600
+#11 11.39 Successfully built rag-service
+#11 11.50 Installing collected packages: urllib3, typing-extensions, six, python-dotenv, pypdf, psycopg-binary, jmespath, idna, h11, click, certifi, annotated-types, annotated-doc, uvicorn, typing-inspection, python-dateutil, pydantic-core, psycopg, opentelemetry-api, httpcore, anyio, starlette, pydantic, httpx, botocore, s3transfer, pydantic-settings, fastapi, boto3, rag-service
+#11 16.11 Successfully installed annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.15.1 boto3-1.43.121 botocore-1.43.121 certifi-2026.10.23 click-8.5.0 fastapi-0.162.0 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.20 jmespath-1.1.0 opentelemetry-api-1.45.1 psycopg-3.3.6 psycopg-binary-3.3.6 pydantic-2.14.1 pydantic-core-2.50.1 pydantic-settings-2.16.2 pypdf-6.21.4 python-dateutil-2.9.0.post0 python-dotenv-1.2.4 rag-service-0.1.0 s3transfer-0.19.3 six-1.17.0 starlette-1.10.0 typing-extensions-4.16.0 typing-inspection-0.4.4 urllib3-2.8.0 uvicorn-0.54.0
+#11 16.11 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#11 16.31 
+#11 16.31 [notice] A new release of pip is available: 25.0.1 -> 26.2.2
+#11 16.31 [notice] To update, run: pip install --upgrade pip
+#11 DONE 17.1s
+
+#12 exporting to image
+#12 exporting layers
+#12 exporting layers 7.4s done
+#12 exporting manifest sha256:f3740f7ba6f8a18e9f7cec30f106898444e98fdf5313d7f7e23ef5256017aecc 0.1s done
+#12 exporting config sha256:55df4c8049cd7a94ff7675a9843bf87b1a4905ca95b1e9e3a69471e9923e17b1
+#12 exporting config sha256:55df4c8049cd7a94ff7675a9843bf87b1a4905ca95b1e9e3a69471e9923e17b1 0.0s done
+#12 exporting attestation manifest sha256:1eb00913b43dbd7512637bb5876e1ac49b8e2dfefdc5cd2a2042f65b092520fa 0.2s done
+#12 exporting manifest list sha256:ac1216c3dce90894479c54b5aee1cd61d1a22cdccfd1fe22c0417e1977f5516e
+#12 exporting manifest list sha256:ac1216c3dce90894479c54b5aee1cd61d1a22cdccfd1fe22c0417e1977f5516e 0.0s done
+#12 naming to docker.io/library/rag-service-api:latest done
+#12 unpacking to docker.io/library/rag-service-api:latest
+#12 unpacking to docker.io/library/rag-service-api:latest 2.2s done
+#12 DONE 10.0s
+
+#13 resolving provenance for metadata file
+#13 DONE 0.0s
+ Image rag-service-api Built 
+ Container rag-service-db-1 Running 
+ Container rag-service-api-1 Recreate 
+ Container rag-service-api-1 Recreated 
+ Container rag-service-db-1 Waiting 
+ Container rag-service-db-1 Healthy 
+ Container rag-service-api-1 Starting 
+ Container rag-service-api-1 Started 

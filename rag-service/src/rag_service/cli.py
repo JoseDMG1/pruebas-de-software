@@ -15,7 +15,7 @@ from rag_service.gemini import EmbeddingRouter, GeminiEmbeddingProvider
 from rag_service.ingestion import DOCUMENT_KINDS, ingest
 from rag_service.observability import log_event
 from rag_service.repository import Repository
-from rag_service.query import QueryService, GeminiChatProvider
+from rag_service.query import QueryService, DeepSeekChatProvider
 from rag_service.demo_setup import prepare_demo
 
 
@@ -38,15 +38,17 @@ def parser() -> argparse.ArgumentParser:
     commands.add_parser("list", help="Listar documentos indexados y número de fragmentos")
     remove = commands.add_parser("delete", help="Eliminar un documento y todos sus fragmentos")
     remove.add_argument("key", help="Clave exacta del documento")
-    smoke = commands.add_parser("check-gemini", help="Probar chat y embeddings Gemini")
+    smoke = commands.add_parser("check-providers", aliases=["check-gemini"],
+                                help="Probar chat DeepSeek y embeddings Gemini")
     smoke.add_argument("--text", default="Reglamento académico universitario.")
-    commands.add_parser("prepare-gemini", help="Validar conexión y salida JSON de Gemini")
+    commands.add_parser("prepare-deepseek", help="Validar conexión y salida JSON de DeepSeek")
+    commands.add_parser("prepare-gemini", help="Validar embeddings Gemini y chat DeepSeek")
     commands.add_parser("prepare-gemini-index", help="Indexar el corpus con embeddings Gemini")
     commands.add_parser("index-status", help="Ver cobertura por proveedor/modelo/revisión")
     question = commands.add_parser("ask", help="Preguntar al prototipo RAG local")
     question.add_argument("query")
     demo = commands.add_parser(
-        "prepare-demo", help="Preparar Gemini y el corpus ficticio del Sprint 1"
+        "prepare-demo", help="Preparar DeepSeek, embeddings Gemini y documentos institucionales"
     )
     demo.add_argument("--directory", type=Path, default=Path("data/inbox"))
     return root
@@ -97,15 +99,18 @@ def main(argv=None) -> int:
             )
         elif args.command == "ask":
             result = QueryService(settings, repository).ask(args.query, request_id).model_dump()
-        elif args.command in {"prepare-gemini", "check-gemini"}:
+        elif args.command == "prepare-deepseek":
+            result = DeepSeekChatProvider(settings).prepare()
+        elif args.command in {"prepare-gemini", "check-gemini", "check-providers"}:
             from dataclasses import asdict
 
             embeddings = GeminiEmbeddingProvider(settings).embed_query(
                 getattr(args, "text", "Reglamento académico universitario.")
             )
-            chat = GeminiChatProvider(settings).prepare()
+            chat = DeepSeekChatProvider(settings).prepare()
             result = {
-                "status": "ok", "provider": "gemini", "chat_model": chat["model"],
+                "status": "ok", "chat_provider": "deepseek", "chat_model": chat["model"],
+                "embedding_provider": "gemini",
                 "embedding": asdict(embeddings.space),
             }
         elif args.command == "prepare-demo":

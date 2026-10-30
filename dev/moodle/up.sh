@@ -6,9 +6,9 @@ docker compose -f compose.moodle.yaml up --build -d
 docker compose -f compose.moodle.yaml exec -T moodle sh -lc \
   'mkdir -p /var/moodledata /var/moodletestdata && chown www-data:www-data /var/moodledata /var/moodletestdata'
 if ! docker compose -f compose.moodle.yaml exec -T -u www-data moodle php -r \
-  'define("CLI_SCRIPT", true); require("config.php"); exit($DB->table_exists("config") && $DB->get_field("config", "value", ["name" => "version"]) ? 0 : 1);'; then
+  'define("CLI_SCRIPT", true); require("config.php"); exit($DB->get_manager()->table_exists("config") && $DB->get_field("config", "value", ["name" => "version"]) ? 0 : 1);'; then
   docker compose -f compose.moodle.yaml exec -T -u www-data moodle sh -lc \
-    'php admin/cli/install_database.php --agree-license --adminuser=admin_sprint2 --adminpass="$MOODLE_DEMO_PASSWORD" --adminemail=admin@example.test --fullname="Campus de pruebas Sprint 2" --shortname="Sprint 2" --lang=en'
+    'php admin/cli/install_database.php --agree-license --adminuser=admin_udv --adminpass="$MOODLE_DEMO_PASSWORD" --adminemail=admin@udv.edu.pe --fullname="Universidad del Valle" --shortname="UDV" --lang=en'
 fi
 docker compose -f compose.moodle.yaml exec -T -u www-data moodle php admin/cli/upgrade.php --non-interactive --allow-unstable
 docker compose -f compose.moodle.yaml exec -T -u www-data moodle php /opt/moodle-dev/seed.php > .local/moodle-fixtures.json

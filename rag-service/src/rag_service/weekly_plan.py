@@ -1,6 +1,7 @@
 """Suggest study blocks from live pending tasks and explicitly declared availability."""
 
 from datetime import date, datetime, time, timedelta
+from rag_service.academic_answers import format_due_date
 from rag_service.conversation import timezone_object
 
 
@@ -17,7 +18,10 @@ def compose_week(context, plan, proposal, runtime):
     else:
         end = start + timedelta(days=6 - start.weekday())
     rows = context.get("assignments")
-    header = f"Plan del {start} al {end} ({runtime.timezone}), según Moodle."
+    header = (
+        f"Plan de estudio\n{format_due_date(start.isoformat())} – "
+        f"{format_due_date(end.isoformat())} · {runtime.timezone} · Según Moodle"
+    )
     partial = plan.has_more or not plan.complete or not isinstance(rows, list)
     parts = [header]
     if partial:
@@ -35,7 +39,7 @@ def compose_week(context, plan, proposal, runtime):
                 "faltan datos para confirmar el total."
             )
         )
-        return "\n".join(parts)
+        return "\n\n".join(parts)
 
     def deadline(row):
         return datetime.fromtimestamp(row["due_at"], zone) if row.get("due_at") else None
@@ -58,8 +62,10 @@ def compose_week(context, plan, proposal, runtime):
 
     def description(row):
         state = "borrador sin presentar" if row["status"] == "draft" else "no entregada"
-        due = row.get("due_date") or "sin fecha"
-        return f"{row['name']} ({row['course_name']}): {state}; vence {due}"
+        due = format_due_date(row.get("due_date")) or "sin fecha"
+        return (
+            f"{row['name']} — {row['course_name']}\n  Estado: {state.capitalize()} · Entrega: {due}"
+        )
 
     # Limit display only, not the live read; disclose omitted names.
     for label, group in [
@@ -68,7 +74,8 @@ def compose_week(context, plan, proposal, runtime):
         ("Sin fecha", undated),
     ]:
         if group:
-            parts.append(label + ": " + "; ".join(description(row) for row in group[:6]) + ".")
+            items = [description(row) for row in group[:6]]
+            parts.append(label + f" ({len(group)})\n" + "\n".join("• " + item for item in items))
             if len(group) > 6:
                 parts.append(
                     f"Hay {len(group) - 6} tareas adicionales en este grupo; "
@@ -85,7 +92,7 @@ def compose_week(context, plan, proposal, runtime):
         parts.append(
             "Ya consulté tus pendientes. ¿Qué días y horas tienes disponibles para estudiar?"
         )
-        return "\n".join(parts)
+        return "\n\n".join(parts)
     parts.append(
         "Esta propuesta no garantiza terminar las tareas. Los bloques son espacios disponibles, "
         "no estimaciones de esfuerzo; conserva los vencimientos de Moodle."
@@ -96,10 +103,13 @@ def compose_week(context, plan, proposal, runtime):
             day = min(start + timedelta(days=index), end, deadline(row).date())
             if day < now.date():
                 continue
-            parts.append(f"{day}: avanzar {row['name']} ({row['course_name']}).")
+            parts.append(
+                f"• {format_due_date(day.isoformat())}: avanzar {row['name']} "
+                f"({row['course_name']})."
+            )
         if undated:
             parts.append("Reserva espacio para las tareas sin fecha cuando indiques su prioridad.")
-        return "\n".join(parts)
+        return "\n\n".join(parts)
     available = proposal.availability
     slots = []
     for delta in range((end - start).days + 1):
@@ -124,7 +134,8 @@ def compose_week(context, plan, proposal, runtime):
         row = eligible[0]
         used.add(row["assignment_id"])
         parts.append(
-            f"{begin:%Y-%m-%d %H:%M}–{finish:%H:%M}: avanzar {row['name']} ({row['course_name']})."
+            f"• {format_due_date(begin.strftime('%Y-%m-%d %H:%M'))}–{finish:%H:%M}: "
+            f"avanzar {row['name']} ({row['course_name']})."
         )
         count += 1
         if count >= 8:
@@ -139,4 +150,4 @@ def compose_week(context, plan, proposal, runtime):
             "Quedan pendientes sin un bloque asignado; ajusta disponibilidad o prioridad. "
             "Una tarea puede necesitar varios bloques."
         )
-    return "\n".join(parts)
+    return "\n\n".join(parts)

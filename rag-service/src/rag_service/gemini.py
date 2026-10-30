@@ -6,7 +6,9 @@ from random import uniform
 from time import sleep
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
-from urllib.request import Request, urlopen
+from urllib.request import Request
+
+from rag_service.provider_http import urlopen
 
 from rag_service.embedding_types import EmbeddingBatch, EmbeddingSpace
 from rag_service.embeddings import validate_embedding

@@ -52,7 +52,7 @@ def test_cli_errors_are_controlled(tmp_path, capsys):
     assert '"pdf_unreadable"' in capsys.readouterr().err
 
 
-def test_cli_prepares_gemini_without_connecting_to_database(monkeypatch, capsys):
+def test_cli_prepares_deepseek_and_gemini_embeddings_without_database(monkeypatch, capsys):
     import json
     from types import SimpleNamespace
 
@@ -68,15 +68,16 @@ def test_cli_prepares_gemini_without_connecting_to_database(monkeypatch, capsys)
         )),
     )
     monkeypatch.setattr(
-        "rag_service.cli.GeminiChatProvider",
+        "rag_service.cli.DeepSeekChatProvider",
         lambda config: SimpleNamespace(prepare=lambda: {
-            "provider": "gemini", "model": config.gemini_chat_model,
+            "provider": "deepseek", "model": config.deepseek_chat_model,
         }),
     )
     assert main(["prepare-gemini"]) == 0
     result = json.loads(capsys.readouterr().out)
-    assert result["provider"] == "gemini"
-    assert result["chat_model"] == "gemini-flash-latest"
+    assert result["chat_provider"] == "deepseek"
+    assert result["chat_model"] == "deepseek-flash"
+    assert result["embedding_provider"] == "gemini"
     assert result["embedding"]["dimensions"] == 768
 
 

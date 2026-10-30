@@ -64,8 +64,8 @@ def respond(service, question, proposal, runtime, context, history, course_ids, 
                 )
                 if answer.startswith("Según Moodle:\n"):
                     answer = (
-                        answer.removeprefix("Según Moodle:\n")
-                        + "\nSegún los datos visibles de Moodle."
+                        answer.removeprefix("Según Moodle:\n").lstrip("\n")
+                        + "\n\nSegún los datos visibles de Moodle."
                     )
             if plan.document_question:
                 try:
@@ -75,37 +75,42 @@ def respond(service, question, proposal, runtime, context, history, course_ids, 
                         request_id,
                         question,
                     )
-                    answer += ("\n" if answer else "") + (
+                    document_answer = (
                         result.answer
                         if not result.insufficient_context
                         else "No encontré una fuente verificada para esa consulta. "
                         "No puedo confirmar normas o pasos sin esa evidencia."
                     )
+                    answer += ("\n\n" if answer else "") + (
+                        "Información institucional:\n" + document_answer
+                    )
                     sources = result.sources
                     discrepancies = calendar_discrepancies(context, sources)
                     if discrepancies:
-                        answer += "\n" + "\n".join(discrepancies)
+                        answer += "\n\n" + "\n".join(discrepancies)
                     insufficient = not bool(proposal.categories) and result.insufficient_context
                 except (AppError, psycopg.Error):
                     if not proposal.categories:
                         raise
                     answer += (
-                        "\nNo pude verificar la parte documental; puedes reintentar esa parte."
+                        "\n\nNo pude verificar la parte documental; puedes reintentar esa parte."
                     )
         except (KeyError, TypeError, ValueError) as exc:
             raise AppError(
                 "invalid_academic_context", "No pude verificar los datos de Moodle."
             ) from exc
     if proposal.finance:
-        answer += "\nTodavía no consulto cuotas, saldos ni pagos personales."
+        answer += "\n\nTodavía no consulto cuotas, saldos ni pagos personales."
     if proposal.blocked_part and proposal.intent != "blocked":
         answer += (
-            "\nSolo puedo atender la parte de tu solicitud que corresponde a la vida universitaria."
+            "\n\nSolo puedo atender la parte de tu solicitud que corresponde a la vida "
+            "universitaria."
         )
     if proposal.social != "none" and proposal.intent not in ("social", "blocked"):
-        answer = {"greeting": "¡Hola! ", "thanks": "¡De nada! ", "bye": "¡Hasta luego! "}[
+        greeting = {"greeting": "¡Hola!", "thanks": "¡De nada!", "bye": "¡Hasta luego!"}[
             proposal.social
-        ] + answer
+        ]
+        answer = greeting + ("\n\n" + answer if answer else "")
     if not answer.strip() or len(answer) > 4000:
         raise AppError("invalid_generation", "La respuesta no pudo verificarse. Acota la consulta.")
     return QueryResponse(

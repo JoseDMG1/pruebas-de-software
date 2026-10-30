@@ -1,17 +1,112 @@
 [
- {"key":"matricula","title":"Matrícula — Universidad Demo del Valle (ficticio)","kind":"GUIA","pages":[
-  "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Matrícula 2026-II. La matrícula ordinaria empieza el 3 de agosto de 2026 y termina el 14 de agosto de 2026. La matrícula extemporánea se realiza del 17 al 19 de agosto de 2026 y tiene un recargo de 25 soles. Para matricularse, el estudiante debe tener su documento de identidad vigente y no tener deudas pendientes.",
-  "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Matrícula 2026-II. Un estudiante regular puede matricularse hasta en 22 créditos por semestre. Para matricularse en un curso debe haber aprobado sus prerrequisitos. El cambio de sección puede solicitarse hasta el 21 de agosto de 2026, sujeto a disponibilidad de vacantes. No se permite cambiar de sección después de esa fecha.",
-  "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Matrícula 2026-II. La Oficina de Matrícula atiende de lunes a viernes, de 9:00 a 16:00 horas. Las consultas se reciben en matricula@demo.invalid. La solicitud de reserva de matrícula debe presentarse antes del inicio de clases y permite reservar hasta dos semestres consecutivos."
- ]},
- {"key":"reglamento","title":"Reglamento académico — Universidad Demo del Valle (ficticio)","kind":"REGLAMENTO","pages":[
-  "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Reglamento académico. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.",
-  "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Reglamento académico. El retiro de un curso se solicita hasta la octava semana del semestre. Se permite retirar hasta dos cursos por semestre. Si el estudiante desaprueba un curso tres veces, debe asistir a una asesoría académica obligatoria antes de volver a matricularse en ese curso.",
-  "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Reglamento académico. El reclamo de una calificación se presenta dentro de tres días hábiles de su publicación. Se dirige al docente del curso e incluye la identificación del estudiante, el curso y la justificación del reclamo. Copiar durante un examen anula esa evaluación y asigna la nota cero."
- ]},
- {"key":"tramites","title":"Trámites — Universidad Demo del Valle (ficticio)","kind":"PROCEDIMIENTO","pages":[
-  "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Trámites documentarios. El certificado de estudios cuesta 35 soles y se entrega en cinco días hábiles. Para solicitarlo se presenta una copia del documento de identidad y el comprobante de pago. La constancia de matrícula cuesta 10 soles y se entrega en un día hábil.",
-  "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Trámites documentarios. La mesa de partes atiende de lunes a viernes, de 8:30 a 17:00 horas. El estado de una solicitud se consulta con el número de expediente entregado al registrarla. La rectificación del nombre en un documento requiere una copia del documento de identidad; este trámite es gratuito y tarda dos días hábiles.",
-  "DOCUMENTO FICTICIO DE PRUEBA. Universidad Demo del Valle. Trámites documentarios. La solicitud de convalidación de cursos debe incluir el certificado de estudios y los sílabos de los cursos aprobados. El plazo de evaluación de la convalidación es de diez días hábiles. La decisión es emitida por la coordinación académica."
- ]}
+  {
+    "key": "matricula",
+    "title": "Matrícula — Universidad del Valle",
+    "kind": "GUIA",
+    "pages": [
+      "Universidad del Valle. Matrícula 2026-II. La matrícula ordinaria empieza el 3 de agosto de 2026 y termina el 14 de agosto de 2026. La matrícula extemporánea se realiza del 17 al 19 de agosto de 2026 y tiene un recargo de 25 soles. Para matricularse, el estudiante debe tener su documento de identidad vigente y no tener deudas pendientes.",
+      "Universidad del Valle. Matrícula 2026-II. Un estudiante regular puede matricularse hasta en 22 créditos por semestre. Para matricularse en un curso debe haber aprobado sus prerrequisitos. El cambio de sección puede solicitarse hasta el 21 de agosto de 2026, sujeto a disponibilidad de vacantes. No se permite cambiar de sección después de esa fecha.",
+      "Universidad del Valle. Matrícula 2026-II. La Oficina de Matrícula atiende de lunes a viernes, de 9:00 a 16:00 horas. Las consultas se reciben en matricula@udv.edu.pe. La solicitud de reserva de matrícula debe presentarse antes del inicio de clases y permite reservar hasta dos semestres consecutivos. El periodo lectivo 2026-II comienza el 24 de agosto de 2026."
+    ]
+  },
+  {
+    "key": "reglamento",
+    "title": "Reglamento académico — Universidad del Valle",
+    "kind": "REGLAMENTO",
+    "pages": [
+      "Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.",
+      "Universidad del Valle. Reglamento académico 2026-II. El retiro de un curso se solicita hasta la octava semana del semestre. Se permite retirar hasta dos cursos por semestre. Si el estudiante desaprueba un curso tres veces, debe asistir a una asesoría académica obligatoria antes de volver a matricularse en ese curso.",
+      "Universidad del Valle. Reglamento académico 2026-II. El reclamo de una calificación se presenta dentro de tres días hábiles de su publicación. Se dirige al docente del curso e incluye la identificación del estudiante, el curso y la justificación del reclamo. Copiar durante un examen anula esa evaluación y asigna la nota cero."
+    ]
+  },
+  {
+    "key": "tramites",
+    "title": "Trámites documentarios — Universidad del Valle",
+    "kind": "PROCEDIMIENTO",
+    "pages": [
+      "Universidad del Valle. Trámites documentarios. El certificado de estudios cuesta 35 soles y se entrega en cinco días hábiles. Para solicitarlo se presenta una copia del documento de identidad y el comprobante de pago. La constancia de matrícula cuesta 10 soles y se entrega en un día hábil.",
+      "Universidad del Valle. Trámites documentarios. La mesa de partes atiende de lunes a viernes, de 8:30 a 17:00 horas. El estado de una solicitud se consulta con el número de expediente entregado al registrarla. La rectificación del nombre en un documento requiere una copia del documento de identidad; este trámite es gratuito y tarda dos días hábiles.",
+      "Universidad del Valle. Trámites documentarios. La solicitud de convalidación de cursos debe incluir el certificado de estudios y los sílabos de los cursos aprobados. El plazo de evaluación de la convalidación es de diez días hábiles. La decisión es emitida por la coordinación académica. La mesa de partes recibe solicitudes en partes@udv.edu.pe."
+    ]
+  },
+  {
+    "key": "calendario-academico",
+    "title": "Calendario académico 2026-II — Universidad del Valle",
+    "kind": "OTRO",
+    "pages": [
+      "Calendario académico oficial de la Universidad del Valle, ciclo 2026-II. Inicio de clases: 24 de agosto de 2026. Semana de evaluaciones parciales: del 12 al 17 de octubre de 2026. Receso académico: 19 y 20 de octubre de 2026. Último día de clases: 12 de diciembre de 2026.",
+      "Calendario académico oficial 2026-II. Exámenes finales: del 14 al 19 de diciembre de 2026. Cierre de actas: 23 de diciembre de 2026. Publicación de notas finales: 28 de diciembre de 2026. El plazo para presentar un reclamo de nota se rige por el Reglamento académico y se cuenta desde la publicación.",
+      "Calendario académico oficial 2026-II. Feriados sin actividad académica: 8 de octubre y 1 de noviembre de 2026. Las fechas de este calendario institucional prevalecen como referencia para hitos académicos generales. Las fechas de entrega de una actividad en Moodle son específicas de cada curso y deben revisarse en la actividad correspondiente. Consultas: calendario@udv.edu.pe."
+    ]
+  },
+  {
+    "key": "biblioteca",
+    "title": "Servicios de biblioteca — Universidad del Valle",
+    "kind": "GUIA",
+    "pages": [
+      "Biblioteca Central de la Universidad del Valle. Atención presencial de lunes a viernes de 8:00 a 20:00 y sábados de 9:00 a 13:00. El préstamo regular permite llevar hasta cinco libros por catorce días calendario. La colección de referencia se consulta dentro de la sala y no se presta a domicilio.",
+      "Biblioteca Central. Cada préstamo regular se puede renovar una vez por siete días, siempre que otro usuario no haya reservado el material. La renovación se solicita desde el catálogo antes de la fecha de vencimiento. Los libros deben devolverse en el módulo de circulación; la devolución fuera de horario se deposita en el buzón habilitado junto a la entrada.",
+      "Biblioteca Central. Las salas de estudio grupal se reservan por bloques de dos horas, con un máximo de seis estudiantes por sala. Para acceder a los recursos digitales institucionales se ingresa con la cuenta universitaria. Para orientación de búsqueda bibliográfica, escribe a biblioteca@udv.edu.pe o acércate al módulo de referencia."
+    ]
+  },
+  {
+    "key": "bienestar-estudiantil",
+    "title": "Bienestar y orientación estudiantil — Universidad del Valle",
+    "kind": "GUIA",
+    "pages": [
+      "Dirección de Bienestar Estudiantil de la Universidad del Valle. Ofrece orientación psicológica breve, consejería vocacional y acompañamiento para adaptación a la vida universitaria. La atención es confidencial y requiere una cita; no reemplaza servicios de emergencia ni atención clínica especializada.",
+      "Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.",
+      "Bienestar Estudiantil. El programa de tutoría de pares conecta a estudiantes de primeros ciclos con voluntarios capacitados para orientación sobre hábitos de estudio y adaptación. La tutoría de pares no califica, no modifica notas ni reemplaza las consultas con el docente. La coordinación responde solicitudes dentro de dos días hábiles."
+    ]
+  },
+  {
+    "key": "servicios-digitales",
+    "title": "Servicios digitales y soporte — Universidad del Valle",
+    "kind": "GUIA",
+    "pages": [
+      "Servicios Digitales de la Universidad del Valle. La cuenta institucional permite acceder a Moodle, correo universitario, biblioteca digital y conexión Wi-Fi del campus. El nombre de usuario es el código universitario asignado durante la matrícula. La contraseña es personal y nunca debe compartirse por correo, chat o llamada.",
+      "Servicios Digitales. Para recuperar el acceso, solicita asistencia a soporte@udv.edu.pe indicando tu código universitario. El equipo de soporte verifica tu identidad antes de restablecer el acceso; nunca incluyas tu contraseña.",
+      "Mesa de Ayuda de Servicios Digitales. Atención de lunes a viernes de 8:00 a 18:00. Tiempo objetivo de primera respuesta: un día hábil. Para reportar un problema de Moodle incluye el curso, la actividad, la hora aproximada y una captura sin datos personales de terceros. Contacto: soporte@udv.edu.pe."
+    ]
+  },
+  {
+    "key": "becas-y-apoyos",
+    "title": "Becas y apoyos académicos — Universidad del Valle",
+    "kind": "PROCEDIMIENTO",
+    "pages": [
+      "Programa de Becas de la Universidad del Valle, convocatoria 2026-II. La beca de continuidad académica puede cubrir hasta el 50 por ciento de los derechos académicos del siguiente ciclo. Requiere matrícula vigente, promedio ponderado mínimo de 15 sobre 20 y no tener sanciones académicas vigentes. La concesión depende de evaluación y disponibilidad presupuestal.",
+      "Programa de Apoyo de Emergencia. Se dirige a estudiantes cuya continuidad académica enfrenta una dificultad imprevista. La solicitud incluye una explicación breve y documentos de sustento; la información se trata de forma reservada. La evaluación no garantiza la asignación de un beneficio y no modifica deudas, notas ni fechas de pago.",
+      "Becas y apoyos. La convocatoria 2026-II recibe solicitudes del 1 al 15 de septiembre de 2026 por correo a becas@udv.edu.pe. Resultados: 30 de septiembre de 2026. Consultas generales: becas@udv.edu.pe. El asistente informa reglas publicadas, pero no consulta el estado de solicitudes ni los saldos o pagos personales."
+    ]
+  },
+  {
+    "key": "integridad-academica",
+    "title": "Integridad académica — Universidad del Valle",
+    "kind": "REGLAMENTO",
+    "pages": [
+      "Política de Integridad Académica de la Universidad del Valle. Todo trabajo presentado debe reconocer las ideas, datos, imágenes y textos de otras personas mediante citas y referencias suficientes para localizarlos. Las instrucciones particulares del docente pueden precisar el estilo bibliográfico exigido.",
+      "Integridad académica. El trabajo en equipo es válido cuando la actividad lo permite y se identifica la contribución de sus integrantes. Presentar como propio un trabajo ajeno, inventar datos, reutilizar una entrega sin autorización o ayudar a otra persona a copiar puede iniciar una revisión académica. La persona involucrada puede presentar su versión de los hechos.",
+      "Integridad académica. Una consulta preventiva sobre citación se puede dirigir al docente o a la Biblioteca Central. Las incidencias se comunican a la Secretaría Académica mediante integridad@udv.edu.pe. Las medidas aplicables dependen del reglamento vigente y de la evaluación del caso; el asistente no determina responsabilidad ni sanciones individuales."
+    ]
+  },
+  {
+    "key": "accesibilidad",
+    "title": "Accesibilidad y ajustes académicos — Universidad del Valle",
+    "kind": "PROCEDIMIENTO",
+    "pages": [
+      "Unidad de Accesibilidad de la Universidad del Valle. Orienta a estudiantes que requieren ajustes para acceder a materiales, evaluaciones o espacios de aprendizaje. Los ajustes se acuerdan de manera individual, con participación del estudiante y del área académica, y respetan los resultados de aprendizaje del curso.",
+      "Accesibilidad. Para iniciar una solicitud, escribe a accesibilidad@udv.edu.pe. Describe la barrera y el ajuste solicitado. La unidad puede pedir documentación pertinente con consentimiento informado; no envíes diagnósticos ni datos sensibles por el chat del asistente.",
+      "Accesibilidad. La unidad confirma la recepción dentro de tres días hábiles y coordina una reunión para revisar alternativas. Los ajustes aprobados se comunican solo a las personas que necesitan implementarlos. Las solicitudes urgentes deben señalar la fecha de la actividad académica próxima."
+    ]
+  },
+  {
+    "key": "investigacion-estudiantil",
+    "title": "Iniciación en investigación — Universidad del Valle",
+    "kind": "GUIA",
+    "pages": [
+      "Oficina de Investigación Formativa de la Universidad del Valle. Los estudiantes pueden integrarse a proyectos vigentes con autorización del docente responsable. Antes de iniciar, deben acordar objetivos, tareas, cronograma, autoría y uso de datos del proyecto.",
+      "Investigación Formativa. Un proyecto que involucra personas requiere evaluación ética y consentimiento antes de recolectar información. No se deben publicar nombres, imágenes, respuestas ni datos identificables de participantes sin autorización expresa. La oficina ofrece talleres de metodología y búsqueda de fuentes durante cada ciclo.",
+      "Investigación Formativa. Para orientación escribe a investigacion.formativa@udv.edu.pe e indica tu programa académico y área de interés; no adjuntes bases de datos con información personal. Las oportunidades dependen de la disponibilidad de cada proyecto y deben confirmarse con su responsable."
+    ]
+  }
 ]

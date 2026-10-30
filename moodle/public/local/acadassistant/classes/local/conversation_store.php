@@ -57,7 +57,8 @@ final class conversation_store {
         bool $contextbreak = false,
         ?array $continuation = null,
         ?string $contextquestion = null,
-        ?array $semanticstate = null
+        ?array $semanticstate = null,
+        array $navigationlinks = []
     ): void {
         $state = $this->state();
         $safeSources = [];
@@ -80,6 +81,7 @@ final class conversation_store {
             'context_question' => \core_text::substr(trim($contextquestion ?? $question), 0, 1000),
             'answer' => \core_text::substr(trim($answer), 0, self::MAX_ANSWER_CHARS),
             'sources' => $safeSources,
+            'navigation_links' => academic_navigation::safe_links($navigationlinks),
             'academic_sources' => array_values(array_intersect(
                 ['calendar', 'academic'],
                 $academicprovenance

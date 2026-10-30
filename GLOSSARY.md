@@ -48,3 +48,12 @@ Interlocutor que ayuda con asuntos de la vida universitaria y responde a saludos
 
 **Plan semanal académico**:
 Propuesta de organización de la semana basada en las tareas pendientes de entrega de la persona, sus vencimientos y su disponibilidad; cuando esta no se conoce, el plan es un borrador con supuestos explícitos. Es una sugerencia para el usuario, no un cambio en sus entregas o en los plazos de Moodle.
+
+**Consulta documental**:
+Pregunta cuya respuesta se sustenta en documentos institucionales comunes o documentos de curso que la persona puede consultar. La respuesta identifica su fuente y reconoce cuando la evidencia disponible no permite responder.
+
+**Consulta académica**:
+Pregunta sobre datos académicos dinámicos que la persona tiene permiso para consultar, como sus cursos, tareas y calificaciones. Su fuente es el registro académico visible para esa persona.
+
+**Destino autorizado**:
+Página de Moodle correspondiente a un curso, actividad o informe al que la persona tiene acceso efectivo. Abrir ese destino no equivale a realizar una entrega ni modificar una calificación.

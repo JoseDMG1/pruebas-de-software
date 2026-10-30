@@ -1,5 +1,9 @@
 # Validación del prototipo del Sprint 1
 
+> Evidencia histórica de versiones anteriores. Para el sistema actual, consultar
+> [la guía de presentación](../../docs/presentacion-asistente.md) y
+> [la evaluación DeepSeek](evaluation-deepseek-results.json).
+
 El alcance incluye ingesta, recuperación básica, respuestas con fuentes y página de prueba,
 utilizando exclusivamente Ollama. Se completa la entrega de prototipo funcional del PDF; la
 integración Moodle y los requisitos generales de rendimiento y seguridad quedan para los

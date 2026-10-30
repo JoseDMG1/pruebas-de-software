@@ -1,4 +1,4 @@
-"""Run bounded, real Gemini checks with synthetic conversation data and a pinned Lima clock."""
+"""Run bounded, real DeepSeek checks with synthetic conversation data and a pinned Lima clock."""
 
 import argparse
 from datetime import datetime
@@ -11,25 +11,29 @@ from rag_service.academic_answers import AcademicPlan
 from rag_service.config import Settings
 from rag_service.conversation import InterpretationRequest
 from rag_service.errors import AppError
-from rag_service.query import GeminiChatProvider
-import rag_service.gemini as gemini_module
+from rag_service.query import DeepSeekChatProvider
+import rag_service.deepseek as deepseek_module
 from rag_service.weekly_plan import compose_week
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--timeout", type=int, default=15)
-    parser.add_argument("--model", help="Override GEMINI_CHAT_MODEL for this validation run")
+    parser.add_argument("--model", help="Override DEEPSEEK_CHAT_MODEL for this validation run")
     parser.add_argument("--retries", type=int, choices=range(4), default=2)
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
-    overrides = {"gemini_chat_model": args.model} if args.model else {}
-    settings = Settings(gemini_timeout=args.timeout, gemini_max_retries=args.retries, **overrides)
-    provider = GeminiChatProvider(settings)
+    overrides = {"deepseek_chat_model": args.model} if args.model else {}
+    settings = Settings(
+        deepseek_timeout=args.timeout,
+        deepseek_max_retries=args.retries,
+        **overrides,
+    )
+    provider = DeepSeekChatProvider(settings)
     model_call_count = 0
     http_attempt_count = 0
     original_request = provider.client.request
-    original_urlopen = gemini_module.urlopen
+    original_urlopen = deepseek_module.urlopen
 
     def count_model_request(method, path, data):
         nonlocal model_call_count
@@ -42,7 +46,7 @@ def main():
         return original_urlopen(request, timeout=timeout)
 
     provider.client.request = count_model_request
-    gemini_module.urlopen = count_http_attempt
+    deepseek_module.urlopen = count_http_attempt
     runtime = {
         "now": int(datetime(2026, 10, 19, 10, tzinfo=ZoneInfo("America/Lima")).timestamp()),
         "timezone": "America/Lima",
@@ -72,7 +76,8 @@ def main():
             "availability": {"days": [1, 3], "start_hour": 14, "end_hour": 16},
         }, None),
     ]
-    report = {"model": settings.gemini_chat_model, "runtime": runtime, "cases": []}
+    report = {"provider": "deepseek", "model": settings.deepseek_chat_model,
+              "runtime": runtime, "cases": []}
     for name, question, state, dates in cases:
         result = {"name": name, "query": question}
         started = time.monotonic()
@@ -114,7 +119,7 @@ def main():
             result["ok"] = True
         except AppError as error:
             result.update(ok=False, error=error.code)
-            stop = error.code in {"gemini_unavailable", "gemini_timeout", "gemini_throttled"}
+            stop = error.code in {"deepseek_unavailable", "deepseek_timeout", "deepseek_throttled"}
         except (AssertionError, ValueError) as error:
             result.update(ok=False, error=type(error).__name__, detail=str(error))
         result.setdefault("generation_calls", model_call_count - calls_before)

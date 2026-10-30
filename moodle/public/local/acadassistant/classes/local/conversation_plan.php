@@ -8,7 +8,7 @@ defined('MOODLE_INTERNAL') || die();
 final class conversation_plan {
     public static function validate(array $input): array {
         $defaults = ['intent' => '', 'social' => 'none', 'categories' => [], 'course_mode' => 'enrolled',
-            'assignment_filter' => 'pending', 'scope_question' => '', 'document_question' => '',
+            'assignment_filter' => 'pending', 'navigation' => 'none', 'scope_question' => '', 'document_question' => '',
             'follow_up' => false, 'teacher_confirmation' => false, 'teacher_reference' => '', 'ambiguous_task' => false,
             'finance' => false, 'blocked_part' => false, 'availability' => null, 'selected_assignment_id' => 0, 'selected_participant_name' => '',
             'availability_unknown' => false, 'week_offset' => 0, 'week_explicit' => false, 'week_start' => '',
@@ -17,13 +17,28 @@ final class conversation_plan {
             self::invalid();
         }
         $plan = array_replace($defaults, $input);
+        if ($plan['navigation'] === 'nearest_deadline') {
+            $plan['ambiguous_task'] = false;
+            $plan['selected_assignment_id'] = 0;
+            $plan['selected_participant_name'] = '';
+        }
         foreach (['intent' => ['social', 'capabilities', 'academic', 'document', 'weekly_plan', 'clarify', 'blocked'],
             'social' => ['none', 'greeting', 'thanks', 'bye'], 'course_mode' => ['enrolled', 'accessible', 'teaching'],
             'assignment_filter' => ['pending', 'submitted', 'all'],
+            'navigation' => ['none', 'open', 'nearest_deadline', 'grading'],
             'clarification' => ['intent', 'course', 'task', 'week', 'availability', 'requests']] as $key => $values) {
             if (!in_array($plan[$key], $values, true)) {
                 self::invalid();
             }
+        }
+        if ($plan['navigation'] !== 'none' && ($plan['intent'] !== 'academic' ||
+                $plan['document_question'] !== '' || !is_array($plan['categories']) || array_diff($plan['categories'],
+                    ['assignments', 'courses', 'grades', 'calendar']))) {
+            self::invalid();
+        }
+        if (in_array($plan['navigation'], ['nearest_deadline', 'grading'], true) &&
+                $plan['categories'] !== ['assignments']) {
+            self::invalid();
         }
         foreach (['follow_up', 'teacher_confirmation', 'ambiguous_task', 'finance', 'blocked_part',
             'availability_unknown', 'week_explicit'] as $key) {

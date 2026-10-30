@@ -1,7 +1,7 @@
-# Pruebas locales de los tickets 01–05
+# Accesos institucionales y recorrido del asistente
 
 Moodle: <http://127.0.0.1:8088/local/acadassistant/index.php>.
-El sitio y los documentos son ficticios. La interfaz Moodle está en inglés; el modelo responde en español.
+El portal está en inglés; el asistente responde en español.
 El enlace **Academic assistant** aparece en la barra principal al iniciar sesión con una cuenta personal.
 
 ## Cuentas y datos
@@ -10,32 +10,36 @@ Las contraseñas se guardan únicamente en `.local/sprint2-credentials.md`, excl
 
 | Cuenta | Acceso de prueba |
 | --- | --- |
-| `estudiante1` (Ana Prueba) | Algebra 101 y Biologia 102; dos tareas pendientes |
-| `estudiante2` (Luis Prueba) | Biologia 102 y Reservado 103; entrega de laboratorio presentada y nota 85/100 |
-| `docente1` (Carla Docente) | Docente de Biologia 102; puede consultar la nota de Luis en ese curso |
-| `autoridad1` (Mario Direccion) | Rol manager con capacidades a nivel del sitio |
-| `admin_sprint2` | Administración del entorno local |
+| `estudiante1` (Ana Torres) | Siete cursos, actividades pendientes y una práctica de programación calificada |
+| `estudiante2` (Luis Mendoza) | Cuatro cursos, entrega de laboratorio presentada y nota 85/100 |
+| `docente1` (Carla Rojas) | Álgebra, Biología e Investigación |
+| `docente2` (Diego Salinas) | Programación y Estadística |
+| `docente3` (Valeria Núñez) | Comunicación e Inglés |
+| `docente4` (Jorge Rivas) | Física y Diseño |
+| `autoridad1` (Mario Salazar) | Dirección académica con capacidades de gestión del sitio |
+| `admin_udv` | Administración del entorno local |
 
-Cada curso tiene un PDF propio. El documento de Reservado 103 contiene el código ficticio
-`ORQUIDEA-73`, para comprobar que solo lo reciben sus participantes y las cuentas con permisos globales.
-El corpus institucional común conserva los documentos ficticios de Universidad Demo del Valle.
+Cada curso tiene un PDF propio. El documento de Metodología de Investigación 103 contiene el código institucional
+`INV-MET-2026`, para comprobar que solo lo reciben sus participantes y las cuentas con permisos globales.
+El catálogo institucional reúne documentos de matrícula, reglamento, calendario, biblioteca,
+bienestar estudiantil, servicios digitales, becas, integridad académica, accesibilidad e investigación.
 
 ## Recorrido de prueba
 
 1. Entra como `estudiante1`, abre **Academic assistant** y pregunta **¿Qué tareas tengo pendientes?**.
-   Debe utilizar las tareas visibles en sus dos cursos, con procedencia Moodle.
+   Debe utilizar las tareas visibles en sus siete cursos, con procedencia Moodle.
 2. Pregunta **¿Y cuándo vencen?**, para comprobar el contexto temporal.
 3. Pulsa **New conversation**. El transcript desaparece y el seguimiento empieza sin los turnos anteriores.
-4. Pregunta **¿Cuál es la nota mínima aprobatoria en Universidad Demo del Valle?**.
-   La respuesta debe citar el reglamento ficticio: 11.
-5. Pregunta **¿Cuál es el código de entrega del proyecto del curso Reservado 103?**.
-   `estudiante1` no debe recibir `ORQUIDEA-73`, ni fuentes del curso reservado.
+4. Pregunta **¿Cuál es la nota mínima aprobatoria en Universidad del Valle?**.
+   La respuesta debe citar el reglamento institucional: 11.
+5. Pregunta **¿Cuál es el código de entrega del proyecto del curso Metodología de Investigación 103?**.
+   `estudiante1` no debe recibir `INV-MET-2026`, ni fuentes del curso reservado.
 6. Cierra sesión, entra como `estudiante2` y repite la pregunta del curso reservado.
    Esta cuenta sí tiene acceso al documento. El chat empieza vacío después del nuevo login.
-7. Como `docente1`, pregunta **¿Qué calificación tiene Luis Prueba en Biologia 102?**.
+7. Como `docente1`, pregunta **¿Qué calificación tiene Luis Mendoza en Biologia 102?**.
    Debe utilizar la nota visible en Moodle (85/100).
 8. Como `autoridad1`, pregunta **¿Qué cursos están disponibles?**.
-   Sus capacidades efectivas permiten acceder a los tres cursos de prueba.
+   Sus capacidades efectivas permiten consultar los cursos disponibles.
 
 Para provocar la comprobación real de timeout en la siguiente petición de una cuenta de prueba,
 sin esperar los 30 minutos configurados:
@@ -49,7 +53,7 @@ Recarga el chat de esa cuenta: Moodle debe pedir iniciar sesión y no restaurar 
 
 ## Encender, detener y verificar
 
-Desde la raíz del repositorio, con Docker, Python y el Ollama existente disponibles:
+Desde la raíz del repositorio, con Docker, Python y las claves de DeepSeek y Gemini configuradas:
 
 ```bash
 bash dev/moodle/up.sh
@@ -62,8 +66,10 @@ Reutiliza los volúmenes propios de Moodle y la base RAG existente.
 ```bash
 # Detener Moodle sin borrar sus datos.
 docker compose -f compose.moodle.yaml stop
-# Verificación real en Chromium, Moodle y Ollama.
+# Verificación real en Chromium, Moodle y DeepSeek.
 rag-service/.venv/bin/python dev/moodle/smoke_browser.py
+# Interacción del chat en escritorio y móvil, con respuestas controladas sin llamadas a IA.
+rag-service/.venv/bin/python dev/moodle/smoke_chat_ui.py
 # PHPUnit del plugin, usando el prefijo phpu_ y dataroot separado.
 docker compose -f compose.moodle.yaml exec -T moodle \
   php public/admin/tool/phpunit/cli/init.php
@@ -72,6 +78,10 @@ docker compose -f compose.moodle.yaml exec -T moodle \
 ```
 
 El reporte de navegador y las capturas se guardan bajo `.local/`, excluido de Git.
+La comprobación de interfaz genera `chat-ui-browser.json` y `chat-notification-desktop.png` /
+`chat-notification-mobile.png`. Revisa Enter y Shift + Enter, conservación del desplazamiento
+al recibir respuestas sin recargar la página, aviso superpuesto de mensaje nuevo y recuperación
+ante errores. La validación de longitud utiliza el Moodle real; las respuestas del asistente se simulan.
 Las credenciales de servicio están en `.moodle.env` y `rag-service/.env`; ninguna se envía al navegador.
 Moodle escucha solo en `127.0.0.1:8088`, su PostgreSQL en `127.0.0.1:55433` y el RAG en `127.0.0.1:8000`.
 El contenedor Moodle usa la red del host Linux para que el cliente RAG siga usando una URL loopback
@@ -98,17 +108,17 @@ Prueba también esta secuencia sin pulsar **New conversation**:
 La negativa sobre cuotas no debe impedir responder profesores o cursos. Una
 consulta académica utiliza procedencia Moodle y no citas de PDFs. Para combinar
 fuentes, pregunta **¿Qué cursos tengo y cuál es la nota mínima aprobatoria en
-Universidad Demo del Valle?**. La respuesta distingue los datos Moodle del reglamento.
+Universidad del Valle?**. La respuesta distingue los datos Moodle del reglamento.
 
 Después de listar varias tareas, **¿cuándo vence esa tarea?** pide aclarar cuál;
 puedes responder con el nombre de la tarea. Una lista parcial permite escribir
 **continúa**, volviendo a comprobar los permisos. Nueva conversación borra ese cursor.
 
-El smoke crea además `estudiante_lista` con 22 cursos de prueba para verificar
-continuación. Usa la contraseña local de las demás cuentas.
+El smoke crea temporalmente `estudiante_lista` con 22 cursos para verificar
+continuación y los elimina al terminar.
 
 Las respuestas académicas concretas se componen desde los registros autorizados;
-la parte documental sigue usando el modelo local y puede tardar decenas de segundos.
+la parte documental usa DeepSeek para redactar y Gemini para embeddings.
 El reporte real y capturas se guardan en `.local/`.
 
 La suite RAG completa utiliza `rag_sprint2_tests`, una base separada del corpus demo:
@@ -119,7 +129,9 @@ TEST_DATABASE_URL=postgresql://rag:rag_local_dev@127.0.0.1:55432/rag_sprint2_tes
 ```
 
 
-## Resultado de la corrección de respuestas
+## Resultado histórico de la corrección de respuestas
+
+La validación actual está en [presentacion-asistente.md](presentacion-asistente.md).
 
 Los cuatro tickets de `.scratch/respuestas-academicas-confiables/` están implementados.
 Pasaron 30 pruebas Moodle (112 assertions), 156 pruebas RAG y el recorrido real
@@ -134,7 +146,7 @@ respetan también las prórrogas individuales vigentes en Moodle.
 
 Para probar una confirmación sobre docentes, pregunta **¿Qué profesores me enseñan
 en este ciclo?** y después **¿Entonces la única docente que tengo registrada es
-Carla Docente y nadie más?**. El asistente responde directamente según los docentes
+Carla Rojas y nadie más?**. El asistente responde directamente según los docentes
 visibles de las matrículas vigentes, sin añadir calendario ni documentos por
 mencionar «este ciclo». Si no ve docentes en otro curso, explica que no puede
 asegurar que no haya otras personas asignadas. La corrección pasó 31 tests Moodle
@@ -160,7 +172,7 @@ Pulsa **New conversation** para empezar una sesión de prueba limpia y utiliza:
    de contenidos, sin consultar las tareas por el mero hecho de mencionar un curso.
 
 Las confirmaciones de docentes responden directamente con el límite de visibilidad;
-**Entonces ella es la única?** puede seguir la confirmación de Carla Docente.
+**Entonces ella es la única?** puede seguir la confirmación de Carla Rojas.
 Si juntas planificación y otra consulta independiente, el chat pide cuál atender primero
 sin descartar silenciosamente una petición. Una solicitud cuyo alcance no puede resolver
 produce aclaración antes de ampliar las lecturas.

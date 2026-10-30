@@ -1,0 +1,1538 @@
+{
+  "complete": true,
+  "timestamp_utc": "2026-10-22T20:56:22.933701+00:00",
+  "provider": "deepseek",
+  "embedding_model": "gemini-embedding-001",
+  "embedding_provider": "gemini",
+  "chat_model": "deepseek-flash",
+  "summary": {
+    "positive_passed": 35,
+    "positive_total": 36,
+    "negative_passed": 5,
+    "negative_total": 5,
+    "accepted": true,
+    "requests": 41,
+    "total_elapsed_seconds": 109.301,
+    "requests_per_second": 0.375,
+    "minimum_seconds": 2.287,
+    "median_seconds": 2.629,
+    "mean_seconds": 2.666,
+    "p95_seconds": 3.016,
+    "maximum_seconds": 3.081,
+    "scoring": "Expected facts and document keys; inspect answers for semantic correctness."
+  },
+  "results": [
+    {
+      "case": {
+        "id": "P01",
+        "query": "¿Cuándo empieza y termina la matrícula ordinaria de 2026-II?",
+        "key": "matricula",
+        "facts": [
+          [
+            "3 de agosto"
+          ],
+          [
+            "14 de agosto"
+          ],
+          [
+            "2026"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.897,
+      "response": {
+        "answer": "La matrícula ordinaria de 2026-II empieza el 3 de agosto de 2026 y termina el 14 de agosto de 2026. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 61,
+            "document_id": 3,
+            "key": "demo-s1-matricula",
+            "title": "Matrícula — Universidad del Valle",
+            "filename": "demo-s1-matricula.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Universidad del Valle. Matrícula 2026-II. La matrícula ordinaria empieza el 3 de agosto de 2026 y termina el 14 de agosto de 2026. La matrícula extemporánea se realiza del 17 al 19 de agosto de 2026 y tiene un recargo de 25 soles. Para matricularse, el estudiante debe tener su documento de identidad vigente y no tener deudas pendientes."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "6aca5233-a574-46ec-bf9e-104e2c0d29fc"
+      }
+    },
+    {
+      "case": {
+        "id": "P02",
+        "query": "¿Cuál es el recargo por matrícula extemporánea?",
+        "key": "matricula",
+        "facts": [
+          [
+            "25",
+            "veinticinco"
+          ],
+          [
+            "soles"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.579,
+      "response": {
+        "answer": "El recargo por matrícula extemporánea es de 25 soles. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 61,
+            "document_id": 3,
+            "key": "demo-s1-matricula",
+            "title": "Matrícula — Universidad del Valle",
+            "filename": "demo-s1-matricula.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Universidad del Valle. Matrícula 2026-II. La matrícula ordinaria empieza el 3 de agosto de 2026 y termina el 14 de agosto de 2026. La matrícula extemporánea se realiza del 17 al 19 de agosto de 2026 y tiene un recargo de 25 soles. Para matricularse, el estudiante debe tener su documento de identidad vigente y no tener deudas pendientes."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "71d42742-26e9-40d7-9f91-7ca96f3ef2b1"
+      }
+    },
+    {
+      "case": {
+        "id": "P03",
+        "query": "¿Cuántos créditos puedo matricular como estudiante regular?",
+        "key": "matricula",
+        "facts": [
+          [
+            "22",
+            "veintidós"
+          ],
+          [
+            "créditos"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.638,
+      "response": {
+        "answer": "Un estudiante regular puede matricularse hasta en 22 créditos por semestre. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 62,
+            "document_id": 3,
+            "key": "demo-s1-matricula",
+            "title": "Matrícula — Universidad del Valle",
+            "filename": "demo-s1-matricula.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Universidad del Valle. Matrícula 2026-II. Un estudiante regular puede matricularse hasta en 22 créditos por semestre. Para matricularse en un curso debe haber aprobado sus prerrequisitos. El cambio de sección puede solicitarse hasta el 21 de agosto de 2026, sujeto a disponibilidad de vacantes. No se permite cambiar de sección después de esa fecha."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "63d55d45-f451-47b8-9dc9-8c2b2d7420cc"
+      }
+    },
+    {
+      "case": {
+        "id": "P04",
+        "query": "¿Qué debo haber aprobado antes de matricularme en un curso?",
+        "key": "matricula",
+        "facts": [
+          [
+            "prerrequisito"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.456,
+      "response": {
+        "answer": "Antes de matricularse en un curso debe haber aprobado sus prerrequisitos. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 62,
+            "document_id": 3,
+            "key": "demo-s1-matricula",
+            "title": "Matrícula — Universidad del Valle",
+            "filename": "demo-s1-matricula.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Universidad del Valle. Matrícula 2026-II. Un estudiante regular puede matricularse hasta en 22 créditos por semestre. Para matricularse en un curso debe haber aprobado sus prerrequisitos. El cambio de sección puede solicitarse hasta el 21 de agosto de 2026, sujeto a disponibilidad de vacantes. No se permite cambiar de sección después de esa fecha."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "dbd09db8-6db7-4025-bb10-bc81d23341bb"
+      }
+    },
+    {
+      "case": {
+        "id": "P05",
+        "query": "¿Hasta qué fecha puedo solicitar cambio de sección?",
+        "key": "matricula",
+        "facts": [
+          [
+            "21 de agosto"
+          ],
+          [
+            "2026"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.766,
+      "response": {
+        "answer": "El cambio de sección puede solicitarse hasta el 21 de agosto de 2026, sujeto a disponibilidad de vacantes. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 62,
+            "document_id": 3,
+            "key": "demo-s1-matricula",
+            "title": "Matrícula — Universidad del Valle",
+            "filename": "demo-s1-matricula.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Universidad del Valle. Matrícula 2026-II. Un estudiante regular puede matricularse hasta en 22 créditos por semestre. Para matricularse en un curso debe haber aprobado sus prerrequisitos. El cambio de sección puede solicitarse hasta el 21 de agosto de 2026, sujeto a disponibilidad de vacantes. No se permite cambiar de sección después de esa fecha."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "b5f3a653-bf51-4f8c-bf3c-92c5aa272b87"
+      }
+    },
+    {
+      "case": {
+        "id": "P06",
+        "query": "¿Cuál es el horario de la Oficina de Matrícula?",
+        "key": "matricula",
+        "facts": [
+          [
+            "lunes"
+          ],
+          [
+            "viernes"
+          ],
+          [
+            "9:00",
+            "09:00"
+          ],
+          [
+            "16:00"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.821,
+      "response": {
+        "answer": "La Oficina de Matrícula atiende de lunes a viernes, de 9:00 a 16:00 horas. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 63,
+            "document_id": 3,
+            "key": "demo-s1-matricula",
+            "title": "Matrícula — Universidad del Valle",
+            "filename": "demo-s1-matricula.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 3,
+            "page_end": 3,
+            "excerpt": "Universidad del Valle. Matrícula 2026-II. La Oficina de Matrícula atiende de lunes a viernes, de 9:00 a 16:00 horas. Las consultas se reciben en matricula@udv.edu.pe. La solicitud de reserva de matrícula debe presentarse antes del inicio de clases y permite reservar hasta dos semestres consecutivos. El periodo lectivo 2026-II comienza el 24 de agosto de 2026."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "3ef17ed7-cbe3-4bfa-bef3-004c9e5bc5e1"
+      }
+    },
+    {
+      "case": {
+        "id": "P07",
+        "query": "¿Cuántos semestres consecutivos puedo reservar mi matrícula?",
+        "key": "matricula",
+        "facts": [
+          [
+            "dos",
+            "2"
+          ],
+          [
+            "semestre"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 3.016,
+      "response": {
+        "answer": "La solicitud de reserva de matrícula permite reservar hasta dos semestres consecutivos. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 63,
+            "document_id": 3,
+            "key": "demo-s1-matricula",
+            "title": "Matrícula — Universidad del Valle",
+            "filename": "demo-s1-matricula.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 3,
+            "page_end": 3,
+            "excerpt": "Universidad del Valle. Matrícula 2026-II. La Oficina de Matrícula atiende de lunes a viernes, de 9:00 a 16:00 horas. Las consultas se reciben en matricula@udv.edu.pe. La solicitud de reserva de matrícula debe presentarse antes del inicio de clases y permite reservar hasta dos semestres consecutivos. El periodo lectivo 2026-II comienza el 24 de agosto de 2026."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "988bebe5-db4a-4f8e-81e3-4e9bb3035d05"
+      }
+    },
+    {
+      "case": {
+        "id": "P08",
+        "query": "¿Cuál es la nota mínima aprobatoria?",
+        "key": "reglamento",
+        "facts": [
+          [
+            "11",
+            "once"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 3.081,
+      "response": {
+        "answer": "Según el Reglamento académico de la Universidad del Valle, la nota mínima aprobatoria es 11 en la escala de 0 a 20. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 64,
+            "document_id": 4,
+            "key": "demo-s1-reglamento",
+            "title": "Reglamento académico — Universidad del Valle",
+            "filename": "demo-s1-reglamento.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "REGLAMENTO",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "2e4493be-b1c5-4d98-bdf3-d2641a9065e7"
+      }
+    },
+    {
+      "case": {
+        "id": "P09",
+        "query": "¿Qué asistencia mínima se requiere para rendir la evaluación final?",
+        "key": "reglamento",
+        "facts": [
+          [
+            "70",
+            "setenta"
+          ],
+          [
+            "por ciento",
+            "%"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.766,
+      "response": {
+        "answer": "Según el Reglamento académico de la Universidad del Valle, se requiere una asistencia mínima del 70 por ciento para rendir la evaluación final. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 64,
+            "document_id": 4,
+            "key": "demo-s1-reglamento",
+            "title": "Reglamento académico — Universidad del Valle",
+            "filename": "demo-s1-reglamento.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "REGLAMENTO",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "9edc9095-47e6-4e2b-a575-a7cd45059149"
+      }
+    },
+    {
+      "case": {
+        "id": "P10",
+        "query": "¿Qué peso tienen la evaluación continua y la evaluación final?",
+        "key": "reglamento",
+        "facts": [
+          [
+            "60",
+            "sesenta"
+          ],
+          [
+            "40",
+            "cuarenta"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.544,
+      "response": {
+        "answer": "La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 64,
+            "document_id": 4,
+            "key": "demo-s1-reglamento",
+            "title": "Reglamento académico — Universidad del Valle",
+            "filename": "demo-s1-reglamento.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "REGLAMENTO",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "bd0cdf25-c56a-4b21-9d4a-11882831b950"
+      }
+    },
+    {
+      "case": {
+        "id": "P11",
+        "query": "¿Hasta qué semana se puede solicitar el retiro de un curso?",
+        "key": "reglamento",
+        "facts": [
+          [
+            "octava",
+            "ocho",
+            "8"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.42,
+      "response": {
+        "answer": "El retiro de un curso se solicita hasta la octava semana del semestre. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 65,
+            "document_id": 4,
+            "key": "demo-s1-reglamento",
+            "title": "Reglamento académico — Universidad del Valle",
+            "filename": "demo-s1-reglamento.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "REGLAMENTO",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Universidad del Valle. Reglamento académico 2026-II. El retiro de un curso se solicita hasta la octava semana del semestre. Se permite retirar hasta dos cursos por semestre. Si el estudiante desaprueba un curso tres veces, debe asistir a una asesoría académica obligatoria antes de volver a matricularse en ese curso."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "35f34156-d01f-4f0c-a127-39b302e9b57c"
+      }
+    },
+    {
+      "case": {
+        "id": "P12",
+        "query": "¿Cuántos cursos se permite retirar por semestre?",
+        "key": "reglamento",
+        "facts": [
+          [
+            "dos",
+            "2"
+          ],
+          [
+            "curso"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.828,
+      "response": {
+        "answer": "Se permite retirar hasta dos cursos por semestre. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 65,
+            "document_id": 4,
+            "key": "demo-s1-reglamento",
+            "title": "Reglamento académico — Universidad del Valle",
+            "filename": "demo-s1-reglamento.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "REGLAMENTO",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Universidad del Valle. Reglamento académico 2026-II. El retiro de un curso se solicita hasta la octava semana del semestre. Se permite retirar hasta dos cursos por semestre. Si el estudiante desaprueba un curso tres veces, debe asistir a una asesoría académica obligatoria antes de volver a matricularse en ese curso."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "0ca5ce9d-10f7-441b-930a-c2bae4dbfc86"
+      }
+    },
+    {
+      "case": {
+        "id": "P13",
+        "query": "¿Qué debo hacer si desapruebo un curso tres veces?",
+        "key": "reglamento",
+        "facts": [
+          [
+            "asesoría académica"
+          ],
+          [
+            "obligatoria"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.718,
+      "response": {
+        "answer": "Si desapruebas un curso tres veces, debes asistir a una asesoría académica obligatoria antes de volver a matricularte en ese curso. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 65,
+            "document_id": 4,
+            "key": "demo-s1-reglamento",
+            "title": "Reglamento académico — Universidad del Valle",
+            "filename": "demo-s1-reglamento.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "REGLAMENTO",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Universidad del Valle. Reglamento académico 2026-II. El retiro de un curso se solicita hasta la octava semana del semestre. Se permite retirar hasta dos cursos por semestre. Si el estudiante desaprueba un curso tres veces, debe asistir a una asesoría académica obligatoria antes de volver a matricularse en ese curso."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "301fa770-f519-4b91-b877-03f739e462ee"
+      }
+    },
+    {
+      "case": {
+        "id": "P14",
+        "query": "¿En qué plazo puedo reclamar una calificación publicada?",
+        "key": "reglamento",
+        "facts": [
+          [
+            "tres",
+            "3"
+          ],
+          [
+            "días hábiles"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.996,
+      "response": {
+        "answer": "Según el Reglamento académico 2026-II de la Universidad del Valle, el reclamo de una calificación se presenta dentro de tres días hábiles de su publicación, dirigido al docente del curso e incluyendo la identificación del estudiante, el curso y la justificación. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 66,
+            "document_id": 4,
+            "key": "demo-s1-reglamento",
+            "title": "Reglamento académico — Universidad del Valle",
+            "filename": "demo-s1-reglamento.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "REGLAMENTO",
+            "page_start": 3,
+            "page_end": 3,
+            "excerpt": "Universidad del Valle. Reglamento académico 2026-II. El reclamo de una calificación se presenta dentro de tres días hábiles de su publicación. Se dirige al docente del curso e incluye la identificación del estudiante, el curso y la justificación del reclamo. Copiar durante un examen anula esa evaluación y asigna la nota cero."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "1e6b4634-28ec-4814-9a1f-174acfc1d74b"
+      }
+    },
+    {
+      "case": {
+        "id": "P15",
+        "query": "¿Cuánto cuesta un certificado de estudios y cuánto tarda su entrega?",
+        "key": "tramites",
+        "facts": [
+          [
+            "35",
+            "treinta y cinco"
+          ],
+          [
+            "cinco",
+            "5"
+          ],
+          [
+            "días hábiles"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.764,
+      "response": {
+        "answer": "El certificado de estudios cuesta 35 soles y se entrega en cinco días hábiles. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 67,
+            "document_id": 5,
+            "key": "demo-s1-tramites",
+            "title": "Trámites documentarios — Universidad del Valle",
+            "filename": "demo-s1-tramites.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "PROCEDIMIENTO",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Universidad del Valle. Trámites documentarios. El certificado de estudios cuesta 35 soles y se entrega en cinco días hábiles. Para solicitarlo se presenta una copia del documento de identidad y el comprobante de pago. La constancia de matrícula cuesta 10 soles y se entrega en un día hábil."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "230fe22d-facd-44a8-b266-bbcc93c14dcc"
+      }
+    },
+    {
+      "case": {
+        "id": "P16",
+        "query": "¿Qué documentos necesito para solicitar el certificado de estudios?",
+        "key": "tramites",
+        "facts": [
+          [
+            "identidad"
+          ],
+          [
+            "comprobante de pago"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.597,
+      "response": {
+        "answer": "Para solicitar el certificado de estudios se presenta una copia del documento de identidad y el comprobante de pago. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 67,
+            "document_id": 5,
+            "key": "demo-s1-tramites",
+            "title": "Trámites documentarios — Universidad del Valle",
+            "filename": "demo-s1-tramites.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "PROCEDIMIENTO",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Universidad del Valle. Trámites documentarios. El certificado de estudios cuesta 35 soles y se entrega en cinco días hábiles. Para solicitarlo se presenta una copia del documento de identidad y el comprobante de pago. La constancia de matrícula cuesta 10 soles y se entrega en un día hábil."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "db22dfa9-4878-4c42-8f68-e297536697bc"
+      }
+    },
+    {
+      "case": {
+        "id": "P17",
+        "query": "¿Cuánto cuesta una constancia de matrícula y cuánto tarda?",
+        "key": "tramites",
+        "facts": [
+          [
+            "10",
+            "diez"
+          ],
+          [
+            "un día hábil",
+            "1 día hábil"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.788,
+      "response": {
+        "answer": "La constancia de matrícula cuesta 10 soles y se entrega en un día hábil. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 67,
+            "document_id": 5,
+            "key": "demo-s1-tramites",
+            "title": "Trámites documentarios — Universidad del Valle",
+            "filename": "demo-s1-tramites.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "PROCEDIMIENTO",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Universidad del Valle. Trámites documentarios. El certificado de estudios cuesta 35 soles y se entrega en cinco días hábiles. Para solicitarlo se presenta una copia del documento de identidad y el comprobante de pago. La constancia de matrícula cuesta 10 soles y se entrega en un día hábil."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "77f11eae-668a-4feb-bd30-11effa5b7207"
+      }
+    },
+    {
+      "case": {
+        "id": "P18",
+        "query": "¿Cómo consulto el estado de una solicitud en mesa de partes?",
+        "key": "tramites",
+        "facts": [
+          [
+            "número de expediente"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.567,
+      "response": {
+        "answer": "El estado de una solicitud se consulta con el número de expediente entregado al registrarla. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 68,
+            "document_id": 5,
+            "key": "demo-s1-tramites",
+            "title": "Trámites documentarios — Universidad del Valle",
+            "filename": "demo-s1-tramites.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "PROCEDIMIENTO",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Universidad del Valle. Trámites documentarios. La mesa de partes atiende de lunes a viernes, de 8:30 a 17:00 horas. El estado de una solicitud se consulta con el número de expediente entregado al registrarla. La rectificación del nombre en un documento requiere una copia del documento de identidad; este trámite es gratuito y tarda dos días hábiles."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "0563ca59-0913-4eda-887f-c0ef38997a04"
+      }
+    },
+    {
+      "case": {
+        "id": "P19",
+        "query": "¿Cuánto cuesta rectificar el nombre de un documento y cuánto tarda?",
+        "key": "tramites",
+        "facts": [
+          [
+            "gratuito",
+            "gratis",
+            "sin costo"
+          ],
+          [
+            "dos",
+            "2"
+          ],
+          [
+            "días hábiles"
+          ]
+        ]
+      },
+      "passed": false,
+      "elapsed_seconds": 2.8,
+      "response": {
+        "answer": "La rectificación del nombre en un documento es gratuita y tarda dos días hábiles. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 68,
+            "document_id": 5,
+            "key": "demo-s1-tramites",
+            "title": "Trámites documentarios — Universidad del Valle",
+            "filename": "demo-s1-tramites.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "PROCEDIMIENTO",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Universidad del Valle. Trámites documentarios. La mesa de partes atiende de lunes a viernes, de 8:30 a 17:00 horas. El estado de una solicitud se consulta con el número de expediente entregado al registrarla. La rectificación del nombre en un documento requiere una copia del documento de identidad; este trámite es gratuito y tarda dos días hábiles."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "45ad3c15-842a-4061-ba9b-d541ad7a87ed"
+      }
+    },
+    {
+      "case": {
+        "id": "P20",
+        "query": "¿Qué documentos debo presentar para convalidar cursos?",
+        "key": "tramites",
+        "facts": [
+          [
+            "certificado de estudios"
+          ],
+          [
+            "sílabos"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.547,
+      "response": {
+        "answer": "Para convalidar cursos debes presentar el certificado de estudios y los sílabos de los cursos aprobados. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 69,
+            "document_id": 5,
+            "key": "demo-s1-tramites",
+            "title": "Trámites documentarios — Universidad del Valle",
+            "filename": "demo-s1-tramites.pdf",
+            "version": 3,
+            "scope": "institutional",
+            "document_type": "PROCEDIMIENTO",
+            "page_start": 3,
+            "page_end": 3,
+            "excerpt": "Universidad del Valle. Trámites documentarios. La solicitud de convalidación de cursos debe incluir el certificado de estudios y los sílabos de los cursos aprobados. El plazo de evaluación de la convalidación es de diez días hábiles. La decisión es emitida por la coordinación académica. La mesa de partes recibe solicitudes en partes@udv.edu.pe."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "c4151412-b78a-44ab-bbdc-7523692209d6"
+      }
+    },
+    {
+      "case": {
+        "id": "P21",
+        "query": "¿Cuántos libros puedo llevar en préstamo y por cuánto tiempo?",
+        "key": "biblioteca",
+        "facts": [
+          [
+            "cinco",
+            "5"
+          ],
+          [
+            "catorce",
+            "14"
+          ],
+          [
+            "días"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.671,
+      "response": {
+        "answer": "El préstamo regular permite llevar hasta cinco libros por catorce días calendario, con posibilidad de renovarlo una vez por siete días si el material no está reservado. [1][2]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 73,
+            "document_id": 32,
+            "key": "demo-s1-biblioteca",
+            "title": "Servicios de biblioteca — Universidad del Valle",
+            "filename": "demo-s1-biblioteca.pdf",
+            "version": 1,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Biblioteca Central de la Universidad del Valle. Atención presencial de lunes a viernes de 8:00 a 20:00 y sábados de 9:00 a 13:00. El préstamo regular permite llevar hasta cinco libros por catorce días calendario. La colección de referencia se consulta dentro de la sala y no se presta a domicilio."
+          },
+          {
+            "source_id": 2,
+            "fragment_id": 74,
+            "document_id": 32,
+            "key": "demo-s1-biblioteca",
+            "title": "Servicios de biblioteca — Universidad del Valle",
+            "filename": "demo-s1-biblioteca.pdf",
+            "version": 1,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Biblioteca Central. Cada préstamo regular se puede renovar una vez por siete días, siempre que otro usuario no haya reservado el material. La renovación se solicita desde el catálogo antes de la fecha de vencimiento. Los libros deben devolverse en el módulo de circulación; la devolución fuera de horario se deposita en el buzón habilitado junto a la entrada."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "c2f29dfb-c269-42ea-96b4-d4da490d614e"
+      }
+    },
+    {
+      "case": {
+        "id": "P22",
+        "query": "¿Cuándo atiende la Biblioteca Central los sábados?",
+        "key": "biblioteca",
+        "facts": [
+          [
+            "9:00",
+            "09:00"
+          ],
+          [
+            "13:00"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.548,
+      "response": {
+        "answer": "La Biblioteca Central atiende los sábados de 9:00 a 13:00. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 73,
+            "document_id": 32,
+            "key": "demo-s1-biblioteca",
+            "title": "Servicios de biblioteca — Universidad del Valle",
+            "filename": "demo-s1-biblioteca.pdf",
+            "version": 1,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Biblioteca Central de la Universidad del Valle. Atención presencial de lunes a viernes de 8:00 a 20:00 y sábados de 9:00 a 13:00. El préstamo regular permite llevar hasta cinco libros por catorce días calendario. La colección de referencia se consulta dentro de la sala y no se presta a domicilio."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "33bfa33c-3046-461a-bf3e-51251efb2128"
+      }
+    },
+    {
+      "case": {
+        "id": "P23",
+        "query": "¿Cómo solicito una cita de orientación psicológica?",
+        "key": "bienestar-estudiantil",
+        "facts": [
+          [
+            "bienestar@udv.edu.pe"
+          ],
+          [
+            "bienestar"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.429,
+      "response": {
+        "answer": "Las citas de orientación psicológica se solicitan por correo a bienestar@udv.edu.pe, con atención de lunes a viernes de 9:00 a 17:00. [1][2]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 113,
+            "document_id": 33,
+            "key": "demo-s1-bienestar-estudiantil",
+            "title": "Bienestar y orientación estudiantil — Universidad del Valle",
+            "filename": "demo-s1-bienestar-estudiantil.pdf",
+            "version": 2,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad."
+          },
+          {
+            "source_id": 2,
+            "fragment_id": 112,
+            "document_id": 33,
+            "key": "demo-s1-bienestar-estudiantil",
+            "title": "Bienestar y orientación estudiantil — Universidad del Valle",
+            "filename": "demo-s1-bienestar-estudiantil.pdf",
+            "version": 2,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Dirección de Bienestar Estudiantil de la Universidad del Valle. Ofrece orientación psicológica breve, consejería vocacional y acompañamiento para adaptación a la vida universitaria. La atención es confidencial y requiere una cita; no reemplaza servicios de emergencia ni atención clínica especializada."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "519f7829-fefb-4d0c-ae85-deb12802a7d0"
+      }
+    },
+    {
+      "case": {
+        "id": "P24",
+        "query": "¿Qué duración tiene la primera entrevista de Bienestar?",
+        "key": "bienestar-estudiantil",
+        "facts": [
+          [
+            "treinta",
+            "30"
+          ],
+          [
+            "minutos"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.287,
+      "response": {
+        "answer": "La primera entrevista de Bienestar dura aproximadamente treinta minutos. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 113,
+            "document_id": 33,
+            "key": "demo-s1-bienestar-estudiantil",
+            "title": "Bienestar y orientación estudiantil — Universidad del Valle",
+            "filename": "demo-s1-bienestar-estudiantil.pdf",
+            "version": 2,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "992be9d9-53fb-452f-b06f-896ea23f1a97"
+      }
+    },
+    {
+      "case": {
+        "id": "P25",
+        "query": "¿Cómo recupero el acceso a mi cuenta institucional?",
+        "key": "servicios-digitales",
+        "facts": [
+          [
+            "soporte@udv.edu.pe"
+          ],
+          [
+            "código universitario"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 3.043,
+      "response": {
+        "answer": "Para recuperar el acceso, solicita asistencia a soporte@udv.edu.pe indicando tu código universitario; el equipo de soporte verifica tu identidad antes de restablecer el acceso y nunca debes incluir tu contraseña. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 116,
+            "document_id": 34,
+            "key": "demo-s1-servicios-digitales",
+            "title": "Servicios digitales y soporte — Universidad del Valle",
+            "filename": "demo-s1-servicios-digitales.pdf",
+            "version": 2,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Servicios Digitales. Para recuperar el acceso, solicita asistencia a soporte@udv.edu.pe indicando tu código universitario. El equipo de soporte verifica tu identidad antes de restablecer el acceso; nunca incluyas tu contraseña."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "8049c077-a3f8-452a-abe5-e5559ee369be"
+      }
+    },
+    {
+      "case": {
+        "id": "P26",
+        "query": "¿Cuánto tarda el soporte digital en responder inicialmente?",
+        "key": "servicios-digitales",
+        "facts": [
+          [
+            "un día hábil"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.565,
+      "response": {
+        "answer": "El tiempo objetivo de primera respuesta es un día hábil. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 117,
+            "document_id": 34,
+            "key": "demo-s1-servicios-digitales",
+            "title": "Servicios digitales y soporte — Universidad del Valle",
+            "filename": "demo-s1-servicios-digitales.pdf",
+            "version": 2,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 3,
+            "page_end": 3,
+            "excerpt": "Mesa de Ayuda de Servicios Digitales. Atención de lunes a viernes de 8:00 a 18:00. Tiempo objetivo de primera respuesta: un día hábil. Para reportar un problema de Moodle incluye el curso, la actividad, la hora aproximada y una captura sin datos personales de terceros. Contacto: soporte@udv.edu.pe."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "94dea088-7a45-4110-902d-202e1058682d"
+      }
+    },
+    {
+      "case": {
+        "id": "P27",
+        "query": "¿Cuál es el promedio mínimo para la beca de continuidad?",
+        "key": "becas-y-apoyos",
+        "facts": [
+          [
+            "15",
+            "quince"
+          ],
+          [
+            "20"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.629,
+      "response": {
+        "answer": "El promedio ponderado mínimo para la beca de continuidad académica es 15 sobre 20. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 118,
+            "document_id": 35,
+            "key": "demo-s1-becas-y-apoyos",
+            "title": "Becas y apoyos académicos — Universidad del Valle",
+            "filename": "demo-s1-becas-y-apoyos.pdf",
+            "version": 2,
+            "scope": "institutional",
+            "document_type": "PROCEDIMIENTO",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Programa de Becas de la Universidad del Valle, convocatoria 2026-II. La beca de continuidad académica puede cubrir hasta el 50 por ciento de los derechos académicos del siguiente ciclo. Requiere matrícula vigente, promedio ponderado mínimo de 15 sobre 20 y no tener sanciones académicas vigentes. La concesión depende de evaluación y disponibilidad presupuestal."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "508087e3-45d9-4940-b3a5-a161c998b23c"
+      }
+    },
+    {
+      "case": {
+        "id": "P28",
+        "query": "¿Hasta qué porcentaje puede cubrir la beca de continuidad?",
+        "key": "becas-y-apoyos",
+        "facts": [
+          [
+            "50",
+            "cincuenta"
+          ],
+          [
+            "por ciento",
+            "%"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.625,
+      "response": {
+        "answer": "La beca de continuidad académica puede cubrir hasta el 50 por ciento de los derechos académicos del siguiente ciclo. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 118,
+            "document_id": 35,
+            "key": "demo-s1-becas-y-apoyos",
+            "title": "Becas y apoyos académicos — Universidad del Valle",
+            "filename": "demo-s1-becas-y-apoyos.pdf",
+            "version": 2,
+            "scope": "institutional",
+            "document_type": "PROCEDIMIENTO",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Programa de Becas de la Universidad del Valle, convocatoria 2026-II. La beca de continuidad académica puede cubrir hasta el 50 por ciento de los derechos académicos del siguiente ciclo. Requiere matrícula vigente, promedio ponderado mínimo de 15 sobre 20 y no tener sanciones académicas vigentes. La concesión depende de evaluación y disponibilidad presupuestal."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "5e8ec4e7-b6bd-4a1a-8be3-08e3ff3906fe"
+      }
+    },
+    {
+      "case": {
+        "id": "P29",
+        "query": "¿Qué debo hacer para reconocer ideas de otras personas en un trabajo?",
+        "key": "integridad-academica",
+        "facts": [
+          [
+            "citas"
+          ],
+          [
+            "referencias"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.581,
+      "response": {
+        "answer": "Debes reconocer las ideas, datos, imágenes y textos de otras personas mediante citas y referencias suficientes para localizarlos, según la Política de Integridad Académica de la Universidad del Valle; las instrucciones del docente pueden precisar el estilo bibliográfico exigido. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 85,
+            "document_id": 36,
+            "key": "demo-s1-integridad-academica",
+            "title": "Integridad académica — Universidad del Valle",
+            "filename": "demo-s1-integridad-academica.pdf",
+            "version": 1,
+            "scope": "institutional",
+            "document_type": "REGLAMENTO",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Política de Integridad Académica de la Universidad del Valle. Todo trabajo presentado debe reconocer las ideas, datos, imágenes y textos de otras personas mediante citas y referencias suficientes para localizarlos. Las instrucciones particulares del docente pueden precisar el estilo bibliográfico exigido."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "cdbc0f1b-6750-4b46-bf59-4b9a71222de5"
+      }
+    },
+    {
+      "case": {
+        "id": "P30",
+        "query": "¿A quién puedo consultar dudas preventivas sobre citación?",
+        "key": "integridad-academica",
+        "facts": [
+          [
+            "docente"
+          ],
+          [
+            "biblioteca"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.419,
+      "response": {
+        "answer": "Puedes dirigir una consulta preventiva sobre citación al docente o a la Biblioteca Central. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 87,
+            "document_id": 36,
+            "key": "demo-s1-integridad-academica",
+            "title": "Integridad académica — Universidad del Valle",
+            "filename": "demo-s1-integridad-academica.pdf",
+            "version": 1,
+            "scope": "institutional",
+            "document_type": "REGLAMENTO",
+            "page_start": 3,
+            "page_end": 3,
+            "excerpt": "Integridad académica. Una consulta preventiva sobre citación se puede dirigir al docente o a la Biblioteca Central. Las incidencias se comunican a la Secretaría Académica mediante integridad@udv.edu.pe. Las medidas aplicables dependen del reglamento vigente y de la evaluación del caso; el asistente no determina responsabilidad ni sanciones individuales."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "36463e38-39b6-41df-abf8-a092f652c114"
+      }
+    },
+    {
+      "case": {
+        "id": "P31",
+        "query": "¿Dónde inicio una solicitud de ajuste académico por accesibilidad?",
+        "key": "accesibilidad",
+        "facts": [
+          [
+            "accesibilidad@udv.edu.pe",
+            "mesa de ayuda"
+          ],
+          [
+            "accesibilidad"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.74,
+      "response": {
+        "answer": "Para iniciar una solicitud de ajuste académico por accesibilidad, escribe a accesibilidad@udv.edu.pe describiendo la barrera y el ajuste solicitado. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 122,
+            "document_id": 37,
+            "key": "demo-s1-accesibilidad",
+            "title": "Accesibilidad y ajustes académicos — Universidad del Valle",
+            "filename": "demo-s1-accesibilidad.pdf",
+            "version": 2,
+            "scope": "institutional",
+            "document_type": "PROCEDIMIENTO",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Accesibilidad. Para iniciar una solicitud, escribe a accesibilidad@udv.edu.pe. Describe la barrera y el ajuste solicitado. La unidad puede pedir documentación pertinente con consentimiento informado; no envíes diagnósticos ni datos sensibles por el chat del asistente."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "4604e700-fdbd-471d-b15b-10f574a5d77d"
+      }
+    },
+    {
+      "case": {
+        "id": "P32",
+        "query": "¿En cuántos días confirman la recepción de una solicitud de accesibilidad?",
+        "key": "accesibilidad",
+        "facts": [
+          [
+            "tres",
+            "3"
+          ],
+          [
+            "días hábiles"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.8,
+      "response": {
+        "answer": "La unidad confirma la recepción de una solicitud de accesibilidad dentro de tres días hábiles. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 123,
+            "document_id": 37,
+            "key": "demo-s1-accesibilidad",
+            "title": "Accesibilidad y ajustes académicos — Universidad del Valle",
+            "filename": "demo-s1-accesibilidad.pdf",
+            "version": 2,
+            "scope": "institutional",
+            "document_type": "PROCEDIMIENTO",
+            "page_start": 3,
+            "page_end": 3,
+            "excerpt": "Accesibilidad. La unidad confirma la recepción dentro de tres días hábiles y coordina una reunión para revisar alternativas. Los ajustes aprobados se comunican solo a las personas que necesitan implementarlos. Las solicitudes urgentes deben señalar la fecha de la actividad académica próxima."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "9a1b47e3-897e-4603-bf85-95e135ed51dd"
+      }
+    },
+    {
+      "case": {
+        "id": "P33",
+        "query": "¿Qué acuerdos deben establecerse antes de iniciar un proyecto de investigación?",
+        "key": "investigacion-estudiantil",
+        "facts": [
+          [
+            "objetivos"
+          ],
+          [
+            "cronograma"
+          ],
+          [
+            "autoría"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.808,
+      "response": {
+        "answer": "Antes de iniciar un proyecto se deben acordar objetivos, tareas, cronograma, autoría y uso de datos del proyecto. [2]",
+        "sources": [
+          {
+            "source_id": 2,
+            "fragment_id": 91,
+            "document_id": 38,
+            "key": "demo-s1-investigacion-estudiantil",
+            "title": "Iniciación en investigación — Universidad del Valle",
+            "filename": "demo-s1-investigacion-estudiantil.pdf",
+            "version": 1,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 1,
+            "page_end": 1,
+            "excerpt": "Oficina de Investigación Formativa de la Universidad del Valle. Los estudiantes pueden integrarse a proyectos vigentes con autorización del docente responsable. Antes de iniciar, deben acordar objetivos, tareas, cronograma, autoría y uso de datos del proyecto."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "528fee61-6471-443c-aaf1-e42845d1fd10"
+      }
+    },
+    {
+      "case": {
+        "id": "P34",
+        "query": "¿Qué se necesita antes de recolectar información de personas para un proyecto?",
+        "key": "investigacion-estudiantil",
+        "facts": [
+          [
+            "evaluación ética"
+          ],
+          [
+            "consentimiento"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.504,
+      "response": {
+        "answer": "Un proyecto que involucra personas requiere evaluación ética y consentimiento antes de recolectar información. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 92,
+            "document_id": 38,
+            "key": "demo-s1-investigacion-estudiantil",
+            "title": "Iniciación en investigación — Universidad del Valle",
+            "filename": "demo-s1-investigacion-estudiantil.pdf",
+            "version": 1,
+            "scope": "institutional",
+            "document_type": "GUIA",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Investigación Formativa. Un proyecto que involucra personas requiere evaluación ética y consentimiento antes de recolectar información. No se deben publicar nombres, imágenes, respuestas ni datos identificables de participantes sin autorización expresa. La oficina ofrece talleres de metodología y búsqueda de fuentes durante cada ciclo."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "75f9a938-f8df-4693-8b31-b91d5bb6b34a"
+      }
+    },
+    {
+      "case": {
+        "id": "P35",
+        "query": "¿Cuándo se realizan los exámenes finales del ciclo 2026-II?",
+        "key": "calendario-academico",
+        "facts": [
+          [
+            "14"
+          ],
+          [
+            "19"
+          ],
+          [
+            "diciembre"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.548,
+      "response": {
+        "answer": "Según el calendario académico oficial 2026-II, los exámenes finales se realizan del 14 al 19 de diciembre de 2026. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 71,
+            "document_id": 31,
+            "key": "demo-s1-calendario-academico",
+            "title": "Calendario académico 2026-II — Universidad del Valle",
+            "filename": "demo-s1-calendario-academico.pdf",
+            "version": 1,
+            "scope": "institutional",
+            "document_type": "OTRO",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Calendario académico oficial 2026-II. Exámenes finales: del 14 al 19 de diciembre de 2026. Cierre de actas: 23 de diciembre de 2026. Publicación de notas finales: 28 de diciembre de 2026. El plazo para presentar un reclamo de nota se rige por el Reglamento académico y se cuenta desde la publicación."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "89640684-26c9-4b09-a5ab-bb5f1c3acf91"
+      }
+    },
+    {
+      "case": {
+        "id": "P36",
+        "query": "¿Cuándo se publican las notas finales de 2026-II?",
+        "key": "calendario-academico",
+        "facts": [
+          [
+            "28"
+          ],
+          [
+            "diciembre"
+          ],
+          [
+            "2026"
+          ]
+        ]
+      },
+      "passed": true,
+      "elapsed_seconds": 2.779,
+      "response": {
+        "answer": "Según el calendario académico oficial 2026-II de la Universidad del Valle, las notas finales se publican el 28 de diciembre de 2026. [1]",
+        "sources": [
+          {
+            "source_id": 1,
+            "fragment_id": 71,
+            "document_id": 31,
+            "key": "demo-s1-calendario-academico",
+            "title": "Calendario académico 2026-II — Universidad del Valle",
+            "filename": "demo-s1-calendario-academico.pdf",
+            "version": 1,
+            "scope": "institutional",
+            "document_type": "OTRO",
+            "page_start": 2,
+            "page_end": 2,
+            "excerpt": "Calendario académico oficial 2026-II. Exámenes finales: del 14 al 19 de diciembre de 2026. Cierre de actas: 23 de diciembre de 2026. Publicación de notas finales: 28 de diciembre de 2026. El plazo para presentar un reclamo de nota se rige por el Reglamento académico y se cuenta desde la publicación."
+          }
+        ],
+        "insufficient_context": false,
+        "request_id": "74c09d1e-d052-4548-99a1-1755416a0ced"
+      }
+    },
+    {
+      "case": {
+        "id": "N01",
+        "query": "¿Quién ganó el mundial de fútbol de 2022?",
+        "insufficient": true
+      },
+      "passed": true,
+      "elapsed_seconds": 2.763,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "946d384b-98a0-479c-b981-e12d6df1ce05"
+      }
+    },
+    {
+      "case": {
+        "id": "N02",
+        "query": "¿Cuántas habitaciones tiene la residencia universitaria?",
+        "insufficient": true
+      },
+      "passed": true,
+      "elapsed_seconds": 2.544,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "03a1c956-d337-4d2b-808c-82a6216fb1a4"
+      }
+    },
+    {
+      "case": {
+        "id": "N03",
+        "query": "¿Cuál es el nombre del rector de la universidad?",
+        "insufficient": true
+      },
+      "passed": true,
+      "elapsed_seconds": 2.438,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "a42acd71-2088-4548-914c-fcce000fa02c"
+      }
+    },
+    {
+      "case": {
+        "id": "N04",
+        "query": "¿Cuánto cuesta el alojamiento en la residencia universitaria?",
+        "insufficient": true
+      },
+      "passed": true,
+      "elapsed_seconds": 2.596,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "1cc799ac-16da-4f13-bddf-f6e350cd69bc"
+      }
+    },
+    {
+      "case": {
+        "id": "N05",
+        "query": "¿Cuál es la nota aprobatoria oficial de la Universidad Nacional Mayor de San Marcos?",
+        "insufficient": true
+      },
+      "passed": true,
+      "elapsed_seconds": 2.395,
+      "response": {
+        "answer": "No hay información suficiente en los documentos disponibles para responder.",
+        "sources": [],
+        "insufficient_context": true,
+        "request_id": "ab1eedbe-bc89-4cb7-a3c5-5e5789360e26"
+      }
+    }
+  ]
+}

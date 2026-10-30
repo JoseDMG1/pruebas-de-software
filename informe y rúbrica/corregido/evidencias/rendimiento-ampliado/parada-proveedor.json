@@ -1,0 +1,15 @@
+{
+  "reason": "Six query failures with gemini_throttled during endurance. Stop future stages while current spike warmup finishes; do not continue increasing external load.",
+  "stopped_orchestrators": [],
+  "orchestrators_stopped_via_exec_interrupt": [
+    "capacity_followup.py",
+    "capacity_http_campaign.py"
+  ],
+  "actual_observed_after_stop": {
+    "endurance": "6/225 errors; stopped after 161.485 seconds",
+    "spike": "7/25 warmup failures; no measured requests",
+    "extended": "4/10 warmup failures; no measured requests",
+    "http_documental_calibration": "1/1 warmup failure; no measured requests",
+    "http_50_100": "not executed"
+  }
+}

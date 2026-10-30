@@ -8,49 +8,55 @@
     </header>
 
     {{#error}}
-        <div class="alert alert-danger" role="alert">{{error}}</div>
+        <div id="assistant-error" class="alert alert-danger" role="alert">{{error}}</div>
     {{/error}}
 
-    <div id="conversation" class="local-acadassistant-conversation" role="log"
-        aria-live="polite" aria-relevant="additions text" aria-label="{{#str}}conversationlog, local_acadassistant{{/str}}">
-        {{#hasmessages}}
-            {{#messages}}
-                <article class="local-acadassistant-turn">
-                    <div class="local-acadassistant-message local-acadassistant-message--user">
-                        <div class="local-acadassistant-message__bubble">
-                            <span class="local-acadassistant-message__label">{{#str}}yourquestion, local_acadassistant{{/str}}</span>
-                            <p>{{question}}</p>
+    <div class="local-acadassistant-conversation-shell">
+        <div id="conversation" class="local-acadassistant-conversation" role="log"
+            aria-live="polite" aria-relevant="additions text" aria-label="{{#str}}conversationlog, local_acadassistant{{/str}}">
+            {{#hasmessages}}
+                {{#messages}}
+                    <article class="local-acadassistant-turn">
+                        <div class="local-acadassistant-message local-acadassistant-message--user">
+                            <div class="local-acadassistant-message__bubble">
+                                <span class="local-acadassistant-message__label">{{#str}}yourquestion, local_acadassistant{{/str}}</span>
+                                <p>{{question}}</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="local-acadassistant-message local-acadassistant-message--assistant">
-                        <span class="local-acadassistant-message__avatar" aria-hidden="true">{{#str}}assistantmark, local_acadassistant{{/str}}</span>
-                        <div class="local-acadassistant-message__bubble">
-                            <span class="local-acadassistant-message__label">{{#str}}assistantanswer, local_acadassistant{{/str}}</span>
-                            <p>{{answer}}</p>
-                            {{#academiclabels}}
-                                <p class="local-acadassistant-provenance">{{label}}</p>
-                            {{/academiclabels}}
-                            {{#sources}}
-                                <details class="local-acadassistant-source">
-                                    <summary>{{label}}: {{title}}</summary>
-                                    <p>{{filename}} ({{pagelabel}})</p>
-                                    <blockquote>{{excerpt}}</blockquote>
-                                </details>
-                            {{/sources}}
+                        <div class="local-acadassistant-message local-acadassistant-message--assistant">
+                            <span class="local-acadassistant-message__avatar" aria-hidden="true">{{#str}}assistantmark, local_acadassistant{{/str}}</span>
+                            <div class="local-acadassistant-message__bubble">
+                                <span class="local-acadassistant-message__label">{{#str}}assistantanswer, local_acadassistant{{/str}}</span>
+                                <div class="local-acadassistant-answer">{{{answer_html}}}</div>
+                                {{#navigation_links}}
+                                    <a class="local-acadassistant-destination" href="{{url}}">
+                                        <span>{{label}}</span><small>{{detail}}</small>
+                                    </a>
+                                {{/navigation_links}}
+                                {{#academiclabels}}
+                                    <p class="local-acadassistant-provenance">{{label}}</p>
+                                {{/academiclabels}}
+                                {{#sources}}
+                                    <details class="local-acadassistant-source">
+                                        <summary>{{label}}: {{title}}</summary>
+                                        <p>{{filename}} ({{pagelabel}})</p>
+                                        <blockquote>{{excerpt}}</blockquote>
+                                    </details>
+                                {{/sources}}
+                            </div>
                         </div>
-                    </div>
-                </article>
-            {{/messages}}
-        {{/hasmessages}}
-        {{^hasmessages}}
-            <div class="local-acadassistant-empty">
-                <span class="local-acadassistant-empty__icon" aria-hidden="true">✦</span>
-                <h3>{{#str}}welcomeheading, local_acadassistant{{/str}}</h3>
-                <p>{{#str}}conversationempty, local_acadassistant{{/str}}</p>
-                <div class="local-acadassistant-suggestions" aria-label="{{#str}}suggestions, local_acadassistant{{/str}}">
-                    <button class="btn btn-outline-secondary" type="button" data-assistant-suggestion="{{#str}}suggestiontasks, local_acadassistant{{/str}}">
-                        {{#str}}suggestiontasks, local_acadassistant{{/str}}
-                    </button>
+                    </article>
+                {{/messages}}
+            {{/hasmessages}}
+            {{^hasmessages}}
+                <div class="local-acadassistant-empty">
+                    <span class="local-acadassistant-empty__icon" aria-hidden="true">✦</span>
+                    <h3>{{#str}}welcomeheading, local_acadassistant{{/str}}</h3>
+                    <p>{{#str}}conversationempty, local_acadassistant{{/str}}</p>
+                    <div class="local-acadassistant-suggestions" aria-label="{{#str}}suggestions, local_acadassistant{{/str}}">
+                        <button class="btn btn-outline-secondary" type="button" data-assistant-suggestion="{{#str}}suggestiontasks, local_acadassistant{{/str}}">
+                            {{#str}}suggestiontasks, local_acadassistant{{/str}}
+                        </button>
                     <button class="btn btn-outline-secondary" type="button" data-assistant-suggestion="{{#str}}suggestioncourses, local_acadassistant{{/str}}">
                         {{#str}}suggestioncourses, local_acadassistant{{/str}}
                     </button>
@@ -61,11 +67,20 @@
             </div>
         {{/hasmessages}}
     </div>
+    <button id="assistant-latest" class="local-acadassistant-latest" type="button" aria-controls="conversation" hidden>
+        <span>{{#str}}gotolatest, local_acadassistant{{/str}}</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M12 4v16m-6-6 6 6 6-6"/>
+        </svg>
+    </button>
+    </div>
 
     <p class="local-acadassistant-data-note">{{#str}}moodledataprovenance, local_acadassistant{{/str}}</p>
 
     <form id="assistant-form" class="local-acadassistant-composer" method="post"
-        action="{{pageurl}}#conversation" data-user-label="{{#str}}yourquestion, local_acadassistant{{/str}}">
+        action="{{pageurl}}" data-user-label="{{#str}}yourquestion, local_acadassistant{{/str}}"
+        data-error-label="{{#str}}assistantunavailable, local_acadassistant{{/str}}">
         <input type="hidden" name="sesskey" value="{{sesskey}}">
         <input type="hidden" name="action" value="ask">
         <label for="assistant-question">{{#str}}questionlabel, local_acadassistant{{/str}}</label>
@@ -109,6 +124,46 @@ require(['core/first'], function() {
     const send = form.querySelector('#assistant-send');
     const status = form.querySelector('#assistant-status');
     const conversation = root.querySelector('#conversation');
+    const latestButton = root.querySelector('#assistant-latest');
+    let errorAlert = root.querySelector('#assistant-error');
+
+    const isNearBottom = function() {
+        return conversation.scrollHeight - conversation.scrollTop - conversation.clientHeight < 48;
+    };
+
+    const scrollToLatest = function(animate) {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        conversation.scrollTo({
+            top: conversation.scrollHeight,
+            behavior: animate && !reduceMotion ? 'smooth' : 'instant'
+        });
+        latestButton.hidden = true;
+    };
+
+    if (conversation.querySelector('.local-acadassistant-turn')) {
+        scrollToLatest(false);
+    }
+
+    question.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229) {
+            event.preventDefault();
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit(send);
+            } else {
+                send.click();
+            }
+        }
+    });
+
+    latestButton.addEventListener('click', function() {
+        scrollToLatest(true);
+    });
+
+    conversation.addEventListener('scroll', function() {
+        if (isNearBottom()) {
+            latestButton.hidden = true;
+        }
+    }, {passive: true});
 
     root.querySelectorAll('[data-assistant-suggestion]').forEach(function(button) {
         button.addEventListener('click', function() {
@@ -117,9 +172,9 @@ require(['core/first'], function() {
         });
     });
 
-    form.addEventListener('submit', function(event) {
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
         if (form.dataset.submitting === 'true') {
-            event.preventDefault();
             return;
         }
 
@@ -128,13 +183,24 @@ require(['core/first'], function() {
             return;
         }
 
+        const requestData = new FormData(form);
+        requestData.set('question', text);
         form.dataset.submitting = 'true';
+        if (errorAlert) {
+            errorAlert.remove();
+            errorAlert = null;
+        }
         form.setAttribute('aria-busy', 'true');
         send.disabled = true;
         status.hidden = false;
         root.querySelectorAll('[data-assistant-suggestion]').forEach(function(button) {
             button.disabled = true;
         });
+
+        const empty = conversation.querySelector('.local-acadassistant-empty');
+        if (empty) {
+            empty.remove();
+        }
 
         const turn = document.createElement('article');
         turn.className = 'local-acadassistant-turn local-acadassistant-turn--pending';
@@ -152,17 +218,60 @@ require(['core/first'], function() {
         turn.appendChild(message);
         conversation.appendChild(turn);
 
-        const submittedQuestion = document.createElement('input');
-        submittedQuestion.type = 'hidden';
-        submittedQuestion.name = question.name;
-        submittedQuestion.value = text;
-        form.appendChild(submittedQuestion);
-        question.removeAttribute('name');
         question.value = '';
-        question.disabled = true;
+        question.readOnly = true;
+        scrollToLatest(false);
 
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        turn.scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block: 'end'});
+        let errorMessage = form.dataset.errorLabel;
+        try {
+            const response = await window.fetch(form.getAttribute('action'), {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: requestData
+            });
+            if (!response.ok) {
+                throw new Error(form.dataset.errorLabel);
+            }
+            const result = new DOMParser().parseFromString(await response.text(), 'text/html');
+            const serverError = result.querySelector('#assistant-error, .local-acadassistant-chat .alert-danger');
+            if (serverError && serverError.textContent.trim()) {
+                errorMessage = serverError.textContent.trim();
+                throw new Error(errorMessage);
+            }
+            const responseTurn = result.querySelector('#conversation .local-acadassistant-turn:last-of-type');
+            const responseQuestion = responseTurn && responseTurn.querySelector('.local-acadassistant-message--user p');
+            if (!responseQuestion || responseQuestion.textContent.trim() !== text) {
+                throw new Error(form.dataset.errorLabel);
+            }
+
+            const followLatest = isNearBottom();
+            const readingPosition = conversation.scrollTop;
+            turn.replaceWith(document.importNode(responseTurn, true));
+            if (followLatest) {
+                scrollToLatest(false);
+            } else {
+                conversation.scrollTop = readingPosition;
+                latestButton.hidden = false;
+            }
+        } catch (error) {
+            turn.remove();
+            question.value = text;
+            errorAlert = document.createElement('div');
+            errorAlert.id = 'assistant-error';
+            errorAlert.className = 'alert alert-danger';
+            errorAlert.setAttribute('role', 'alert');
+            errorAlert.textContent = errorMessage;
+            root.querySelector('.local-acadassistant-conversation-shell').before(errorAlert);
+        } finally {
+            form.dataset.submitting = 'false';
+            form.removeAttribute('aria-busy');
+            send.disabled = false;
+            question.readOnly = false;
+            status.hidden = true;
+            root.querySelectorAll('[data-assistant-suggestion]').forEach(function(button) {
+                button.disabled = false;
+            });
+        }
     });
 });
 {{/js}}

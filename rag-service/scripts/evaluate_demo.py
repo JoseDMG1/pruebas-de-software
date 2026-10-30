@@ -1,4 +1,4 @@
-"""Ejecutar la evaluación real del corpus ficticio contra la API local."""
+"""Ejecutar la evaluación real del corpus institucional contra la API local."""
 
 from rag_service.evaluation import main
 

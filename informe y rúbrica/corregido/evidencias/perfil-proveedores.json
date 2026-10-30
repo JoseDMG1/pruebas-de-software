@@ -1,0 +1,848 @@
+{
+  "timestamp_utc": "2026-10-29T08:13:00.270861+00:00",
+  "scope": "Direct provider chain, not Moodle capacity",
+  "results": [
+    {
+      "worker": 1,
+      "seconds": 7.212,
+      "ok": true,
+      "intent": "document"
+    },
+    {
+      "worker": 2,
+      "seconds": 6.576,
+      "ok": true,
+      "intent": "document"
+    },
+    {
+      "worker": 3,
+      "seconds": 6.661,
+      "ok": true,
+      "intent": "document"
+    },
+    {
+      "worker": 4,
+      "seconds": 8.385,
+      "ok": true,
+      "intent": "document"
+    },
+    {
+      "worker": 5,
+      "seconds": 7.505,
+      "ok": true,
+      "intent": "document"
+    },
+    {
+      "worker": 6,
+      "seconds": 7.301,
+      "ok": true,
+      "intent": "document"
+    },
+    {
+      "worker": 7,
+      "seconds": 6.561,
+      "ok": true,
+      "intent": "document"
+    },
+    {
+      "worker": 8,
+      "seconds": 6.936,
+      "ok": true,
+      "intent": "document"
+    },
+    {
+      "worker": 9,
+      "seconds": 7.201,
+      "ok": true,
+      "intent": "document"
+    },
+    {
+      "worker": 10,
+      "seconds": 6.95,
+      "ok": true,
+      "intent": "document"
+    }
+  ],
+  "events": [
+    {
+      "worker": 3,
+      "stage": "dns",
+      "seconds": 0.0119,
+      "status": "ok"
+    },
+    {
+      "worker": 6,
+      "stage": "dns",
+      "seconds": 0.0031,
+      "status": "ok"
+    },
+    {
+      "worker": 1,
+      "stage": "dns",
+      "seconds": 0.017,
+      "status": "ok"
+    },
+    {
+      "worker": 5,
+      "stage": "dns",
+      "seconds": 0.0068,
+      "status": "ok"
+    },
+    {
+      "worker": 4,
+      "stage": "dns",
+      "seconds": 0.0114,
+      "status": "ok"
+    },
+    {
+      "worker": 2,
+      "stage": "dns",
+      "seconds": 0.0168,
+      "status": "ok"
+    },
+    {
+      "worker": 9,
+      "stage": "dns",
+      "seconds": 0.0024,
+      "status": "ok"
+    },
+    {
+      "worker": 7,
+      "stage": "dns",
+      "seconds": 0.0077,
+      "status": "ok"
+    },
+    {
+      "worker": 8,
+      "stage": "dns",
+      "seconds": 0.005,
+      "status": "ok"
+    },
+    {
+      "worker": 10,
+      "stage": "dns",
+      "seconds": 0.0063,
+      "status": "ok"
+    },
+    {
+      "worker": 3,
+      "stage": "tcp_connect",
+      "seconds": 0.0178,
+      "status": "ok"
+    },
+    {
+      "worker": 6,
+      "stage": "tcp_connect",
+      "seconds": 0.0179,
+      "status": "ok"
+    },
+    {
+      "worker": 1,
+      "stage": "tcp_connect",
+      "seconds": 0.0179,
+      "status": "ok"
+    },
+    {
+      "worker": 2,
+      "stage": "tcp_connect",
+      "seconds": 0.0206,
+      "status": "ok"
+    },
+    {
+      "worker": 4,
+      "stage": "tcp_connect",
+      "seconds": 0.0209,
+      "status": "ok"
+    },
+    {
+      "worker": 5,
+      "stage": "tcp_connect",
+      "seconds": 0.0211,
+      "status": "ok"
+    },
+    {
+      "worker": 7,
+      "stage": "tcp_connect",
+      "seconds": 0.0193,
+      "status": "ok"
+    },
+    {
+      "worker": 9,
+      "stage": "tcp_connect",
+      "seconds": 0.0196,
+      "status": "ok"
+    },
+    {
+      "worker": 8,
+      "stage": "tcp_connect",
+      "seconds": 0.0196,
+      "status": "ok"
+    },
+    {
+      "worker": 10,
+      "stage": "tcp_connect",
+      "seconds": 0.0201,
+      "status": "ok"
+    },
+    {
+      "worker": 1,
+      "stage": "tls_handshake",
+      "seconds": 0.0228,
+      "status": "ok"
+    },
+    {
+      "worker": 3,
+      "stage": "tls_handshake",
+      "seconds": 0.0234,
+      "status": "ok"
+    },
+    {
+      "worker": 6,
+      "stage": "tls_handshake",
+      "seconds": 0.0235,
+      "status": "ok"
+    },
+    {
+      "worker": 2,
+      "stage": "tls_handshake",
+      "seconds": 0.0336,
+      "status": "ok"
+    },
+    {
+      "worker": 7,
+      "stage": "tls_handshake",
+      "seconds": 0.0309,
+      "status": "ok"
+    },
+    {
+      "worker": 10,
+      "stage": "tls_handshake",
+      "seconds": 0.0246,
+      "status": "ok"
+    },
+    {
+      "worker": 4,
+      "stage": "tls_handshake",
+      "seconds": 0.0353,
+      "status": "ok"
+    },
+    {
+      "worker": 9,
+      "stage": "tls_handshake",
+      "seconds": 0.0321,
+      "status": "ok"
+    },
+    {
+      "worker": 8,
+      "stage": "tls_handshake",
+      "seconds": 0.0324,
+      "status": "ok"
+    },
+    {
+      "worker": 5,
+      "stage": "tls_handshake",
+      "seconds": 0.0371,
+      "status": "ok"
+    },
+    {
+      "worker": 2,
+      "stage": "deepseek_total",
+      "seconds": 1.2927,
+      "status": "ok"
+    },
+    {
+      "worker": 7,
+      "stage": "deepseek_total",
+      "seconds": 1.2979,
+      "status": "ok"
+    },
+    {
+      "worker": 1,
+      "stage": "deepseek_total",
+      "seconds": 1.365,
+      "status": "ok"
+    },
+    {
+      "worker": 8,
+      "stage": "deepseek_total",
+      "seconds": 1.3598,
+      "status": "ok"
+    },
+    {
+      "worker": 10,
+      "stage": "deepseek_total",
+      "seconds": 1.4135,
+      "status": "ok"
+    },
+    {
+      "worker": 3,
+      "stage": "deepseek_total",
+      "seconds": 1.5194,
+      "status": "ok"
+    },
+    {
+      "worker": 6,
+      "stage": "deepseek_total",
+      "seconds": 1.539,
+      "status": "ok"
+    },
+    {
+      "worker": 9,
+      "stage": "deepseek_total",
+      "seconds": 1.5888,
+      "status": "ok"
+    },
+    {
+      "worker": 5,
+      "stage": "deepseek_total",
+      "seconds": 1.753,
+      "status": "ok"
+    },
+    {
+      "worker": 4,
+      "stage": "deepseek_total",
+      "seconds": 2.0154,
+      "status": "ok"
+    },
+    {
+      "worker": 2,
+      "stage": "deepseek_total",
+      "seconds": 1.2245,
+      "status": "ok"
+    },
+    {
+      "worker": 2,
+      "stage": "dns",
+      "seconds": 0.0015,
+      "status": "ok"
+    },
+    {
+      "worker": 2,
+      "stage": "tcp_connect",
+      "seconds": 0.0407,
+      "status": "ok"
+    },
+    {
+      "worker": 2,
+      "stage": "tls_handshake",
+      "seconds": 0.045,
+      "status": "ok"
+    },
+    {
+      "worker": 7,
+      "stage": "deepseek_total",
+      "seconds": 1.3674,
+      "status": "ok"
+    },
+    {
+      "worker": 7,
+      "stage": "dns",
+      "seconds": 0.0015,
+      "status": "ok"
+    },
+    {
+      "worker": 8,
+      "stage": "deepseek_total",
+      "seconds": 1.3312,
+      "status": "ok"
+    },
+    {
+      "worker": 8,
+      "stage": "dns",
+      "seconds": 0.0014,
+      "status": "ok"
+    },
+    {
+      "worker": 7,
+      "stage": "tcp_connect",
+      "seconds": 0.0455,
+      "status": "ok"
+    },
+    {
+      "worker": 8,
+      "stage": "tcp_connect",
+      "seconds": 0.0475,
+      "status": "ok"
+    },
+    {
+      "worker": 7,
+      "stage": "tls_handshake",
+      "seconds": 0.0423,
+      "status": "ok"
+    },
+    {
+      "worker": 8,
+      "stage": "tls_handshake",
+      "seconds": 0.0428,
+      "status": "ok"
+    },
+    {
+      "worker": 10,
+      "stage": "deepseek_total",
+      "seconds": 1.3825,
+      "status": "ok"
+    },
+    {
+      "worker": 10,
+      "stage": "dns",
+      "seconds": 0.0015,
+      "status": "ok"
+    },
+    {
+      "worker": 1,
+      "stage": "deepseek_total",
+      "seconds": 1.4849,
+      "status": "ok"
+    },
+    {
+      "worker": 1,
+      "stage": "dns",
+      "seconds": 0.0014,
+      "status": "ok"
+    },
+    {
+      "worker": 10,
+      "stage": "tcp_connect",
+      "seconds": 0.0425,
+      "status": "ok"
+    },
+    {
+      "worker": 1,
+      "stage": "tcp_connect",
+      "seconds": 0.0411,
+      "status": "ok"
+    },
+    {
+      "worker": 10,
+      "stage": "tls_handshake",
+      "seconds": 0.0469,
+      "status": "ok"
+    },
+    {
+      "worker": 1,
+      "stage": "tls_handshake",
+      "seconds": 0.0457,
+      "status": "ok"
+    },
+    {
+      "worker": 6,
+      "stage": "deepseek_total",
+      "seconds": 1.4124,
+      "status": "ok"
+    },
+    {
+      "worker": 6,
+      "stage": "dns",
+      "seconds": 0.0015,
+      "status": "ok"
+    },
+    {
+      "worker": 6,
+      "stage": "tcp_connect",
+      "seconds": 0.0381,
+      "status": "ok"
+    },
+    {
+      "worker": 3,
+      "stage": "deepseek_total",
+      "seconds": 1.4834,
+      "status": "ok"
+    },
+    {
+      "worker": 3,
+      "stage": "dns",
+      "seconds": 0.0014,
+      "status": "ok"
+    },
+    {
+      "worker": 6,
+      "stage": "tls_handshake",
+      "seconds": 0.0431,
+      "status": "ok"
+    },
+    {
+      "worker": 9,
+      "stage": "deepseek_total",
+      "seconds": 1.4407,
+      "status": "ok"
+    },
+    {
+      "worker": 3,
+      "stage": "tcp_connect",
+      "seconds": 0.0417,
+      "status": "ok"
+    },
+    {
+      "worker": 9,
+      "stage": "dns",
+      "seconds": 0.0014,
+      "status": "ok"
+    },
+    {
+      "worker": 9,
+      "stage": "tcp_connect",
+      "seconds": 0.0379,
+      "status": "ok"
+    },
+    {
+      "worker": 3,
+      "stage": "tls_handshake",
+      "seconds": 0.047,
+      "status": "ok"
+    },
+    {
+      "worker": 9,
+      "stage": "tls_handshake",
+      "seconds": 0.0439,
+      "status": "ok"
+    },
+    {
+      "worker": 5,
+      "stage": "deepseek_total",
+      "seconds": 1.4681,
+      "status": "ok"
+    },
+    {
+      "worker": 5,
+      "stage": "dns",
+      "seconds": 0.0014,
+      "status": "ok"
+    },
+    {
+      "worker": 5,
+      "stage": "tcp_connect",
+      "seconds": 0.0384,
+      "status": "ok"
+    },
+    {
+      "worker": 5,
+      "stage": "tls_handshake",
+      "seconds": 0.043,
+      "status": "ok"
+    },
+    {
+      "worker": 4,
+      "stage": "deepseek_total",
+      "seconds": 1.5563,
+      "status": "ok"
+    },
+    {
+      "worker": 4,
+      "stage": "dns",
+      "seconds": 0.0015,
+      "status": "ok"
+    },
+    {
+      "worker": 4,
+      "stage": "tcp_connect",
+      "seconds": 0.0401,
+      "status": "ok"
+    },
+    {
+      "worker": 4,
+      "stage": "tls_handshake",
+      "seconds": 0.045,
+      "status": "ok"
+    },
+    {
+      "worker": 2,
+      "stage": "gemini_embedding_total",
+      "seconds": 1.333,
+      "status": "ok"
+    },
+    {
+      "worker": 2,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 7,
+      "stage": "gemini_embedding_total",
+      "seconds": 1.3255,
+      "status": "ok"
+    },
+    {
+      "worker": 7,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 8,
+      "stage": "gemini_embedding_total",
+      "seconds": 1.3304,
+      "status": "ok"
+    },
+    {
+      "worker": 8,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 10,
+      "stage": "gemini_embedding_total",
+      "seconds": 1.3132,
+      "status": "ok"
+    },
+    {
+      "worker": 10,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 1,
+      "stage": "gemini_embedding_total",
+      "seconds": 1.3446,
+      "status": "ok"
+    },
+    {
+      "worker": 1,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 6,
+      "stage": "gemini_embedding_total",
+      "seconds": 1.3187,
+      "status": "ok"
+    },
+    {
+      "worker": 6,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 3,
+      "stage": "gemini_embedding_total",
+      "seconds": 1.3007,
+      "status": "ok"
+    },
+    {
+      "worker": 3,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 9,
+      "stage": "gemini_embedding_total",
+      "seconds": 1.3432,
+      "status": "ok"
+    },
+    {
+      "worker": 9,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 5,
+      "stage": "gemini_embedding_total",
+      "seconds": 1.2729,
+      "status": "ok"
+    },
+    {
+      "worker": 5,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 4,
+      "stage": "gemini_embedding_total",
+      "seconds": 1.3092,
+      "status": "ok"
+    },
+    {
+      "worker": 4,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 2,
+      "stage": "deepseek_total",
+      "seconds": 1.0213,
+      "status": "ok"
+    },
+    {
+      "worker": 10,
+      "stage": "deepseek_total",
+      "seconds": 0.8214,
+      "status": "ok"
+    },
+    {
+      "worker": 8,
+      "stage": "deepseek_total",
+      "seconds": 0.9404,
+      "status": "ok"
+    },
+    {
+      "worker": 7,
+      "stage": "deepseek_total",
+      "seconds": 1.1347,
+      "status": "ok"
+    },
+    {
+      "worker": 6,
+      "stage": "deepseek_total",
+      "seconds": 0.9995,
+      "status": "ok"
+    },
+    {
+      "worker": 3,
+      "stage": "deepseek_total",
+      "seconds": 1.0238,
+      "status": "ok"
+    },
+    {
+      "worker": 1,
+      "stage": "deepseek_total",
+      "seconds": 1.1994,
+      "status": "ok"
+    },
+    {
+      "worker": 5,
+      "stage": "deepseek_total",
+      "seconds": 1.077,
+      "status": "ok"
+    },
+    {
+      "worker": 9,
+      "stage": "deepseek_total",
+      "seconds": 1.201,
+      "status": "ok"
+    },
+    {
+      "worker": 4,
+      "stage": "deepseek_total",
+      "seconds": 1.2135,
+      "status": "ok"
+    },
+    {
+      "worker": 7,
+      "stage": "deepseek_total",
+      "seconds": 1.3645,
+      "status": "ok"
+    },
+    {
+      "worker": 7,
+      "stage": "dns",
+      "seconds": 0.0002,
+      "status": "ok"
+    },
+    {
+      "worker": 2,
+      "stage": "deepseek_total",
+      "seconds": 1.6222,
+      "status": "ok"
+    },
+    {
+      "worker": 2,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 3,
+      "stage": "deepseek_total",
+      "seconds": 1.2588,
+      "status": "ok"
+    },
+    {
+      "worker": 3,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 8,
+      "stage": "deepseek_total",
+      "seconds": 1.9004,
+      "status": "ok"
+    },
+    {
+      "worker": 8,
+      "stage": "dns",
+      "seconds": 0.0002,
+      "status": "ok"
+    },
+    {
+      "worker": 10,
+      "stage": "deepseek_total",
+      "seconds": 1.9478,
+      "status": "ok"
+    },
+    {
+      "worker": 10,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 1,
+      "stage": "deepseek_total",
+      "seconds": 1.7488,
+      "status": "ok"
+    },
+    {
+      "worker": 1,
+      "stage": "dns",
+      "seconds": 0.0002,
+      "status": "ok"
+    },
+    {
+      "worker": 9,
+      "stage": "deepseek_total",
+      "seconds": 1.5583,
+      "status": "ok"
+    },
+    {
+      "worker": 9,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 6,
+      "stage": "deepseek_total",
+      "seconds": 1.959,
+      "status": "ok"
+    },
+    {
+      "worker": 6,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 5,
+      "stage": "deepseek_total",
+      "seconds": 1.8597,
+      "status": "ok"
+    },
+    {
+      "worker": 5,
+      "stage": "dns",
+      "seconds": 0.0001,
+      "status": "ok"
+    },
+    {
+      "worker": 4,
+      "stage": "deepseek_total",
+      "seconds": 2.2122,
+      "status": "ok"
+    },
+    {
+      "worker": 4,
+      "stage": "dns",
+      "seconds": 0.0002,
+      "status": "ok"
+    }
+  ]
+}

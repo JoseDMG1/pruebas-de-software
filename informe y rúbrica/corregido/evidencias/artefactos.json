@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "timestamp_utc": "2026-10-29T19:03:57.590517+00:00",
+  "summary": "Archivos editables abren; IDs y referencias verificadas; PDF conserva casos; PPT contiene notas; secretos configurados ausentes. La inspección visual se registra por separado.",
+  "checks": {
+    "editable_files_open": true,
+    "thirteen_workbook_sheets": true,
+    "separate_types_sheet_removed": true,
+    "type_column_named": true,
+    "all_36_plans_classified": true,
+    "thirty_six_complete_cases": true,
+    "ten_complete_stories": true,
+    "all_ids_in_word": true,
+    "unique_ids": true,
+    "all_requirements_have_existing_cases": true,
+    "all_cases_have_existing_stories": true,
+    "twelve_slides_with_notes": true,
+    "all_cases_in_pdf": true,
+    "pdf_has_references_and_conclusions": true,
+    "execution_statuses_match_evidence": true,
+    "evidence_paths_resolve": true,
+    "originals_unchanged_since_record": true,
+    "configured_secrets_absent": true
+  },
+  "missing_evidence": [],
+  "secret_leak_paths": [],
+  "pdf_info": "Author:          python-docx\nCreator:         Writer\nProducer:        LibreOffice 26.2.6.3 (X86_64)\nCreationDate:    Thu Oct 29 14:01:12 2026 -05\nCustom Metadata: no\nMetadata Stream: yes\nTagged:          yes\nUserProperties:  no\nSuspects:        no\nForm:            none\nJavaScript:      no\nPages:           42\nEncrypted:       no\nPage size:       595.304 x 841.89 pts (A4)\nPage rot:        0\nFile size:       2078624 bytes\nOptimized:       no\nPDF version:     1.7\n"
+}

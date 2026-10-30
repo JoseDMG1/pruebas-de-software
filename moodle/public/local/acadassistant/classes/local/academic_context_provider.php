@@ -74,6 +74,9 @@ final class academic_context_provider {
         if (($plan['intent'] ?? '') === 'weekly_plan') {
             $courses = $this->courses_for_mode($courses, 'enrolled');
         }
+        if (($plan['navigation'] ?? 'none') !== 'none') {
+            $courses = $this->courses_for_mode($courses, $plan['course_mode']);
+        }
         $academicavailable = $this->scopeavailable;
         $courseids = array_values(array_map(static fn($course): int => (int)$course->id, $courses));
         $documentcourseids = [];

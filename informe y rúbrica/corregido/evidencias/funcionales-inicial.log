@@ -1,0 +1,13 @@
+anonymous PASS
+documental PASS
+erroneous PASS
+ambiguous FAIL
+out_of_scope PASS
+courses PASS
+foreign_grade PASS
+injection PASS
+integration PASS
+weekly FAIL
+followup PASS
+session PASS
+limits PASS

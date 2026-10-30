@@ -1,4 +1,4 @@
-"""Corpus ficticio reproducible; nunca carga documentos ajenos."""
+"""Prepara los documentos institucionales incluidos en el proyecto."""
 
 import json
 import textwrap
@@ -8,7 +8,7 @@ from pathlib import Path
 from rag_service.errors import AppError
 from rag_service.ingestion import ingest
 from rag_service.gemini import EmbeddingRouter, GeminiEmbeddingProvider
-from rag_service.query import GeminiChatProvider
+from rag_service.query import DeepSeekChatProvider
 
 
 def corpus():
@@ -54,18 +54,29 @@ def make_pdf(pages):
 def prepare_demo(settings, repository, directory=Path("data/inbox")):
     local = GeminiEmbeddingProvider(settings)
     embeddings = local.embed_many(["Reglamento académico universitario."]).space
-    chat = GeminiChatProvider(settings).prepare()
+    chat = DeepSeekChatProvider(settings).prepare()
     repository.initialize()
     directory.mkdir(parents=True, exist_ok=True)
     documents = []
+    indexed = {item["clave"]: item for item in repository.list_documents()}
     for item in corpus():
         path = directory / f"demo-s1-{item['key']}.pdf"
         expected = make_pdf(item["pages"])
         if path.exists():
             if path.read_bytes() != expected:
-                raise AppError(
-                    "demo_file_conflict", "Un PDF de demostración existente difiere del corpus."
-                )
+                key = f"demo-s1-{item['key']}"
+                current = indexed.get(key)
+                title_prefix = item["title"].split(" — ", 1)[0]
+                if item["key"] == "tramites":
+                    title_prefix = "Trámites"
+                if (current is None or current["alcance"] != "institutional" or
+                        not (current["titulo"] == title_prefix or
+                             current["titulo"].startswith(title_prefix + " — ") or
+                             current["titulo"] == item["title"])):
+                    raise AppError(
+                        "demo_file_conflict", "Un PDF de demostración existente difiere del corpus."
+                    )
+                path.write_bytes(expected)
         else:
             with path.open("xb") as output:
                 output.write(expected)

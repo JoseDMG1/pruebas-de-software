@@ -1288,3 +1288,65 @@ def test_shared_institution_modifier_is_not_a_separate_compound_request():
     assert request_clauses(
         "En Universidad Otra, ¿qué cursos tengo y cuál es la nota mínima?"
     ) == ["En Universidad Otra, ¿qué cursos tengo", "cuál es la nota mínima"]
+
+
+@pytest.mark.parametrize("navigation", ["open", "nearest_deadline", "grading"])
+def test_navigation_plan_requires_academic_scope(navigation):
+    from rag_service.conversation import ConversationPlan
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        ConversationPlan(intent="blocked", navigation=navigation)
+    plan = ConversationPlan(intent="academic", categories=["assignments"], navigation=navigation)
+    assert plan.navigation == navigation
+
+
+def test_nearest_deadline_is_a_criterion_not_an_ambiguous_task_reference():
+    from rag_service.conversation import ConversationPlan
+
+    plan = ConversationPlan(intent="academic", categories=["assignments"],
+        navigation="nearest_deadline", ambiguous_task=True, selected_assignment_id=12)
+    assert plan.ambiguous_task is False and plan.selected_assignment_id == 0
+
+
+@pytest.mark.parametrize('query,start,end,expected', [
+    ('lunes y miércoles dos horas', 0, 2, False),
+    ('solo viernes dos horas', 14, 16, False),
+    ('martes y jueves de 14 a 16', 14, 16, True),
+    ('viernes de 15:00 hasta las 18:00', 15, 18, True),
+    ('viernes entre las dos y las cuatro de la tarde', 14, 16, True),
+    ('viernes 14-16', 14, 16, True),
+    ('viernes de 14 a 16.', 14, 16, True),
+    ('viernes de dos a cuatro', 14, 16, False),
+    ('lunes 14:30 a 16:30', 14, 16, False),
+])
+def test_study_hours_need_an_explicit_range(query, start, end, expected):
+    from rag_service.conversation import DeclaredAvailability, availability_hours_are_grounded
+    availability = DeclaredAvailability(days=['viernes'], start_hour=start, end_hour=end)
+    assert availability_hours_are_grounded(query, availability) is expected
+
+
+def test_model_cannot_turn_duration_into_an_invented_study_window():
+    from rag_service.conversation import InterpretationRequest
+    from rag_service.query import GeminiChatProvider
+
+    class Model:
+        def _models(self):
+            return [{'name': 'qwen2.5:3b', 'digest': 'test'}]
+
+        def request(self, method, path, data):
+            if path == '/api/show':
+                return {'capabilities': ['completion']}
+            response = {'planning': True, 'intents': []}
+            if data['format']['title'] == 'ScheduleOutput':
+                response = {'availability': {'days': ['viernes'], 'start_hour': 14, 'end_hour': 16}}
+            return {'done': True, 'message': {'content': json.dumps(response)}}
+
+    plan = GeminiChatProvider(Settings(_env_file=None), Model()).interpret(
+        InterpretationRequest(
+            query='Solo puedo estudiar el viernes dos horas', runtime=payload()['runtime']
+        )
+    )
+    assert plan.intent == 'weekly_plan'
+    assert plan.availability is None
+    assert plan.availability_unknown

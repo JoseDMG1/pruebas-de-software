@@ -1,0 +1,1806 @@
+{
+  "profiles": [
+    {
+      "username": "carga001",
+      "user_id": 11,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga002",
+      "user_id": 12,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga003",
+      "user_id": 13,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga004",
+      "user_id": 14,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga005",
+      "user_id": 15,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga006",
+      "user_id": 16,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga007",
+      "user_id": 17,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga008",
+      "user_id": 18,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga009",
+      "user_id": 19,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga010",
+      "user_id": 20,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga011",
+      "user_id": 21,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga012",
+      "user_id": 22,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga013",
+      "user_id": 23,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga014",
+      "user_id": 24,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga015",
+      "user_id": 25,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga016",
+      "user_id": 26,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga017",
+      "user_id": 27,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga018",
+      "user_id": 28,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga019",
+      "user_id": 29,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga020",
+      "user_id": 30,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga021",
+      "user_id": 31,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga022",
+      "user_id": 32,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga023",
+      "user_id": 33,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga024",
+      "user_id": 34,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga025",
+      "user_id": 35,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga026",
+      "user_id": 36,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga027",
+      "user_id": 37,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga028",
+      "user_id": 38,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga029",
+      "user_id": 39,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga030",
+      "user_id": 40,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga031",
+      "user_id": 41,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga032",
+      "user_id": 42,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga033",
+      "user_id": 43,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga034",
+      "user_id": 44,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga035",
+      "user_id": 45,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga036",
+      "user_id": 46,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga037",
+      "user_id": 47,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga038",
+      "user_id": 48,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga039",
+      "user_id": 49,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga040",
+      "user_id": 50,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga041",
+      "user_id": 51,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga042",
+      "user_id": 52,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga043",
+      "user_id": 53,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga044",
+      "user_id": 54,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga045",
+      "user_id": 55,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga046",
+      "user_id": 56,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga047",
+      "user_id": 57,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga048",
+      "user_id": 58,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga049",
+      "user_id": 59,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga050",
+      "user_id": 60,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga051",
+      "user_id": 61,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga052",
+      "user_id": 62,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga053",
+      "user_id": 63,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga054",
+      "user_id": 64,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga055",
+      "user_id": 65,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga056",
+      "user_id": 66,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga057",
+      "user_id": 67,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga058",
+      "user_id": 68,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga059",
+      "user_id": 69,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga060",
+      "user_id": 70,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga061",
+      "user_id": 71,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga062",
+      "user_id": 72,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga063",
+      "user_id": 73,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga064",
+      "user_id": 74,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga065",
+      "user_id": 75,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga066",
+      "user_id": 76,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga067",
+      "user_id": 77,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga068",
+      "user_id": 78,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga069",
+      "user_id": 79,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga070",
+      "user_id": 80,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga071",
+      "user_id": 81,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga072",
+      "user_id": 82,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga073",
+      "user_id": 83,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga074",
+      "user_id": 84,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga075",
+      "user_id": 85,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga076",
+      "user_id": 86,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga077",
+      "user_id": 87,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga078",
+      "user_id": 88,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga079",
+      "user_id": 89,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga080",
+      "user_id": 90,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga081",
+      "user_id": 91,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga082",
+      "user_id": 92,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga083",
+      "user_id": 93,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga084",
+      "user_id": 94,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga085",
+      "user_id": 95,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga086",
+      "user_id": 96,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga087",
+      "user_id": 97,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga088",
+      "user_id": 98,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga089",
+      "user_id": 99,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga090",
+      "user_id": 100,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga091",
+      "user_id": 101,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga092",
+      "user_id": 102,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga093",
+      "user_id": 103,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga094",
+      "user_id": 104,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga095",
+      "user_id": 105,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga096",
+      "user_id": 106,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga097",
+      "user_id": 107,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga098",
+      "user_id": 108,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    },
+    {
+      "username": "carga099",
+      "user_id": 109,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    },
+    {
+      "username": "carga100",
+      "user_id": 110,
+      "expected_courses": [
+        "Diseno Digital 109",
+        "Programacion 104",
+        "Metodología de Investigación 103",
+        "Biologia 102"
+      ],
+      "source_profile": "estudiante2",
+      "forbidden_courses": [
+        "Algebra 101",
+        "Comunicacion Academica 105",
+        "Estadistica 106",
+        "Fisica General 107",
+        "Ingles Academico 108"
+      ]
+    }
+  ],
+  "count": 100,
+  "scope": "100 distinct local student identities; enrolments mirror two prepared profiles, no copied grades or submissions."
+}

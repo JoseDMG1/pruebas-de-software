@@ -1,0 +1,8 @@
+START nivel-25 25 300 500
+END nivel-25 0 {'requests': 500, 'errors': 0, 'error_percent': 0.0, 'successful_within_10_seconds': 497, 'successful_within_10_percent': 99.4, 'p95_seconds': 8.5548, 'median_seconds': 4.7799, 'maximum_seconds': 11.1413, 'elapsed_seconds': 317.754, 'throughput_requests_per_second': 1.574, 'accepted': True, 'p99_seconds': 9.2605, 'semantic_errors': 0, 'transport_or_application_errors': 0} None
+START nivel-50 50 300 500
+END nivel-50 1 {'requests': 550, 'errors': 0, 'error_percent': 0.0, 'successful_within_10_seconds': 339, 'successful_within_10_percent': 61.636, 'p95_seconds': 13.0916, 'median_seconds': 8.426449999999999, 'maximum_seconds': 14.9736, 'elapsed_seconds': 315.777, 'throughput_requests_per_second': 1.742, 'accepted': False, 'p99_seconds': 14.5708, 'semantic_errors': 0, 'transport_or_application_errors': 0} None
+START recuperacion-10 10 300 100
+END recuperacion-10 0 {'requests': 300, 'errors': 0, 'error_percent': 0.0, 'successful_within_10_seconds': 300, 'successful_within_10_percent': 100.0, 'p95_seconds': 7.0112, 'median_seconds': 3.4901999999999997, 'maximum_seconds': 9.1176, 'elapsed_seconds': 306.824, 'throughput_requests_per_second': 0.978, 'accepted': True, 'p99_seconds': 7.1911, 'semantic_errors': 0, 'transport_or_application_errors': 0} None
+START sostenida-25 25 900 250
+END sostenida-25 1 {'requests': 225, 'errors': 6, 'error_percent': 2.667, 'successful_within_10_seconds': 219, 'successful_within_10_percent': 97.333, 'p95_seconds': 8.395, 'median_seconds': 4.618, 'maximum_seconds': 10.1622, 'elapsed_seconds': 161.485, 'throughput_requests_per_second': 1.393, 'accepted': False, 'p99_seconds': 9.2019, 'semantic_errors': 0, 'transport_or_application_errors': 6} over_5_percent_errors_in_last_minute

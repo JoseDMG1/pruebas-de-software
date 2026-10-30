@@ -471,3 +471,13 @@ omisiones**; Ruff y `git diff --check` también pasaron. Una ejecución sin la
 variable de base de pruebas detectó 14 pruebas omitidas, por lo que no cuenta
 como aceptación completa. La cuota indicada sigue en cooldown y el recorrido
 real Moodle + Gemini continúa pendiente.
+
+## Cierre con DeepSeek — 2026-10-22
+
+La aceptación antes pendiente por cuota Gemini se completó con DeepSeek para chat
+y Gemini solo para embeddings. El recorrido integral final contiene 72 consultas,
+cero reintentos y `complete: true`; mediana 3,49 s y p95 8,13 s.
+270 pruebas RAG y 51 pruebas Moodle (234 aserciones) aprobadas.
+Se incorporaron navegación autorizada y corpus ampliado, con evidencia y límites
+en [validacion-deepseek.md](../../docs/validacion-deepseek.md).
+Los reportes anteriores de esta página describen sus ejecuciones originales.

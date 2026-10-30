@@ -40,7 +40,7 @@ final class academic_assistant {
         if (in_array($plan['intent'], ['academic', 'document', 'weekly_plan'], true)) {
             $provider = new academic_context_provider();
             $context = $provider->collect_for_plan($plan, $conversationcontext, $offset, $seen, $question);
-            if ($plan['intent'] === 'weekly_plan') {
+            if ($plan['intent'] === 'weekly_plan' || $plan['navigation'] === 'nearest_deadline') {
                 // Native access is revalidated for every page; neither names nor cursors grant access.
                 for ($page = 1; $page < 10 && $context['academic_context']['query']['has_more']; $page++) {
                     try {
@@ -66,8 +66,13 @@ final class academic_assistant {
                 }
             }
         }
-        $response = $client->query($question, $context['course_ids'], $context['academic_context'],
-            $plan['follow_up'] ? $conversationcontext : [], $plan, rag_client::runtime());
+        if ($plan['navigation'] !== 'none') {
+            $response = academic_navigation::respond($plan, $context['academic_context'], null, $context['course_ids']);
+        } else {
+            $response = $client->query($question, $context['course_ids'], $context['academic_context'],
+                $plan['follow_up'] ? $conversationcontext : [], $plan, rag_client::runtime());
+            $response['navigation_links'] = [];
+        }
         $response['continuation'] = ($context['academic_context']['query']['has_more'] ?? false) &&
             $plan['intent'] !== 'weekly_plan'
             ? ['question' => $context['context_question'], 'seen' => $context['continuation_seen']] : null;
@@ -102,6 +107,15 @@ final class academic_assistant {
         if ($plan['intent'] === 'weekly_plan') {
             $response['semantic_state']['week_offset'] = $plan['week_offset'];
             $response['semantic_state']['week_start'] = $plan['week_start'];
+        }
+        if (!empty($response['navigation_choices'])) {
+            $response['semantic_state']['task_choices'] = $response['navigation_choices'];
+            if (count($response['navigation_choices']) === 1) {
+                $chosen = $response['navigation_choices'][0];
+                $response['semantic_state']['topic']['selected_assignment_id'] = $chosen['assignment_id'];
+                $response['semantic_state']['topic']['selected_participant_name'] = $chosen['participant'] ?? '';
+                $response['semantic_state']['topic']['scope_question'] = $chosen['name'] . ' en ' . $chosen['course_name'];
+            }
         }
         $response['academic_provenance'] = [];
         if (in_array('calendar', $context['requested_categories'], true)) {

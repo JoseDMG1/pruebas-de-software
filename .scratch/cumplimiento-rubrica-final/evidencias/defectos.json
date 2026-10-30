@@ -1,0 +1,104 @@
+{
+  "timestamp_utc": "2026-10-29",
+  "defects": [
+    {
+      "id": "DEF-01",
+      "severity": "Media — evaluador",
+      "title": "Aceptación documental al 80% en lugar del 90% acordado",
+      "steps": "Inspeccionar evaluation.py antes del cambio: positive >= ceil(positives * 0.8). Evaluar el límite con 32/36 positivas y 5/5 negativas.",
+      "expected": "32/36 no alcanza 90% y debe rechazarse; 33/36 sí alcanza el objetivo.",
+      "actual": "El umbral previo aprobaba desde 29/36. Código previo registrado en el diff respecto al árbol anterior.",
+      "fix": "Función acceptance_met exige >=90%, ejecución completa y todas las abstenciones. El reporte explicita minimum_positive_accuracy=0.9.",
+      "status": "Corregido y verificado",
+      "retest": "test_final_acceptance_requires_ninety_percent y test_final_acceptance_rejects_incomplete_run_or_failed_abstention; pytest.xml. Evaluación real: evaluacion-ia.json."
+    },
+    {
+      "id": "DEF-02",
+      "severity": "Baja — comparador",
+      "title": "Respuesta correcta con «gratuita» se marcaba incorrecta",
+      "steps": "Caso P19: responder «La rectificación es gratuita y tarda dos días hábiles» con fuente demo-s1-tramites.",
+      "expected": "Reconocer costo cero y plazo de dos días con la fuente correcta.",
+      "actual": "La lista de alternativas solo incluía gratuito, gratis y sin costo; rechazaba el género femenino. La evidencia histórica se conserva en rag-service/docs/evaluation-deepseek-results.json.",
+      "fix": "Añadir «gratuita» como alternativa equivalente antes de la nueva evaluación; mantener los requisitos de plazo y fuente.",
+      "status": "Corregido y verificado",
+      "retest": "test_rectification_accepts_gender_variant_without_weakening_facts; evaluación nueva P19 en evaluacion-ia.json. No se modifica el reporte histórico."
+    },
+    {
+      "id": "DEF-03",
+      "severity": "Media — producto",
+      "title": "Duración sin hora de inicio aceptada como disponibilidad completa",
+      "steps": "En conversación nueva: «Organiza mis pendientes de esta semana; puedo estudiar lunes y miércoles dos horas». Luego indicar solo viernes dos horas.",
+      "expected": "Pedir horas concretas u ofrecer borrador provisional sin bloques inventados.",
+      "actual": "La primera ejecución produjo «No hay un bloque futuro adecuado ... con ese horario», aunque no existía hora de inicio declarada. Ver funcionales-inicial.json (weekly y followup).",
+      "fix": "Prompt distingue duración de intervalo. Validación conservadora exige horas de inicio y fin presentes en un intervalo explícito; si faltan, se usa borrador provisional.",
+      "status": "Corregido y verificado",
+      "retest": "test_model_cannot_turn_duration_into_an_invented_study_window y test_study_hours_need_an_explicit_range; funcionales.json#incomplete_hours, #weekly y #followup."
+    },
+    {
+      "id": "DEF-04",
+      "severity": "Baja — arnés de pruebas",
+      "title": "Aclaración válida y horario dependiente de fecha mal evaluados",
+      "steps": "Enviar «¿Y esa?» sin antecedente y plan con lunes/miércoles cuando esos días ya pasaron. Comparar verificador inicial.",
+      "expected": "Aceptar una aclaración inequívoca y usar fechas futuras para probar la creación de un bloque; comprobar horas exactas en seguimiento.",
+      "actual": "«¿Qué información o ayuda universitaria necesitas?» no coincidía con las palabras permitidas. El seguimiento aceptaba viernes mencionado en un vencimiento, sin comprobar el bloque.",
+      "fix": "Añadir la aclaración observada; usar fecha futura calculada en America/Lima y horas explícitas; exigir 14:00–16:00 y después 16:00–18:00 con una acción de avance.",
+      "status": "Corregido y verificado",
+      "retest": "funcionales-inicial.json se conserva; funcionales.json contiene expectativas corregidas sin cambiar los hechos del sistema."
+    },
+    {
+      "id": "DEF-05",
+      "severity": "Media — regresión detectada durante corrección",
+      "title": "Intervalo válido terminado en punto rechazado",
+      "steps": "Enviar «puedo estudiar viernes de 14 a 16.» con la primera versión de la comprobación de horas.",
+      "expected": "Aceptar el punto final de oración y conservar el intervalo 14–16.",
+      "actual": "La primera comprobación confundía el punto final con separador decimal; devolvía borrador. Ver funcionales-reprueba1.json.",
+      "fix": "Rechazar ':' o '.' únicamente cuando continúan con un dígito; probar punto final y no redondear minutos 14:30–16:30.",
+      "status": "Corregido y verificado",
+      "retest": "test_study_hours_need_an_explicit_range parametrizado; funcionales.json#weekly y #followup."
+    },
+    {
+      "id": "DEF-06",
+      "severity": "Media — arnés de navegación",
+      "title": "Selector obsoleto reporta cero enlaces aunque existen",
+      "steps": "Ejecutar smoke_navigation.py con la plantilla actual; inspeccionar selector .local-acadassistant-destination a.",
+      "expected": "Localizar y abrir los enlaces nativos generados por el chat.",
+      "actual": "Respuesta indica empate de vencimientos, pero el test busca un enlace dentro de otro enlace y obtiene cero. La clase está en el propio elemento <a>. Ver navegacion-diagnostico.json.",
+      "fix": "Usar a.local-acadassistant-destination y registrar también el texto de respuesta para diagnóstico.",
+      "status": "Corregido y verificado",
+      "retest": "navegacion.json y navegacion.log: siete consultas y apertura real de destinos."
+    },
+    {
+      "id": "DEF-07",
+      "severity": "Alta — rendimiento",
+      "title": "Conexiones nuevas al proveedor provocan colas de latencia superiores al objetivo",
+      "steps": "Ejecutar load_chat.py con 10 sesiones y 100 consultas; después profile_providers.py con diez cadenas directas.",
+      "expected": "Al menos 95% de las respuestas exitosas en <=10 segundos con cero errores.",
+      "actual": "Carga inicial: 88/100 en <=10 s; p95 28.1885 s; cero errores. Perfil: establecimiento TCP de 19.7116 s dentro de llamada DeepSeek de 21.9073 s; DNS, TLS y embeddings no explican esa espera.",
+      "fix": "Cliente HTTPX reutilizable, hasta 20 conexiones persistentes; conexión y espera de pool limitadas a 3 s, lectura conserva timeout configurado. Sin caché de respuestas, prompts ni decisiones de acceso; credenciales por petición.",
+      "status": "Corregido y verificado",
+      "retest": "test_provider_http.py comprueba reutilización TCP real, separación de credenciales y contrato de errores; perfil-proveedores.json sin llamadas >10 s. Comparar carga-inicial.json y carga.json. Reprueba final: 100/100 en <=10 s, p95 7.3972 s, máximo 8.1947 s, cero errores; misma mezcla y configuración."
+    },
+    {
+      "id": "DEF-08",
+      "severity": "Alta — disponibilidad documental",
+      "title": "La cuota diaria de embeddings impide completar la carga sostenida",
+      "steps": "Ejecutar la mezcla documental/académica sostenida a 25 cuentas después de los niveles de carga; comprobar logs query y hacer una petición diagnóstica al proveedor.",
+      "expected": "Completar 900 s con cero errores y al menos 95% de respuestas correctas en <=10 s.",
+      "actual": "A los 161,485 s: 225 solicitudes y seis errores gemini_throttled. HTTP 429 confirma cuota diaria por proyecto/modelo de 1000 solicitudes. Pico posterior: siete errores de calentamiento y ninguna consulta medida.",
+      "fix": "Pendiente: restablecer o ampliar cuota suficiente para la campaña; presupuestar embeddings de consulta/ingesta y otras cargas del proyecto. No se modificó facturación ni se sustituyó proveedor. Detener carga ante throttling, conservar fallo y no reintentar indefinidamente.",
+      "status": "Abierto — cuota del proveedor",
+      "retest": "Pendiente de cuota disponible. Repetir sostenida y pico completos; no basta la carga breve aprobada. Evidencia: rendimiento-ampliado/sostenida-25.json, pico-10-25-10.json y cuota-gemini.json."
+    },
+    {
+      "id": "DEF-09",
+      "severity": "Media — límite de capacidad local",
+      "title": "Cincuenta cuentas no cumplen la latencia objetivo en el equipo compartido",
+      "steps": "Ejecutar nivel-50 con 50 cuentas distintas, mínimo 500 consultas y cinco minutos, mientras se registra CPU/RAM/swap.",
+      "expected": "Referencia de comparación: al menos 95% de respuestas correctas en <=10 s. El nivel superior solo se declara aprobado si cumple.",
+      "actual": "550 consultas correctas, cero errores; 61,636% en <=10 s y p95 de 13,0916 s. CPU media del host 87,28%, pico 99,87%; swap máximo 3169 MiB. Chromium comparte el equipo con Moodle/RAG.",
+      "fix": "No atribuir el límite exclusivamente al servidor. Mantener 25 como nivel que aprobó la carga breve; falta validar estabilidad y separar el generador del servicio para caracterizar mayor capacidad. La carga HTTP alta quedó pendiente por cuota.",
+      "status": "Límite medido — diagnóstico parcial",
+      "retest": "La recuperación de 10 cuentas aprobó 300 consultas sin errores, p95 7,0112 s. El límite de 50 no se considera corregido. Evidencia: rendimiento-ampliado/nivel-50.json y recuperacion-10.json."
+    }
+  ]
+}

@@ -1,5 +1,8 @@
 """Render authorized academic facts independently of documentary generation."""
 
+from datetime import date
+from datetime import datetime
+import re
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt
@@ -34,16 +37,8 @@ def compose_academic(context: dict, plan: AcademicPlan, question: str = "") -> s
                 "accessible": "Cursos que puedes consultar",
                 "teaching": "Cursos que enseñas",
             }[plan.course_mode]
-            parts.append(
-                heading
-                + ": "
-                + (
-                    "; ".join(f"{row['name']} ({row['short_name']})" for row in rows)
-                    if rows
-                    else "no hay cursos en este resultado"
-                )
-                + "."
-            )
+            items = [f"{row['name']} ({row['short_name']})" for row in rows]
+            parts.append(_section(heading, items, "no hay cursos en este resultado"))
         elif category == "assignments":
             heading = {
                 "pending": "Tareas pendientes de entrega",
@@ -61,28 +56,23 @@ def compose_academic(context: dict, plan: AcademicPlan, question: str = "") -> s
                     continue
                 if plan.assignment_filter == "submitted" and row["status"] != "submitted":
                     continue
-                due = row.get("due_date") or "sin fecha de vencimiento disponible"
-                items.append(f"{row['name']} — {row['course_name']}: {status}; vence {due}")
-            parts.append(
-                heading
-                + ": "
-                + (
-                    "; ".join(items)
-                    if items
-                    else (
-                        (
-                            "no hay más tareas pendientes en este resultado"
-                            if plan.continuing
-                            else "no tienes tareas pendientes"
-                            if plan.complete
-                            else "no hay tareas pendientes entre los registros consultados"
-                        )
-                        if plan.assignment_filter == "pending"
-                        else "no hay tareas en este resultado"
-                    )
+                due = format_due_date(row.get("due_date")) or "sin fecha de vencimiento disponible"
+                items.append(
+                    f"{row['name']} — {row['course_name']}\n"
+                    f"  Estado: {status.capitalize()} · Entrega: {due}"
                 )
-                + "."
+            empty = (
+                (
+                    "no hay más tareas pendientes en este resultado"
+                    if plan.continuing
+                    else "no tienes tareas pendientes"
+                    if plan.complete
+                    else "no hay tareas pendientes entre los registros consultados"
+                )
+                if plan.assignment_filter == "pending"
+                else "no hay tareas en este resultado"
             )
+            parts.append(_section(heading, items, empty))
         elif category == "teachers":
             if plan.teacher_confirmation:
                 parts.append(confirm_teacher(rows, plan, question))
@@ -95,33 +85,30 @@ def compose_academic(context: dict, plan: AcademicPlan, question: str = "") -> s
                 elif not names:
                     names = "no hay docentes asignados o visibles en este resultado"
                 items.append(f"{row['course_name']}: {names}")
-            parts.append(
-                "Docentes por curso: "
-                + ("; ".join(items) or "no hay cursos en este resultado")
-                + "."
-            )
+            parts.append(_section("Docentes por curso", items, "no hay cursos en este resultado"))
         elif category == "grades":
+            items = [
+                f"{row['item_name']} — {row['course_name']}\n"
+                f"  {row.get('participant') or 'Tu calificación'}: {row['grade']}"
+                for row in rows
+            ]
             parts.append(
-                "Calificaciones visibles: "
-                + (
-                    "; ".join(
-                        f"{row['item_name']} — {row['course_name']}"
-                        f" — {row.get('participant') or 'tu calificación'}"
-                        f": {row['grade']}"
-                        for row in rows
-                    )
-                    or "no hay calificaciones visibles en este resultado"
+                _section(
+                    "Calificaciones visibles",
+                    items,
+                    "no hay calificaciones visibles en este resultado",
                 )
-                + "."
             )
         elif category == "calendar":
+            items = [
+                f"{row['name']}\n  Fecha: "
+                f"{format_due_date(row['starts_date']) or row['starts_date']}"
+                for row in rows
+            ]
             parts.append(
-                "Calendario Moodle: "
-                + (
-                    "; ".join(f"{row['name']}: {row['starts_date']}" for row in rows)
-                    or "no hay eventos visibles en el intervalo consultado"
+                _section(
+                    "Calendario Moodle", items, "no hay eventos visibles en el intervalo consultado"
                 )
-                + "."
             )
     if parts and not (plan.teacher_confirmation and plan.categories == ["teachers"]):
         parts.insert(0, "Según Moodle:")
@@ -133,7 +120,52 @@ def compose_academic(context: dict, plan: AcademicPlan, question: str = "") -> s
             "No pude completar la consulta. Precisa la persona o acota el curso; "
             "este resultado no representa todos tus datos."
         )
-    return "\n".join(parts)
+    return "\n\n".join(parts)
+
+
+def _section(title: str, items: list[str], empty: str) -> str:
+    """Keep Moodle facts scannable in the chat's escaped, plain-text transcript."""
+    if not items:
+        return f"{title}\n{empty.capitalize()}."
+    lines = [f"{title} ({len(items)})"]
+    lines.extend("• " + item for item in items)
+    return "\n".join(lines)
+
+
+def format_due_date(value) -> str:
+    """Display Moodle's local timestamp in Spanish without relying on host locale."""
+    if not isinstance(value, str):
+        return ""
+    try:
+        stamp = value.strip()
+        match = re.fullmatch(r"(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?", stamp)
+        if not match:
+            return value
+        parsed = date(int(match[1]), int(match[2]), int(match[3]))
+        clock = f"{int(match[4]):02}:{match[5]}" if match[4] is not None else ""
+        if clock:
+            datetime.strptime(clock, "%H:%M")
+    except ValueError:
+        return value
+    weekdays = ("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo")
+    months = (
+        "enero",
+        "febrero",
+        "marzo",
+        "abril",
+        "mayo",
+        "junio",
+        "julio",
+        "agosto",
+        "septiembre",
+        "octubre",
+        "noviembre",
+        "diciembre",
+    )
+    result = (
+        f"{weekdays[parsed.weekday()]}, {parsed.day} de {months[parsed.month - 1]} de {parsed.year}"
+    )
+    return f"{result} · {clock}" if clock else result
 
 
 def confirm_teacher(rows: list, plan: AcademicPlan, question: str) -> str:
@@ -146,33 +178,53 @@ def confirm_teacher(rows: list, plan: AcademicPlan, question: str) -> str:
     names = list(dict.fromkeys(name for row in rows for name in row["names"]))
     matched = [name for name in names if normalise(name) in normalise(question)]
     populated = [row for row in rows if row["names"]]
-    identities_known = all(isinstance(row.get("teacher_id"), int) and
-                           not isinstance(row.get("teacher_id"), bool) and row["teacher_id"] > 0
-                           for row in populated)
+    identities_known = all(
+        isinstance(row.get("teacher_id"), int)
+        and not isinstance(row.get("teacher_id"), bool)
+        and row["teacher_id"] > 0
+        for row in populated
+    )
     identities = {row["teacher_id"] for row in populated} if identities_known else set()
-    gaps = list(dict.fromkeys(row["course_name"] for row in rows
-                              if not row["names"] or row.get("state") == "unavailable"))
+    gaps = list(
+        dict.fromkeys(
+            row["course_name"]
+            for row in rows
+            if not row["names"] or row.get("state") == "unavailable"
+        )
+    )
     if not names:
-        return ("No puedo confirmar quién te enseña con los datos visibles de Moodle. "
-                "No ver docentes no significa que no haya docentes asignados.")
+        return (
+            "No puedo confirmar quién te enseña con los datos visibles de Moodle. "
+            "No ver docentes no significa que no haya docentes asignados."
+        )
     if plan.has_more or not plan.complete:
-        return ("No puedo confirmar que sea la única docente: la consulta es parcial. "
-                "Según Moodle, aparecen: " + ", ".join(names) + ".")
+        return (
+            "No puedo confirmar que sea la única docente: la consulta es parcial. "
+            "Según Moodle, aparecen: " + ", ".join(names) + "."
+        )
     if len(matched) == 1 and len(names) == 1 and identities_known and len(identities) > 1:
-        answer = (f"No, Moodle muestra más de una persona docente con el nombre {names[0]}. "
-                  "No puedo distinguir a cuál te refieres solo por el nombre.")
+        answer = (
+            f"No, Moodle muestra más de una persona docente con el nombre {names[0]}. "
+            "No puedo distinguir a cuál te refieres solo por el nombre."
+        )
     elif len(matched) == 1 and identities_known and len(identities) == 1:
-        answer = (f"Sí, {matched[0]} es la única docente visible "
-                  "en los cursos consultados de Moodle.")
+        answer = (
+            f"Sí, {matched[0]} es la única docente visible en los cursos consultados de Moodle."
+        )
     elif len(matched) == 1 and len(names) > 1:
         others = [name for name in names if name != matched[0]]
-        answer = (f"No, además de {matched[0]}, Moodle muestra a " + ", ".join(others) + ".")
+        answer = f"No, además de {matched[0]}, Moodle muestra a " + ", ".join(others) + "."
     else:
-        answer = ("No puedo confirmar esa afirmación. Según Moodle, los docentes visibles son: "
-                  + ", ".join(names) + ".")
+        answer = (
+            "No puedo confirmar esa afirmación. Según Moodle, los docentes visibles son: "
+            + ", ".join(names)
+            + "."
+        )
     if gaps:
-        answer += (" No puedo asegurar que no haya otros docentes asignados: no tengo nombres "
-                   "visibles en " + ", ".join(gaps) + ".")
+        answer += (
+            " No puedo asegurar que no haya otros docentes asignados: no tengo nombres "
+            "visibles en " + ", ".join(gaps) + "."
+        )
     return answer
 
 

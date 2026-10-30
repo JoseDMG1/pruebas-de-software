@@ -1,0 +1,254 @@
+{
+  "stage": "http-control-academico-1",
+  "timestamp_utc": "2026-10-29T18:46:17.204390+00:00",
+  "complete": true,
+  "configuration": {
+    "stage": "http-control-academico-1",
+    "users": 1,
+    "seconds": 0,
+    "requests": 3,
+    "output": ".scratch/rendimiento-ampliado/evidencias/http-control-academico-1.json",
+    "mix": "academic"
+  },
+  "harness_sha256": "58e79688264b823a655baa0f31ad26826e87d6541117c1cb1a2ead83ee1d00f1",
+  "measurement": "Native Moodle authenticated POST + redirect GET through real RAG/providers; ends at HTML receipt, excludes browser rendering. Separate from browser E2E results.",
+  "profiles": [
+    {
+      "username": "carga001",
+      "user_id": 11,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1",
+      "forbidden_courses": [
+        "Diseno Digital 109",
+        "Metodología de Investigación 103"
+      ]
+    }
+  ],
+  "questions": [
+    [
+      "courses",
+      "¿Qué cursos tengo?"
+    ],
+    [
+      "teachers",
+      "¿Qué profesores me enseñan?"
+    ],
+    [
+      "calendar",
+      "Llévame a mi calendario de Moodle"
+    ]
+  ],
+  "samples": [
+    {
+      "username": "carga001",
+      "round": 1,
+      "kind": "courses",
+      "question": "¿Qué cursos tengo?",
+      "timestamp_utc": "2026-10-29T18:46:20.968305+00:00",
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (7) \n Algebra 101 (ALG101) Biologia 102 (BIO102) Comunicacion Academica 105 (COM105) Estadistica 106 (EST106) Fisica General 107 (FIS107) Ingles Academico 108 (ING108) Programacion 104 (PROG104) \n Según los datos visibles de Moodle.",
+      "seconds": 3.3183,
+      "links": []
+    },
+    {
+      "username": "carga001",
+      "round": 2,
+      "kind": "teachers",
+      "question": "¿Qué profesores me enseñan?",
+      "timestamp_utc": "2026-10-29T18:46:24.552563+00:00",
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (7) \n Algebra 101: Carla Rojas Biologia 102: Carla Rojas Comunicacion Academica 105: Valeria Núñez Estadistica 106: Diego Salinas Fisica General 107: Jorge Rivas Ingles Academico 108: Valeria Núñez Programacion 104: Diego Salinas \n Según los datos visibles de Moodle.",
+      "seconds": 3.5364,
+      "links": []
+    },
+    {
+      "username": "carga001",
+      "round": 3,
+      "kind": "calendar",
+      "question": "Llévame a mi calendario de Moodle",
+      "timestamp_utc": "2026-10-29T18:46:28.348225+00:00",
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle. \n Según los datos visibles de Moodle.",
+      "seconds": 2.6927,
+      "links": [
+        "http://127.0.0.1:8088/calendar/view.php?view=upcoming"
+      ]
+    }
+  ],
+  "warmup": [
+    {
+      "username": "carga001",
+      "round": 0,
+      "kind": "courses",
+      "question": "¿Qué cursos tengo?",
+      "timestamp_utc": "2026-10-29T18:46:18.068176+00:00",
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (7) \n Algebra 101 (ALG101) Biologia 102 (BIO102) Comunicacion Academica 105 (COM105) Estadistica 106 (EST106) Fisica General 107 (FIS107) Ingles Academico 108 (ING108) Programacion 104 (PROG104) \n Según los datos visibles de Moodle.",
+      "seconds": 2.64,
+      "links": []
+    }
+  ],
+  "telemetry": [
+    {
+      "timestamp_utc": "2026-10-29T18:46:17.262438+00:00",
+      "load_average": [
+        0.57080078125,
+        5.861328125,
+        10.611328125
+      ],
+      "mem_total_kib": 11598796,
+      "mem_available_kib": 8044260,
+      "swap_used_kib": 2111040,
+      "cpu_total_ticks": 2751317,
+      "cpu_idle_ticks": 1969768,
+      "browser_rss_kib": 0,
+      "containers": [
+        {
+          "BlockIO": "257MB / 58.5MB",
+          "CPUPerc": "1.55%",
+          "Container": "rag-service-api-1",
+          "ID": "bb80279c4f13",
+          "MemPerc": "0.88%",
+          "MemUsage": "99.8MiB / 11.06GiB",
+          "Name": "rag-service-api-1",
+          "NetIO": "32.4MB / 102MB",
+          "PIDs": "2"
+        },
+        {
+          "BlockIO": "166MB / 23.5MB",
+          "CPUPerc": "0.00%",
+          "Container": "rag-service-db-1",
+          "ID": "da04f0af88d5",
+          "MemPerc": "0.18%",
+          "MemUsage": "19.83MiB / 11.06GiB",
+          "Name": "rag-service-db-1",
+          "NetIO": "21.5MB / 4.97MB",
+          "PIDs": "6"
+        },
+        {
+          "BlockIO": "366MB / 188MB",
+          "CPUPerc": "0.01%",
+          "Container": "pruebasdesoftware-moodle-1",
+          "ID": "9d8c0fc73945",
+          "MemPerc": "1.32%",
+          "MemUsage": "149.6MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-1",
+          "NetIO": "0B / 0B",
+          "PIDs": "11"
+        },
+        {
+          "BlockIO": "176MB / 319MB",
+          "CPUPerc": "0.02%",
+          "Container": "pruebasdesoftware-moodle-db-1",
+          "ID": "662bb3b6fcf4",
+          "MemPerc": "0.30%",
+          "MemUsage": "34.45MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-db-1",
+          "NetIO": "95.2MB / 168MB",
+          "PIDs": "7"
+        }
+      ],
+      "container_stats_ok": true,
+      "rag_healthy": true,
+      "rag_probe_seconds": 0.042,
+      "moodle_healthy": true,
+      "moodle_probe_seconds": 0.065
+    },
+    {
+      "timestamp_utc": "2026-10-29T18:46:24.419557+00:00",
+      "load_average": [
+        0.63037109375,
+        5.7001953125,
+        10.5078125
+      ],
+      "mem_total_kib": 11598796,
+      "mem_available_kib": 8197604,
+      "swap_used_kib": 2110960,
+      "cpu_total_ticks": 2754154,
+      "cpu_idle_ticks": 1972082,
+      "browser_rss_kib": 0,
+      "containers": [
+        {
+          "BlockIO": "257MB / 58.5MB",
+          "CPUPerc": "0.85%",
+          "Container": "rag-service-api-1",
+          "ID": "bb80279c4f13",
+          "MemPerc": "0.88%",
+          "MemUsage": "99.26MiB / 11.06GiB",
+          "Name": "rag-service-api-1",
+          "NetIO": "32.4MB / 102MB",
+          "PIDs": "3"
+        },
+        {
+          "BlockIO": "166MB / 23.5MB",
+          "CPUPerc": "0.00%",
+          "Container": "rag-service-db-1",
+          "ID": "da04f0af88d5",
+          "MemPerc": "0.18%",
+          "MemUsage": "19.83MiB / 11.06GiB",
+          "Name": "rag-service-db-1",
+          "NetIO": "21.5MB / 4.97MB",
+          "PIDs": "6"
+        },
+        {
+          "BlockIO": "366MB / 188MB",
+          "CPUPerc": "0.01%",
+          "Container": "pruebasdesoftware-moodle-1",
+          "ID": "9d8c0fc73945",
+          "MemPerc": "1.29%",
+          "MemUsage": "146.7MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-1",
+          "NetIO": "0B / 0B",
+          "PIDs": "11"
+        },
+        {
+          "BlockIO": "176MB / 319MB",
+          "CPUPerc": "4.22%",
+          "Container": "pruebasdesoftware-moodle-db-1",
+          "ID": "662bb3b6fcf4",
+          "MemPerc": "0.31%",
+          "MemUsage": "34.63MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-db-1",
+          "NetIO": "95.3MB / 168MB",
+          "PIDs": "7"
+        }
+      ],
+      "container_stats_ok": true,
+      "rag_healthy": true,
+      "rag_probe_seconds": 0.025,
+      "moodle_healthy": true,
+      "moodle_probe_seconds": 0.07
+    }
+  ],
+  "measurement_started_utc": "2026-10-29T18:46:20.733180+00:00",
+  "summary": {
+    "requests": 3,
+    "errors": 0,
+    "error_percent": 0.0,
+    "successful_within_10_seconds": 3,
+    "successful_within_10_percent": 100.0,
+    "p95_seconds": 3.5364,
+    "median_seconds": 3.3183,
+    "maximum_seconds": 3.5364,
+    "elapsed_seconds": 10.332,
+    "throughput_requests_per_second": 0.29,
+    "accepted": true,
+    "p99_seconds": 3.5364,
+    "semantic_errors": 0,
+    "transport_or_application_errors": 0
+  },
+  "accepted": true,
+  "finished_utc": "2026-10-29T18:46:31.065825+00:00"
+}

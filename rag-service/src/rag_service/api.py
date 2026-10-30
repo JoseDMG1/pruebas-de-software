@@ -158,6 +158,10 @@ def create_app(settings: Settings | None = None, repository=None, query_service=
                 code, message = exc.code, str(exc)
                 http_status = {
                     "invalid_generation": 502,
+                    "deepseek_request": 502,
+                    "deepseek_response": 502,
+                    "deepseek_timeout": 504,
+                    "deepseek_configuration": 503,
                     "gemini_response": 502,
                     "invalid_embedding": 502,
                     "gemini_timeout": 504,

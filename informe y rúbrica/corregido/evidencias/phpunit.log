@@ -1,0 +1,12 @@
+Moodle 5.3dev (Build: 20260911)
+Php: 8.3.36, pgsql: 17.11, OS: Linux 7.0.0-38-generic x86_64
+PHPUnit 11.5.56 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.3.36
+Configuration: /var/www/moodle/phpunit.xml
+
+.....................................................             53 / 53 (100%)
+
+Time: 00:50.666, Memory: 91.00 MB
+
+OK (53 tests, 243 assertions)

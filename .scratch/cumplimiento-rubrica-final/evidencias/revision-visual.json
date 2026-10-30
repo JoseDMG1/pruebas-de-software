@@ -1,0 +1,10 @@
+{
+  "timestamp_utc": "2026-10-29T08:33:57.254585+00:00",
+  "method": "PDF export with LibreOffice and inspection of selected rendered pages using pdftoppm",
+  "reviewed": [
+    "Report: cover/layout, requirements table, case cards, performance table and plots, defect register",
+    "Slides: architecture, performance and defects"
+  ],
+  "result": "Selected pages show legible text, complete charts and no observed clipping. Structural checks cover all case IDs and editable files.",
+  "scope": "Sampled visual inspection, not a claim of human review of every cell or every page."
+}

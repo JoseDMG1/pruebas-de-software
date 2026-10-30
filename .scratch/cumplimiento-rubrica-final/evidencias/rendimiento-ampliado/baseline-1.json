@@ -1,0 +1,525 @@
+{
+  "complete": false,
+  "stage": "baseline-1",
+  "timestamp_utc": "2026-10-29T18:05:33.627266+00:00",
+  "configuration": {
+    "stage": "baseline-1",
+    "users": 1,
+    "seconds": 0,
+    "requests": 10,
+    "max_seconds": 1200,
+    "pause": 0,
+    "profiles": ".scratch/rendimiento-ampliado/evidencias/perfiles.json",
+    "output": ".scratch/rendimiento-ampliado/evidencias/baseline-1.json"
+  },
+  "profiles": [
+    {
+      "username": "carga001",
+      "user_id": 11,
+      "expected_courses": [
+        "Ingles Academico 108",
+        "Fisica General 107",
+        "Estadistica 106",
+        "Comunicacion Academica 105",
+        "Programacion 104",
+        "Biologia 102",
+        "Algebra 101"
+      ],
+      "source_profile": "estudiante1"
+    }
+  ],
+  "questions": [
+    [
+      "rule",
+      "¿Cuál es la nota mínima aprobatoria?"
+    ],
+    [
+      "courses",
+      "¿Qué cursos tengo?"
+    ],
+    [
+      "teachers",
+      "¿Qué profesores me enseñan?"
+    ],
+    [
+      "support",
+      "¿Cómo solicito orientación psicológica?"
+    ],
+    [
+      "calendar",
+      "Llévame a mi calendario de Moodle"
+    ]
+  ],
+  "measurement": "Submit click to rendered response, measured before semantic extraction. Login/warmup excluded; resets and declared pauses included in throughput. No harness retries. Same host generates load and runs services.",
+  "samples": [
+    {
+      "username": "carga001",
+      "round": 1,
+      "kind": "rule",
+      "timestamp_utc": "2026-10-29T18:05:50.658413+00:00",
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]",
+      "seconds": 5.7575,
+      "links": []
+    },
+    {
+      "username": "carga001",
+      "round": 2,
+      "kind": "courses",
+      "timestamp_utc": "2026-10-29T18:05:57.970354+00:00",
+      "question": "¿Qué cursos tengo?",
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (7)\nAlgebra 101 (ALG101)\nBiologia 102 (BIO102)\nComunicacion Academica 105 (COM105)\nEstadistica 106 (EST106)\nFisica General 107 (FIS107)\nIngles Academico 108 (ING108)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle.",
+      "seconds": 2.7824,
+      "links": []
+    },
+    {
+      "username": "carga001",
+      "round": 3,
+      "kind": "teachers",
+      "timestamp_utc": "2026-10-29T18:06:02.414313+00:00",
+      "question": "¿Qué profesores me enseñan?",
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (7)\nAlgebra 101: Carla Rojas\nBiologia 102: Carla Rojas\nComunicacion Academica 105: Valeria Núñez\nEstadistica 106: Diego Salinas\nFisica General 107: Jorge Rivas\nIngles Academico 108: Valeria Núñez\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle.",
+      "seconds": 3.664,
+      "links": []
+    },
+    {
+      "username": "carga001",
+      "round": 4,
+      "kind": "support",
+      "timestamp_utc": "2026-10-29T18:06:07.679227+00:00",
+      "question": "¿Cómo solicito orientación psicológica?",
+      "ok": false,
+      "error": "semantic_mismatch",
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]\n\nLa fuente indica: «Dirección de Bienestar Estudiantil de la Universidad del Valle. Ofrece orientación psicológica breve, consejería vocacional y acompañamiento para adaptación a la vida universitaria. La atención es confidencial y requiere una cita; no reemplaza servicios de emergencia ni atención clínica especializada.». [2]",
+      "seconds": 7.1744,
+      "links": []
+    }
+  ],
+  "warmup": [
+    {
+      "username": "carga001",
+      "round": 0,
+      "kind": "rule",
+      "timestamp_utc": "2026-10-29T18:05:41.987124+00:00",
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]",
+      "seconds": 7.0781,
+      "links": []
+    }
+  ],
+  "telemetry": [
+    {
+      "timestamp_utc": "2026-10-29T18:05:35.367072+00:00",
+      "load_average": [
+        0.66455078125,
+        0.4375,
+        0.40478515625
+      ],
+      "mem_total_kib": 11598796,
+      "mem_available_kib": 6064404,
+      "swap_used_kib": 0,
+      "cpu_total_ticks": 1783748,
+      "cpu_idle_ticks": 1553146,
+      "containers": [
+        {
+          "BlockIO": "151MB / 0B",
+          "CPUPerc": "0.16%",
+          "Container": "rag-service-api-1",
+          "ID": "bb80279c4f13",
+          "MemPerc": "0.77%",
+          "MemUsage": "87.34MiB / 11.06GiB",
+          "Name": "rag-service-api-1",
+          "NetIO": "10.2kB / 1.88kB",
+          "PIDs": "2"
+        },
+        {
+          "BlockIO": "127MB / 1.23MB",
+          "CPUPerc": "0.00%",
+          "Container": "rag-service-db-1",
+          "ID": "da04f0af88d5",
+          "MemPerc": "0.49%",
+          "MemUsage": "55.93MiB / 11.06GiB",
+          "Name": "rag-service-db-1",
+          "NetIO": "17.5kB / 1.45kB",
+          "PIDs": "6"
+        },
+        {
+          "BlockIO": "206MB / 7.34MB",
+          "CPUPerc": "52.36%",
+          "Container": "pruebasdesoftware-moodle-1",
+          "ID": "9d8c0fc73945",
+          "MemPerc": "0.84%",
+          "MemUsage": "94.74MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-1",
+          "NetIO": "0B / 0B",
+          "PIDs": "7"
+        },
+        {
+          "BlockIO": "132MB / 93.1MB",
+          "CPUPerc": "3.09%",
+          "Container": "pruebasdesoftware-moodle-db-1",
+          "ID": "662bb3b6fcf4",
+          "MemPerc": "0.59%",
+          "MemUsage": "66.59MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-db-1",
+          "NetIO": "7.76MB / 8.81MB",
+          "PIDs": "7"
+        }
+      ],
+      "container_stats_ok": true,
+      "rag_healthy": true,
+      "rag_probe_seconds": 0.051,
+      "moodle_healthy": true,
+      "moodle_probe_seconds": 0.115
+    },
+    {
+      "timestamp_utc": "2026-10-29T18:05:42.617924+00:00",
+      "load_average": [
+        0.611328125,
+        0.43017578125,
+        0.40234375
+      ],
+      "mem_total_kib": 11598796,
+      "mem_available_kib": 5834492,
+      "swap_used_kib": 0,
+      "cpu_total_ticks": 1786611,
+      "cpu_idle_ticks": 1554866,
+      "containers": [
+        {
+          "BlockIO": "153MB / 0B",
+          "CPUPerc": "0.49%",
+          "Container": "rag-service-api-1",
+          "ID": "bb80279c4f13",
+          "MemPerc": "0.78%",
+          "MemUsage": "88.59MiB / 11.06GiB",
+          "Name": "rag-service-api-1",
+          "NetIO": "23kB / 37.7kB",
+          "PIDs": "2"
+        },
+        {
+          "BlockIO": "127MB / 1.23MB",
+          "CPUPerc": "13.11%",
+          "Container": "rag-service-db-1",
+          "ID": "da04f0af88d5",
+          "MemPerc": "0.50%",
+          "MemUsage": "56.1MiB / 11.06GiB",
+          "Name": "rag-service-db-1",
+          "NetIO": "18.6kB / 2.68kB",
+          "PIDs": "6"
+        },
+        {
+          "BlockIO": "242MB / 7.35MB",
+          "CPUPerc": "0.01%",
+          "Container": "pruebasdesoftware-moodle-1",
+          "ID": "9d8c0fc73945",
+          "MemPerc": "1.16%",
+          "MemUsage": "131.4MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-1",
+          "NetIO": "0B / 0B",
+          "PIDs": "13"
+        },
+        {
+          "BlockIO": "139MB / 94.1MB",
+          "CPUPerc": "0.02%",
+          "Container": "pruebasdesoftware-moodle-db-1",
+          "ID": "662bb3b6fcf4",
+          "MemPerc": "0.60%",
+          "MemUsage": "68.04MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-db-1",
+          "NetIO": "7.87MB / 8.98MB",
+          "PIDs": "7"
+        }
+      ],
+      "container_stats_ok": true,
+      "rag_healthy": true,
+      "rag_probe_seconds": 0.026,
+      "moodle_healthy": true,
+      "moodle_probe_seconds": 0.087
+    },
+    {
+      "timestamp_utc": "2026-10-29T18:05:49.799691+00:00",
+      "load_average": [
+        0.5166015625,
+        0.41552734375,
+        0.3974609375
+      ],
+      "mem_total_kib": 11598796,
+      "mem_available_kib": 5928144,
+      "swap_used_kib": 0,
+      "cpu_total_ticks": 1789453,
+      "cpu_idle_ticks": 1557172,
+      "containers": [
+        {
+          "BlockIO": "153MB / 0B",
+          "CPUPerc": "0.30%",
+          "Container": "rag-service-api-1",
+          "ID": "bb80279c4f13",
+          "MemPerc": "0.79%",
+          "MemUsage": "89.37MiB / 11.06GiB",
+          "Name": "rag-service-api-1",
+          "NetIO": "50.3kB / 108kB",
+          "PIDs": "3"
+        },
+        {
+          "BlockIO": "133MB / 1.23MB",
+          "CPUPerc": "0.00%",
+          "Container": "rag-service-db-1",
+          "ID": "da04f0af88d5",
+          "MemPerc": "0.51%",
+          "MemUsage": "57.66MiB / 11.06GiB",
+          "Name": "rag-service-db-1",
+          "NetIO": "46.3kB / 9.63kB",
+          "PIDs": "6"
+        },
+        {
+          "BlockIO": "245MB / 7.37MB",
+          "CPUPerc": "0.01%",
+          "Container": "pruebasdesoftware-moodle-1",
+          "ID": "9d8c0fc73945",
+          "MemPerc": "1.24%",
+          "MemUsage": "140.2MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-1",
+          "NetIO": "0B / 0B",
+          "PIDs": "12"
+        },
+        {
+          "BlockIO": "139MB / 94.1MB",
+          "CPUPerc": "2.17%",
+          "Container": "pruebasdesoftware-moodle-db-1",
+          "ID": "662bb3b6fcf4",
+          "MemPerc": "0.60%",
+          "MemUsage": "68.34MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-db-1",
+          "NetIO": "7.91MB / 9.07MB",
+          "PIDs": "7"
+        }
+      ],
+      "container_stats_ok": true,
+      "rag_healthy": true,
+      "rag_probe_seconds": 0.025,
+      "moodle_healthy": true,
+      "moodle_probe_seconds": 0.095
+    },
+    {
+      "timestamp_utc": "2026-10-29T18:05:56.986653+00:00",
+      "load_average": [
+        0.47509765625,
+        0.408203125,
+        0.39501953125
+      ],
+      "mem_total_kib": 11598796,
+      "mem_available_kib": 5911036,
+      "swap_used_kib": 0,
+      "cpu_total_ticks": 1792297,
+      "cpu_idle_ticks": 1559519,
+      "containers": [
+        {
+          "BlockIO": "153MB / 0B",
+          "CPUPerc": "0.89%",
+          "Container": "rag-service-api-1",
+          "ID": "bb80279c4f13",
+          "MemPerc": "0.79%",
+          "MemUsage": "89.49MiB / 11.06GiB",
+          "Name": "rag-service-api-1",
+          "NetIO": "74.1kB / 186kB",
+          "PIDs": "3"
+        },
+        {
+          "BlockIO": "133MB / 1.23MB",
+          "CPUPerc": "0.00%",
+          "Container": "rag-service-db-1",
+          "ID": "da04f0af88d5",
+          "MemPerc": "0.51%",
+          "MemUsage": "57.66MiB / 11.06GiB",
+          "Name": "rag-service-db-1",
+          "NetIO": "74kB / 16.6kB",
+          "PIDs": "6"
+        },
+        {
+          "BlockIO": "245MB / 7.4MB",
+          "CPUPerc": "2.28%",
+          "Container": "pruebasdesoftware-moodle-1",
+          "ID": "9d8c0fc73945",
+          "MemPerc": "1.28%",
+          "MemUsage": "144.7MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-1",
+          "NetIO": "0B / 0B",
+          "PIDs": "12"
+        },
+        {
+          "BlockIO": "139MB / 94.2MB",
+          "CPUPerc": "0.02%",
+          "Container": "pruebasdesoftware-moodle-db-1",
+          "ID": "662bb3b6fcf4",
+          "MemPerc": "0.58%",
+          "MemUsage": "65.92MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-db-1",
+          "NetIO": "7.95MB / 9.15MB",
+          "PIDs": "6"
+        }
+      ],
+      "container_stats_ok": true,
+      "rag_healthy": true,
+      "rag_probe_seconds": 0.025,
+      "moodle_healthy": true,
+      "moodle_probe_seconds": 0.08
+    },
+    {
+      "timestamp_utc": "2026-10-29T18:06:04.159771+00:00",
+      "load_average": [
+        0.47607421875,
+        0.4111328125,
+        0.39599609375
+      ],
+      "mem_total_kib": 11598796,
+      "mem_available_kib": 5952604,
+      "swap_used_kib": 0,
+      "cpu_total_ticks": 1795137,
+      "cpu_idle_ticks": 1561807,
+      "containers": [
+        {
+          "BlockIO": "153MB / 0B",
+          "CPUPerc": "0.74%",
+          "Container": "rag-service-api-1",
+          "ID": "bb80279c4f13",
+          "MemPerc": "0.79%",
+          "MemUsage": "89.07MiB / 11.06GiB",
+          "Name": "rag-service-api-1",
+          "NetIO": "89.7kB / 226kB",
+          "PIDs": "3"
+        },
+        {
+          "BlockIO": "133MB / 1.23MB",
+          "CPUPerc": "0.00%",
+          "Container": "rag-service-db-1",
+          "ID": "da04f0af88d5",
+          "MemPerc": "0.51%",
+          "MemUsage": "57.66MiB / 11.06GiB",
+          "Name": "rag-service-db-1",
+          "NetIO": "75.1kB / 17.8kB",
+          "PIDs": "6"
+        },
+        {
+          "BlockIO": "245MB / 7.42MB",
+          "CPUPerc": "13.94%",
+          "Container": "pruebasdesoftware-moodle-1",
+          "ID": "9d8c0fc73945",
+          "MemPerc": "1.31%",
+          "MemUsage": "148MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-1",
+          "NetIO": "0B / 0B",
+          "PIDs": "12"
+        },
+        {
+          "BlockIO": "139MB / 94.3MB",
+          "CPUPerc": "7.94%",
+          "Container": "pruebasdesoftware-moodle-db-1",
+          "ID": "662bb3b6fcf4",
+          "MemPerc": "0.60%",
+          "MemUsage": "68.39MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-db-1",
+          "NetIO": "7.98MB / 9.23MB",
+          "PIDs": "7"
+        }
+      ],
+      "container_stats_ok": true,
+      "rag_healthy": true,
+      "rag_probe_seconds": 0.025,
+      "moodle_healthy": true,
+      "moodle_probe_seconds": 0.073
+    },
+    {
+      "timestamp_utc": "2026-10-29T18:06:11.323089+00:00",
+      "load_average": [
+        0.51806640625,
+        0.42138671875,
+        0.3994140625
+      ],
+      "mem_total_kib": 11598796,
+      "mem_available_kib": 6025980,
+      "swap_used_kib": 0,
+      "cpu_total_ticks": 1797974,
+      "cpu_idle_ticks": 1564098,
+      "containers": [
+        {
+          "BlockIO": "153MB / 0B",
+          "CPUPerc": "0.29%",
+          "Container": "rag-service-api-1",
+          "ID": "bb80279c4f13",
+          "MemPerc": "0.79%",
+          "MemUsage": "89.31MiB / 11.06GiB",
+          "Name": "rag-service-api-1",
+          "NetIO": "110kB / 289kB",
+          "PIDs": "2"
+        },
+        {
+          "BlockIO": "133MB / 1.23MB",
+          "CPUPerc": "0.00%",
+          "Container": "rag-service-db-1",
+          "ID": "da04f0af88d5",
+          "MemPerc": "0.51%",
+          "MemUsage": "57.66MiB / 11.06GiB",
+          "Name": "rag-service-db-1",
+          "NetIO": "101kB / 23.4kB",
+          "PIDs": "6"
+        },
+        {
+          "BlockIO": "245MB / 7.57MB",
+          "CPUPerc": "0.01%",
+          "Container": "pruebasdesoftware-moodle-1",
+          "ID": "9d8c0fc73945",
+          "MemPerc": "1.32%",
+          "MemUsage": "149.3MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-1",
+          "NetIO": "0B / 0B",
+          "PIDs": "12"
+        },
+        {
+          "BlockIO": "139MB / 94.3MB",
+          "CPUPerc": "0.01%",
+          "Container": "pruebasdesoftware-moodle-db-1",
+          "ID": "662bb3b6fcf4",
+          "MemPerc": "0.60%",
+          "MemUsage": "68.21MiB / 11.06GiB",
+          "Name": "pruebasdesoftware-moodle-db-1",
+          "NetIO": "8.05MB / 9.37MB",
+          "PIDs": "7"
+        }
+      ],
+      "container_stats_ok": true,
+      "rag_healthy": true,
+      "rag_probe_seconds": 0.025,
+      "moodle_healthy": true,
+      "moodle_probe_seconds": 0.073
+    }
+  ],
+  "browser": "153.0.8010.12",
+  "measurement_started_utc": "2026-10-29T18:05:49.144243+00:00",
+  "summary": {
+    "requests": 4,
+    "errors": 1,
+    "error_percent": 25.0,
+    "successful_within_10_seconds": 3,
+    "successful_within_10_percent": 75.0,
+    "p95_seconds": 7.1744,
+    "median_seconds": 4.71075,
+    "maximum_seconds": 7.1744,
+    "elapsed_seconds": 25.787,
+    "throughput_requests_per_second": 0.155,
+    "accepted": false,
+    "p99_seconds": 7.1744,
+    "semantic_errors": 1,
+    "transport_or_application_errors": 0
+  },
+  "stop_reason": "over_5_percent_errors_in_last_minute",
+  "accepted": false,
+  "finished_utc": "2026-10-29T18:06:14.930895+00:00"
+}

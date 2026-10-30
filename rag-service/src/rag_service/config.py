@@ -11,6 +11,11 @@ class Settings(BaseSettings):
     database_url: str = "postgresql://rag:rag_local_dev@localhost:55432/rag"
     moodle_service_secret: SecretStr | None = None
     local_demo_query_enabled: bool = False
+    deepseek_api_key: SecretStr | None = None
+    deepseek_base_url: str = "https://api.deepseek.com"
+    deepseek_chat_model: str = "deepseek-flash"
+    deepseek_timeout: int = Field(default=120, ge=1, le=600)
+    deepseek_max_retries: int = Field(default=2, ge=0, le=3)
     gemini_api_key: SecretStr | None = None
     gemini_chat_model: str = "gemini-flash-latest"
     gemini_embedding_model: str = "gemini-embedding-001"

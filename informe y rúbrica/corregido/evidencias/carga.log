@@ -1,0 +1,11 @@
+Round 1/10: 10/10 answers; max 7.39s
+Round 2/10: 10/10 answers; max 7.21s
+Round 3/10: 10/10 answers; max 7.62s
+Round 4/10: 10/10 answers; max 7.08s
+Round 5/10: 10/10 answers; max 7.77s
+Round 6/10: 10/10 answers; max 7.78s
+Round 7/10: 10/10 answers; max 7.37s
+Round 8/10: 10/10 answers; max 7.06s
+Round 9/10: 10/10 answers; max 8.19s
+Round 10/10: 10/10 answers; max 7.15s
+{"requests": 100, "errors": 0, "error_percent": 0.0, "successful_within_10_seconds": 100, "successful_within_10_percent": 100.0, "p95_seconds": 7.3972, "median_seconds": 3.9395, "maximum_seconds": 8.1947, "elapsed_seconds": 112.609, "throughput_requests_per_second": 0.888, "accepted": true}

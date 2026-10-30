@@ -1,24 +1,27 @@
 # Servicio RAG académico
 
-Sistema independiente de Moodle, ubicado en `rag-service/`. Procesa PDF, recupera fragmentos con
-pgvector y responde con fuentes mediante Gemini. La página de prueba está en
-**http://127.0.0.1:8000/demo**. Usa un corpus académico ficticio, identificado como demostración.
+Sistema académico integrado con Moodle. Procesa documentos PDF, recupera fragmentos con pgvector
+y redacta respuestas fundamentadas con DeepSeek. El asistente institucional está disponible en
+**http://127.0.0.1:8000/demo** durante la ejecución local.
 
-El servicio usa Gemini para interpretación, respuestas y embeddings. El modelo conversacional
-es `gemini-flash-latest` y el de embeddings `gemini-embedding-001` (768 dimensiones). No se usa
-Ollama ni Bedrock como proveedor alternativo. Las solicitudes protegidas siguen verificando la
+DeepSeek interpreta las consultas y redacta las respuestas con `deepseek-flash` (V4.1 Flash).
+Gemini se conserva únicamente para embeddings de consulta e ingesta (`gemini-embedding-001`,
+768 dimensiones); su clave no se usa para generar texto. Las solicitudes protegidas siguen verificando la
 aserción firmada de Moodle; Moodle conserva la autoridad sobre identidad y permisos.
+
+Para arquitectura, requisitos, flujos, pruebas, límites y costos, consulta el
+[informe técnico integral](docs/informe-integral-rag-service.md).
 
 ## Entorno preparado
 
-PostgreSQL y la API se ejecutan en Docker. Configura `GEMINI_API_KEY` en `.env` del servidor RAG;
-no la compartas con Moodle ni la pongas en el navegador o en el repositorio.
+PostgreSQL y la API se ejecutan en Docker. Configura `DEEPSEEK_API_KEY` y `GEMINI_API_KEY` en
+`.env` del servidor RAG; no compartas esas claves con Moodle ni las pongas en el navegador o en el repositorio.
 Para comprobar el estado:
 
 ```bash
 docker compose ps
 curl http://127.0.0.1:8000/health
-.venv/bin/rag check-gemini
+.venv/bin/rag check-providers
 .venv/bin/rag ask '¿Cuál es la nota mínima aprobatoria?'
 ```
 
@@ -27,7 +30,7 @@ publican únicamente en localhost. La API no requiere un contenedor de modelos l
 
 ## Instalación reproducible
 
-Requisitos: Python 3.12 o superior, Docker Compose y una clave de Gemini API.
+Requisitos: Python 3.12 o superior, Docker Compose y claves de DeepSeek y Gemini.
 
 ```bash
 cd rag-service
@@ -35,15 +38,15 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev]'
 cp .env.example .env
-# Configura GEMINI_API_KEY en .env antes de ejecutar comandos de inferencia.
+# Configura DEEPSEEK_API_KEY y GEMINI_API_KEY en .env antes de preparar el servicio.
 docker compose up -d db
 rag prepare-demo
 # El corpus se genera en data/inbox y se indexa con claves estables.
 docker compose up --build -d api
 ```
 
-`prepare-demo` valida Gemini, aplica las migraciones 001–004, genera tres PDF
-ficticios e ingesta su contenido. Es repetible: documentos idénticos devuelven `unchanged` y no
+`prepare-demo` valida DeepSeek y Gemini, aplica las migraciones 001–004, genera once documentos PDF
+e ingesta su contenido. Es repetible: documentos idénticos devuelven `unchanged` y no
 incrementan versiones. No sobrescribe un PDF existente con contenido diferente. También prepara
 embeddings Gemini para los fragmentos ya almacenados; no elimina los espacios antiguos.
 
@@ -51,20 +54,23 @@ Si ya existe `.env`, conservarlo y ajustar sus variables en lugar de copiar el e
 Para preparar componentes individualmente:
 
 ```bash
-rag check-gemini
+rag prepare-deepseek
 rag init-db
 rag prepare-gemini-index
 rag index-status
 ```
 
-La ruta conversacional usa `v1beta/models/gemini-flash-latest:generateContent`. Los embeddings de
-consulta e ingesta usan `gemini-embedding-001` (768 dimensiones) con tipos de tarea de recuperación.
+La ruta conversacional usa DeepSeek Chat Completions con el modelo `deepseek-flash`. La salida JSON
+se valida con los modelos Pydantic del RAG; DeepSeek se ejecuta en modo sin razonamiento para
+reducir latencia y tokens en estas respuestas estructuradas. Los embeddings de consulta e ingesta
+usan `gemini-embedding-001` (768 dimensiones) con tipos de tarea de recuperación.
 
 ## Preguntas por página, API y CLI
 
 Abrir `/demo`, escribir una pregunta y consultar. La página muestra espera, errores, respuesta y
 fuentes con título, archivo, páginas, versión y texto utilizado. Cada consulta es independiente,
-sin historial persistente. Los documentos describen la **Universidad Demo del Valle**, que es ficticia.
+sin historial persistente. Las fuentes cubren matrícula, reglamento, trámites, calendario académico,
+biblioteca, bienestar, servicios digitales, becas, integridad académica, accesibilidad e investigación.
 
 ```bash
 rag ask '¿Cuánto cuesta un certificado de estudios y cuánto tarda su entrega?'
@@ -102,7 +108,7 @@ Si falta información, devuelve HTTP 200 con una explicación y sin fuentes. Ope
 
 La consulta se vectoriza con Gemini. Se seleccionan cuatro fragmentos por distancia coseno. Solo se
 usan vectores del mismo proveedor, modelo, revisión y dimensión; el espacio debe cubrir el corpus
-vigente completo. Gemini recibe los fragmentos como datos y devuelve JSON validado. Las referencias
+vigente completo. DeepSeek recibe los fragmentos como datos y devuelve JSON validado. Las referencias
 se comprueban contra esos fragmentos, y los metadatos provienen de PostgreSQL. Una referencia válida
 no demuestra por sí sola que cada afirmación sea correcta: la evaluación incluye revisión de respuestas.
 
@@ -111,7 +117,7 @@ no demuestra por sí sola que cada afirmación sea correcta: la evaluación incl
 | Pregunta inválida | HTTP 422 |
 | Índice incompleto o proveedor/base no disponibles | HTTP 503 |
 | Respuesta o embedding inválidos | HTTP 502 |
-| Timeout de Gemini | HTTP 504 |
+| Timeout de DeepSeek o Gemini | HTTP 504 |
 | Documento cambiado o eliminado durante generación | HTTP 409; repetir consulta |
 
 No se descargan modelos al responder. Las operaciones registran UTC, estado, duración e identificador;
@@ -160,37 +166,31 @@ locales o Bedrock antiguos.
 ## Configuración
 
 El entorno tiene prioridad sobre `.env`. El archivo local, `.venv`, la caché del navegador y los PDF
-generados están excluidos de Git. Los contenidos ficticios y las preguntas de evaluación sí se versionan.
+generados están excluidos de Git. Los contenidos locales y las preguntas de evaluación sí se versionan.
 
 | Variable | Valor inicial |
 |---|---|
 | `DATABASE_URL` | PostgreSQL local en `localhost:55432` |
-| `GEMINI_API_KEY` | Obligatoria; guardar solo en `.env` del servidor |
-| `GEMINI_CHAT_MODEL` | `gemini-flash-latest` |
+| `DEEPSEEK_API_KEY` | Obligatoria para interpretación y respuestas; solo en `.env` del servidor |
+| `DEEPSEEK_BASE_URL` | `https://api.deepseek.com` |
+| `DEEPSEEK_CHAT_MODEL` | `deepseek-flash` (DeepSeek V4.1 Flash) |
+| `DEEPSEEK_TIMEOUT` / `DEEPSEEK_MAX_RETRIES` | 120 segundos / 2 reintentos adicionales (0–3) |
+| `GEMINI_API_KEY` | Obligatoria solo para embeddings; guardar en `.env` del servidor |
 | `GEMINI_EMBEDDING_MODEL` | `gemini-embedding-001` |
 | `GEMINI_EMBEDDING_DIMENSIONS` | 768 |
-| `GEMINI_TIMEOUT` | 120 segundos por llamada |
-| `GEMINI_MAX_RETRIES` | 2 reintentos adicionales para errores transitorios (0–3) |
 | `CHUNK_SIZE_CHARS` / `CHUNK_OVERLAP_CHARS` | 2000 / 200 |
 
-El cliente reintenta errores HTTP 408, 429 y 5xx, además de errores de conexión y timeout.
-Espera aproximadamente 1 y 2 segundos, con una pequeña variación aleatoria. Los errores de
-credenciales o petición inválida no se reintentan. Cada intento usa `GEMINI_TIMEOUT`; con dos
-reintentos la espera total puede acercarse a tres veces ese límite. No cambia de modelo durante
-los reintentos. `GEMINI_CHAT_MODEL` permite elegir explícitamente otro modelo Gemini accesible.
-
-En la prueba local del 2026-10-19 se configuró `gemini-3.5-flash-lite` en `.env`: devolvió
-una respuesta JSON real, mientras el alias `gemini-flash-latest` presentaba alta demanda.
-La selección explícita del modelo conversacional no requiere cambiar el índice de embeddings.
-El cliente envía los esquemas Pydantic mediante `generationConfig.responseFormat.text.schema`,
-el formato JSON Schema documentado por Gemini, conservando referencias y restricciones.
+DeepSeek reintenta errores HTTP 408, 429 y 5xx, además de errores de conexión y timeout, con
+espera exponencial acotada. Las credenciales y peticiones inválidas no se reintentan. Los errores
+de Gemini aplican únicamente al cálculo de embeddings. Cambiar el modelo conversacional no requiere
+reconstruir el índice vectorial.
 
 Para repetir la validación real con datos sintéticos y un reloj fijo de Lima:
 
 ```bash
-.venv/bin/python scripts/check_gemini_conversation.py --model gemini-3.5-flash-lite \
+.venv/bin/python scripts/check_deepseek_conversation.py --model deepseek-flash \
   --timeout 15 --retries 2 \
-  --report ../.scratch/asistente-conversacional/gemini-live-validation.json
+  --report ../.scratch/asistente-conversacional/deepseek-live-validation.json
 ```
 
 El comando realiza llamadas reales y se detiene cuando
@@ -214,16 +214,18 @@ La suite usa proveedores simulados y esquemas PostgreSQL temporales; no consume 
 Nunca apuntar `TEST_DATABASE_URL` a producción. CI instala Chromium y ejecuta
 la suite estricta. Sin navegador o base de pruebas, la aceptación no se considera completa.
 
-La evaluación adicional sí llama a Gemini real a través de la API desplegada. Tiene 20 preguntas
-respondibles y 5 sin información. Requiere al menos 16 respuestas correctas y abstención en las cinco
-negativas. Comprueba hechos y fuentes esperados; los resultados completos permiten revisión semántica.
+La evaluación adicional llama a DeepSeek real a través de la API desplegada. Incluye 36 preguntas
+respondibles y 5 sin información. Requiere al menos 80 % de respuestas positivas correctas y
+abstención en todas las negativas. Comprueba hechos y fuentes esperados; los resultados completos permiten revisión semántica.
 No modifica preguntas ni documentos para acomodar una respuesta fallida. Guarda el informe en
-`docs/evaluation-results.json`, con respuestas y latencias. El corpus pequeño y ficticio no certifica
+`docs/evaluation-deepseek-results.json`, con respuestas y latencias. El corpus evaluado no certifica
 la calidad de todo el sistema ni el objetivo general de diez segundos del PDF.
+
+La validación actual está en [el informe DeepSeek](../docs/validacion-deepseek.md).
 
 Consultar [la trazabilidad del Sprint 1](docs/sprint-1.md) y [la evidencia de validación](docs/validation.md).
 
-El prototipo anterior a la migración Gemini pasó 127 pruebas automáticas y la evaluación fija:
+La versión anterior a la migración DeepSeek pasó 127 pruebas automáticas y la evaluación fija:
 19/20 respuestas positivas
 correctas tras revisión semántica, con 5/5 abstenciones. La mediana fue de 22,9 segundos; el informe
-documenta un fallo conocido de nombre de trámite. Estos resultados corresponden al corpus ficticio.
+documenta un fallo conocido de nombre de trámite. Estos resultados corresponden a la versión histórica del corpus, anterior a su ampliación.

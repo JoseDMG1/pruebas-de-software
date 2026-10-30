@@ -1,0 +1,18 @@
+{
+  "desktop": {
+    "viewport": {
+      "width": 1280,
+      "height": 1100
+    },
+    "complete": true,
+    "provider_calls": 0
+  },
+  "mobile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "complete": true,
+    "provider_calls": 0
+  }
+}

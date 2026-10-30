@@ -9,6 +9,7 @@ rag-service/.pytest_cache/
 rag-service/.ruff_cache/
 rag-service/**/__pycache__/
 rag-service/**/*.py[cod]
+dev/**/__pycache__/
 
 # Local account and tool configuration.
 .aws/

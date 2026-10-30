@@ -1,27 +1,537 @@
 [
- {"id":"P01","query":"¿Cuándo empieza y termina la matrícula ordinaria de 2026-II?","key":"matricula","facts":[["3 de agosto"],["14 de agosto"],["2026"]]},
- {"id":"P02","query":"¿Cuál es el recargo por matrícula extemporánea?","key":"matricula","facts":[["25","veinticinco"],["soles"]]},
- {"id":"P03","query":"¿Cuántos créditos puedo matricular como estudiante regular?","key":"matricula","facts":[["22","veintidós"],["créditos"]]},
- {"id":"P04","query":"¿Qué debo haber aprobado antes de matricularme en un curso?","key":"matricula","facts":[["prerrequisito"]]},
- {"id":"P05","query":"¿Hasta qué fecha puedo solicitar cambio de sección?","key":"matricula","facts":[["21 de agosto"],["2026"]]},
- {"id":"P06","query":"¿Cuál es el horario de la Oficina de Matrícula?","key":"matricula","facts":[["lunes"],["viernes"],["9:00","09:00"],["16:00"]]},
- {"id":"P07","query":"¿Cuántos semestres consecutivos puedo reservar mi matrícula?","key":"matricula","facts":[["dos","2"],["semestre"]]},
- {"id":"P08","query":"¿Cuál es la nota mínima aprobatoria?","key":"reglamento","facts":[["11","once"]]},
- {"id":"P09","query":"¿Qué asistencia mínima se requiere para rendir la evaluación final?","key":"reglamento","facts":[["70","setenta"],["por ciento","%"]]},
- {"id":"P10","query":"¿Qué peso tienen la evaluación continua y la evaluación final?","key":"reglamento","facts":[["60","sesenta"],["40","cuarenta"]]},
- {"id":"P11","query":"¿Hasta qué semana se puede solicitar el retiro de un curso?","key":"reglamento","facts":[["octava","ocho","8"]]},
- {"id":"P12","query":"¿Cuántos cursos se permite retirar por semestre?","key":"reglamento","facts":[["dos","2"],["curso"]]},
- {"id":"P13","query":"¿Qué debo hacer si desapruebo un curso tres veces?","key":"reglamento","facts":[["asesoría académica"],["obligatoria"]]},
- {"id":"P14","query":"¿En qué plazo puedo reclamar una calificación publicada?","key":"reglamento","facts":[["tres","3"],["días hábiles"]]},
- {"id":"P15","query":"¿Cuánto cuesta un certificado de estudios y cuánto tarda su entrega?","key":"tramites","facts":[["35","treinta y cinco"],["cinco","5"],["días hábiles"]]},
- {"id":"P16","query":"¿Qué documentos necesito para solicitar el certificado de estudios?","key":"tramites","facts":[["identidad"],["comprobante de pago"]]},
- {"id":"P17","query":"¿Cuánto cuesta una constancia de matrícula y cuánto tarda?","key":"tramites","facts":[["10","diez"],["un día hábil","1 día hábil"]]},
- {"id":"P18","query":"¿Cómo consulto el estado de una solicitud en mesa de partes?","key":"tramites","facts":[["número de expediente"]]},
- {"id":"P19","query":"¿Cuánto cuesta rectificar el nombre de un documento y cuánto tarda?","key":"tramites","facts":[["gratuito","gratis","sin costo"],["dos","2"],["días hábiles"]]},
- {"id":"P20","query":"¿Qué documentos debo presentar para convalidar cursos?","key":"tramites","facts":[["certificado de estudios"],["sílabos"]]},
- {"id":"N01","query":"¿Quién ganó el mundial de fútbol de 2022?","insufficient":true},
- {"id":"N02","query":"¿Qué becas ofrece la universidad y cuáles son sus montos?","insufficient":true},
- {"id":"N03","query":"¿Cuál es el nombre del rector de la universidad?","insufficient":true},
- {"id":"N04","query":"¿Cuánto cuesta el alojamiento en la residencia universitaria?","insufficient":true},
- {"id":"N05","query":"¿Cuál es la nota aprobatoria oficial de la Universidad Nacional Mayor de San Marcos?","insufficient":true}
+  {
+    "id": "P01",
+    "query": "¿Cuándo empieza y termina la matrícula ordinaria de 2026-II?",
+    "key": "matricula",
+    "facts": [
+      [
+        "3 de agosto"
+      ],
+      [
+        "14 de agosto"
+      ],
+      [
+        "2026"
+      ]
+    ]
+  },
+  {
+    "id": "P02",
+    "query": "¿Cuál es el recargo por matrícula extemporánea?",
+    "key": "matricula",
+    "facts": [
+      [
+        "25",
+        "veinticinco"
+      ],
+      [
+        "soles"
+      ]
+    ]
+  },
+  {
+    "id": "P03",
+    "query": "¿Cuántos créditos puedo matricular como estudiante regular?",
+    "key": "matricula",
+    "facts": [
+      [
+        "22",
+        "veintidós"
+      ],
+      [
+        "créditos"
+      ]
+    ]
+  },
+  {
+    "id": "P04",
+    "query": "¿Qué debo haber aprobado antes de matricularme en un curso?",
+    "key": "matricula",
+    "facts": [
+      [
+        "prerrequisito"
+      ]
+    ]
+  },
+  {
+    "id": "P05",
+    "query": "¿Hasta qué fecha puedo solicitar cambio de sección?",
+    "key": "matricula",
+    "facts": [
+      [
+        "21 de agosto"
+      ],
+      [
+        "2026"
+      ]
+    ]
+  },
+  {
+    "id": "P06",
+    "query": "¿Cuál es el horario de la Oficina de Matrícula?",
+    "key": "matricula",
+    "facts": [
+      [
+        "lunes"
+      ],
+      [
+        "viernes"
+      ],
+      [
+        "9:00",
+        "09:00"
+      ],
+      [
+        "16:00"
+      ]
+    ]
+  },
+  {
+    "id": "P07",
+    "query": "¿Cuántos semestres consecutivos puedo reservar mi matrícula?",
+    "key": "matricula",
+    "facts": [
+      [
+        "dos",
+        "2"
+      ],
+      [
+        "semestre"
+      ]
+    ]
+  },
+  {
+    "id": "P08",
+    "query": "¿Cuál es la nota mínima aprobatoria?",
+    "key": "reglamento",
+    "facts": [
+      [
+        "11",
+        "once"
+      ]
+    ]
+  },
+  {
+    "id": "P09",
+    "query": "¿Qué asistencia mínima se requiere para rendir la evaluación final?",
+    "key": "reglamento",
+    "facts": [
+      [
+        "70",
+        "setenta"
+      ],
+      [
+        "por ciento",
+        "%"
+      ]
+    ]
+  },
+  {
+    "id": "P10",
+    "query": "¿Qué peso tienen la evaluación continua y la evaluación final?",
+    "key": "reglamento",
+    "facts": [
+      [
+        "60",
+        "sesenta"
+      ],
+      [
+        "40",
+        "cuarenta"
+      ]
+    ]
+  },
+  {
+    "id": "P11",
+    "query": "¿Hasta qué semana se puede solicitar el retiro de un curso?",
+    "key": "reglamento",
+    "facts": [
+      [
+        "octava",
+        "ocho",
+        "8"
+      ]
+    ]
+  },
+  {
+    "id": "P12",
+    "query": "¿Cuántos cursos se permite retirar por semestre?",
+    "key": "reglamento",
+    "facts": [
+      [
+        "dos",
+        "2"
+      ],
+      [
+        "curso"
+      ]
+    ]
+  },
+  {
+    "id": "P13",
+    "query": "¿Qué debo hacer si desapruebo un curso tres veces?",
+    "key": "reglamento",
+    "facts": [
+      [
+        "asesoría académica"
+      ],
+      [
+        "obligatoria"
+      ]
+    ]
+  },
+  {
+    "id": "P14",
+    "query": "¿En qué plazo puedo reclamar una calificación publicada?",
+    "key": "reglamento",
+    "facts": [
+      [
+        "tres",
+        "3"
+      ],
+      [
+        "días hábiles"
+      ]
+    ]
+  },
+  {
+    "id": "P15",
+    "query": "¿Cuánto cuesta un certificado de estudios y cuánto tarda su entrega?",
+    "key": "tramites",
+    "facts": [
+      [
+        "35",
+        "treinta y cinco"
+      ],
+      [
+        "cinco",
+        "5"
+      ],
+      [
+        "días hábiles"
+      ]
+    ]
+  },
+  {
+    "id": "P16",
+    "query": "¿Qué documentos necesito para solicitar el certificado de estudios?",
+    "key": "tramites",
+    "facts": [
+      [
+        "identidad"
+      ],
+      [
+        "comprobante de pago"
+      ]
+    ]
+  },
+  {
+    "id": "P17",
+    "query": "¿Cuánto cuesta una constancia de matrícula y cuánto tarda?",
+    "key": "tramites",
+    "facts": [
+      [
+        "10",
+        "diez"
+      ],
+      [
+        "un día hábil",
+        "1 día hábil"
+      ]
+    ]
+  },
+  {
+    "id": "P18",
+    "query": "¿Cómo consulto el estado de una solicitud en mesa de partes?",
+    "key": "tramites",
+    "facts": [
+      [
+        "número de expediente"
+      ]
+    ]
+  },
+  {
+    "id": "P19",
+    "query": "¿Cuánto cuesta rectificar el nombre de un documento y cuánto tarda?",
+    "key": "tramites",
+    "facts": [
+      [
+        "gratuito",
+        "gratuita",
+        "gratis",
+        "sin costo"
+      ],
+      [
+        "dos",
+        "2"
+      ],
+      [
+        "días hábiles"
+      ]
+    ]
+  },
+  {
+    "id": "P20",
+    "query": "¿Qué documentos debo presentar para convalidar cursos?",
+    "key": "tramites",
+    "facts": [
+      [
+        "certificado de estudios"
+      ],
+      [
+        "sílabos"
+      ]
+    ]
+  },
+  {
+    "id": "P21",
+    "query": "¿Cuántos libros puedo llevar en préstamo y por cuánto tiempo?",
+    "key": "biblioteca",
+    "facts": [
+      [
+        "cinco",
+        "5"
+      ],
+      [
+        "catorce",
+        "14"
+      ],
+      [
+        "días"
+      ]
+    ]
+  },
+  {
+    "id": "P22",
+    "query": "¿Cuándo atiende la Biblioteca Central los sábados?",
+    "key": "biblioteca",
+    "facts": [
+      [
+        "9:00",
+        "09:00"
+      ],
+      [
+        "13:00"
+      ]
+    ]
+  },
+  {
+    "id": "P23",
+    "query": "¿Cómo solicito una cita de orientación psicológica?",
+    "key": "bienestar-estudiantil",
+    "facts": [
+      [
+        "bienestar@udv.edu.pe"
+      ],
+      [
+        "bienestar"
+      ]
+    ]
+  },
+  {
+    "id": "P24",
+    "query": "¿Qué duración tiene la primera entrevista de Bienestar?",
+    "key": "bienestar-estudiantil",
+    "facts": [
+      [
+        "treinta",
+        "30"
+      ],
+      [
+        "minutos"
+      ]
+    ]
+  },
+  {
+    "id": "P25",
+    "query": "¿Cómo recupero el acceso a mi cuenta institucional?",
+    "key": "servicios-digitales",
+    "facts": [
+      [
+        "soporte@udv.edu.pe"
+      ],
+      [
+        "código universitario"
+      ]
+    ]
+  },
+  {
+    "id": "P26",
+    "query": "¿Cuánto tarda el soporte digital en responder inicialmente?",
+    "key": "servicios-digitales",
+    "facts": [
+      [
+        "un día hábil"
+      ]
+    ]
+  },
+  {
+    "id": "P27",
+    "query": "¿Cuál es el promedio mínimo para la beca de continuidad?",
+    "key": "becas-y-apoyos",
+    "facts": [
+      [
+        "15",
+        "quince"
+      ],
+      [
+        "20"
+      ]
+    ]
+  },
+  {
+    "id": "P28",
+    "query": "¿Hasta qué porcentaje puede cubrir la beca de continuidad?",
+    "key": "becas-y-apoyos",
+    "facts": [
+      [
+        "50",
+        "cincuenta"
+      ],
+      [
+        "por ciento",
+        "%"
+      ]
+    ]
+  },
+  {
+    "id": "P29",
+    "query": "¿Qué debo hacer para reconocer ideas de otras personas en un trabajo?",
+    "key": "integridad-academica",
+    "facts": [
+      [
+        "citas"
+      ],
+      [
+        "referencias"
+      ]
+    ]
+  },
+  {
+    "id": "P30",
+    "query": "¿A quién puedo consultar dudas preventivas sobre citación?",
+    "key": "integridad-academica",
+    "facts": [
+      [
+        "docente"
+      ],
+      [
+        "biblioteca"
+      ]
+    ]
+  },
+  {
+    "id": "P31",
+    "query": "¿Dónde inicio una solicitud de ajuste académico por accesibilidad?",
+    "key": "accesibilidad",
+    "facts": [
+      [
+        "accesibilidad@udv.edu.pe",
+        "mesa de ayuda"
+      ],
+      [
+        "accesibilidad"
+      ]
+    ]
+  },
+  {
+    "id": "P32",
+    "query": "¿En cuántos días confirman la recepción de una solicitud de accesibilidad?",
+    "key": "accesibilidad",
+    "facts": [
+      [
+        "tres",
+        "3"
+      ],
+      [
+        "días hábiles"
+      ]
+    ]
+  },
+  {
+    "id": "P33",
+    "query": "¿Qué acuerdos deben establecerse antes de iniciar un proyecto de investigación?",
+    "key": "investigacion-estudiantil",
+    "facts": [
+      [
+        "objetivos"
+      ],
+      [
+        "cronograma"
+      ],
+      [
+        "autoría"
+      ]
+    ]
+  },
+  {
+    "id": "P34",
+    "query": "¿Qué se necesita antes de recolectar información de personas para un proyecto?",
+    "key": "investigacion-estudiantil",
+    "facts": [
+      [
+        "evaluación ética"
+      ],
+      [
+        "consentimiento"
+      ]
+    ]
+  },
+  {
+    "id": "P35",
+    "query": "¿Cuándo se realizan los exámenes finales del ciclo 2026-II?",
+    "key": "calendario-academico",
+    "facts": [
+      [
+        "14"
+      ],
+      [
+        "19"
+      ],
+      [
+        "diciembre"
+      ]
+    ]
+  },
+  {
+    "id": "P36",
+    "query": "¿Cuándo se publican las notas finales de 2026-II?",
+    "key": "calendario-academico",
+    "facts": [
+      [
+        "28"
+      ],
+      [
+        "diciembre"
+      ],
+      [
+        "2026"
+      ]
+    ]
+  },
+  {
+    "id": "N01",
+    "query": "¿Quién ganó el mundial de fútbol de 2022?",
+    "insufficient": true
+  },
+  {
+    "id": "N02",
+    "query": "¿Cuántas habitaciones tiene la residencia universitaria?",
+    "insufficient": true
+  },
+  {
+    "id": "N03",
+    "query": "¿Cuál es el nombre del rector de la universidad?",
+    "insufficient": true
+  },
+  {
+    "id": "N04",
+    "query": "¿Cuánto cuesta el alojamiento en la residencia universitaria?",
+    "insufficient": true
+  },
+  {
+    "id": "N05",
+    "query": "¿Cuál es la nota aprobatoria oficial de la Universidad Nacional Mayor de San Marcos?",
+    "insufficient": true
+  }
 ]

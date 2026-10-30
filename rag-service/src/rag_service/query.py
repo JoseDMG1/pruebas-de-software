@@ -1,4 +1,4 @@
-"""Consulta académica con Gemini, recuperación vectorial y referencias verificadas."""
+"""Consulta académica con DeepSeek, recuperación vectorial y referencias verificadas."""
 
 import json
 from datetime import date
@@ -40,8 +40,10 @@ from rag_service.conversation import (
     ROUTE_PROMPT,
     ROUTE_EXAMPLES,
     WEEKDAYS,
+    availability_hours_are_grounded,
 )
 from rag_service.gemini import GeminiAPI, GeminiEmbeddingProvider
+from rag_service.deepseek import DeepSeekAPI
 
 INSUFFICIENT_ANSWER = "No hay información suficiente en los documentos disponibles para responder."
 
@@ -49,9 +51,11 @@ INSUFFICIENT_ANSWER = "No hay información suficiente en los documentos disponib
 def request_clauses(question):
     """Extract literal compound requests for validated argument selection."""
     # Commas and opening question marks can introduce a shared modifier, not a request.
-    return [part.strip().strip("¿¡ ") for part in re.split(
-        r"\s+(?:y|además|también)\s+|[;.?!]", question, flags=re.I
-    ) if part.strip().strip("¿¡ ")]
+    return [
+        part.strip().strip("¿¡ ")
+        for part in re.split(r"\s+(?:y|además|también)\s+|[;.?!]", question, flags=re.I)
+        if part.strip().strip("¿¡ ")
+    ]
 
 
 class ConversationTurn(BaseModel):
@@ -128,8 +132,8 @@ CONTEXTO_CONVERSACION pertenece a esta sesión y sirve para resolver referencias
 Comprueba los datos de la respuesta actual en los contextos documental y académico.
 Responde en español y en el JSON pedido.
 Si un fragmento o registro académico contiene el dato solicitado, responde usando ese dato;
-conserva cantidades, unidades, fechas y condiciones. No rechaces una pregunta respondible solo
-porque un documento sea ficticio: la persona está consultando esta demostración.
+conserva cantidades, unidades, fechas y condiciones. Responde cuando la evidencia disponible
+contenga la respuesta.
 source_ids enumera únicamente documentos y se citan como [1], [2], etc. Para datos académicos de
 Moodle, menciona su procedencia en palabras y deja source_ids=[] cuando la respuesta no use un
 documento. No inventes fuentes ni datos. Puedes reformular, pero no agregar hechos.
@@ -140,7 +144,7 @@ Los fragmentos ya fueron filtrados por acceso antes de llegar aquí. Una frase d
 “solo para participantes autorizados” describe su alcance, no significa que debas rechazar
 al usuario: puedes responder con los fragmentos recibidos. El nombre de un curso no es
 el nombre de una institución; conserva esta distinción al comprobar la evidencia.
-Los datos ficticios no describen instituciones reales. Si la pregunta nombra otra institución,
+Si la pregunta nombra otra institución,
 no traslades las reglas del contexto a esa institución: no hay información suficiente.
 Los datos académicos vienen de Moodle y describen información vigente visible para esta persona.
 En assignments, status=not_submitted o draft indica una tarea no entregada;
@@ -360,15 +364,18 @@ class GeminiChatProvider:
             "¿Qué es este documento?",
             [
                 {
-                    "contenido": "Es una prueba ficticia.",
+                    "contenido": "El reglamento académico establece el procedimiento aplicable.",
                     "alcance": "institutional",
                     "tipo_documento": "OTRO",
-                    "titulo": "Documento de prueba",
+                    "titulo": "Reglamento académico",
                 }
             ],
         )
-        return {"provider": "gemini", "model": self.settings.gemini_chat_model,
-                "revision": "v1beta"}
+        return {
+            "provider": "gemini",
+            "model": self.settings.gemini_chat_model,
+            "revision": "v1beta",
+        }
 
     def interpret(self, request):
         from rag_service.conversation import resolve_task_choice
@@ -405,24 +412,39 @@ class GeminiChatProvider:
         def generate_plan(prompt, schema, message, examples=(), context=None):
             messages = [{"role": "system", "content": prompt}]
             for example, intents, social, finance, rationale, *overrides in examples:
-                messages.extend([
-                    {"role": "user", "content": json.dumps({"query": example}, ensure_ascii=False)},
-                    {"role": "assistant", "content": json.dumps({
-                        "readers": sorted(ACADEMIC_CATEGORIES.intersection(intents)),
-                        "documentary": "document" in intents,
-                        "rationale": rationale, "planning": "weekly_plan" in intents,
-                        "confirmation": False, "task_reference": False,
-                        "scope_explicit": bool(ACADEMIC_CATEGORIES.intersection(intents)),
-                        "intents": [item for item in intents if item != "weekly_plan"],
-                        "social": social,
-                        "follow_up": False, "finance": finance,
-                        **(overrides[0] if overrides else {}),
-                    })},
-                ])
+                messages.extend(
+                    [
+                        {
+                            "role": "user",
+                            "content": json.dumps({"query": example}, ensure_ascii=False),
+                        },
+                        {
+                            "role": "assistant",
+                            "content": json.dumps(
+                                {
+                                    "readers": sorted(ACADEMIC_CATEGORIES.intersection(intents)),
+                                    "documentary": "document" in intents,
+                                    "rationale": rationale,
+                                    "planning": "weekly_plan" in intents,
+                                    "confirmation": False,
+                                    "task_reference": False,
+                                    "scope_explicit": bool(
+                                        ACADEMIC_CATEGORIES.intersection(intents)
+                                    ),
+                                    "intents": [item for item in intents if item != "weekly_plan"],
+                                    "social": social,
+                                    "follow_up": False,
+                                    "finance": finance,
+                                    **(overrides[0] if overrides else {}),
+                                }
+                            ),
+                        },
+                    ]
+                )
             if context:
-                messages.append({"role": "assistant", "content": json.dumps(
-                    context, ensure_ascii=False
-                )})
+                messages.append(
+                    {"role": "assistant", "content": json.dumps(context, ensure_ascii=False)}
+                )
             messages.append({"role": "user", "content": message})
             result = self.client.request(
                 "POST",
@@ -451,57 +473,105 @@ class GeminiChatProvider:
                 "readers": schema["properties"]["readers"],
                 "confirmation": schema["properties"]["confirmation"],
                 "documentary": schema["properties"]["documentary"],
-                **{key: value for key, value in schema["properties"].items()
-                   if key not in {"finance", "readers", "confirmation",
-                                  "documentary"}},
+                **{
+                    key: value
+                    for key, value in schema["properties"].items()
+                    if key not in {"finance", "readers", "confirmation", "documentary"}
+                },
             }
             schema["required"] = [
-                "readers", "rationale", "planning", "confirmation", "task_reference",
+                "readers",
+                "rationale",
+                "planning",
+                "confirmation",
+                "task_reference",
                 "scope_explicit",
                 "documentary",
-                "intents", "social",
-                "follow_up", "finance",
+                "intents",
+                "social",
+                "follow_up",
+                "finance",
             ]
             route = RoutingDecision.model_validate_json(
-                generate_plan(ROUTE_PROMPT, schema,
+                generate_plan(
+                    ROUTE_PROMPT,
+                    schema,
                     json.dumps({"query": request.query}, ensure_ascii=False),
-                    ROUTE_EXAMPLES, context={
-                    **({"previous_topic": {"intent": previous.intent,
-                        "categories": previous.categories, "scope": previous.scope_question,
-                        "clarification": previous.clarification,
-                        "selected_task_known": bool(previous.selected_assignment_id),
-                        "ambiguous_task": previous.ambiguous_task}}
-                        if previous else {}),
-                    **({"conversation_context": [request.conversation_context[-1].model_dump()]}
-                        if request.conversation_context and not previous else {}),
-                })
+                    ROUTE_EXAMPLES,
+                    context={
+                        **(
+                            {
+                                "previous_topic": {
+                                    "intent": previous.intent,
+                                    "categories": previous.categories,
+                                    "scope": previous.scope_question,
+                                    "clarification": previous.clarification,
+                                    "selected_task_known": bool(previous.selected_assignment_id),
+                                    "ambiguous_task": previous.ambiguous_task,
+                                }
+                            }
+                            if previous
+                            else {}
+                        ),
+                        **(
+                            {
+                                "conversation_context": [
+                                    request.conversation_context[-1].model_dump()
+                                ]
+                            }
+                            if request.conversation_context and not previous
+                            else {}
+                        ),
+                    },
+                )
             )
             if route.intent == "social":
-                social = SocialDecision.model_validate_json(generate_plan(
-                    SOCIAL_PROMPT, SocialDecision.model_json_schema(),
-                    json.dumps({"query": request.query}, ensure_ascii=False),
-                )).social
+                social = SocialDecision.model_validate_json(
+                    generate_plan(
+                        SOCIAL_PROMPT,
+                        SocialDecision.model_json_schema(),
+                        json.dumps({"query": request.query}, ensure_ascii=False),
+                    )
+                ).social
                 data = ConversationPlan(
-                    intent="blocked" if social == "none" else "social", social=social,
+                    intent="blocked" if social == "none" else "social",
+                    social=social,
                     finance=route.finance,
                 ).model_dump()
             elif route.intent in ("capabilities", "blocked", "clarify"):
                 data = ConversationPlan(
-                    intent=route.intent, social=route.social, follow_up=route.follow_up,
-                    finance=route.finance, blocked_part=route.blocked_part,
+                    intent=route.intent,
+                    social=route.social,
+                    follow_up=route.follow_up,
+                    finance=route.finance,
+                    blocked_part=route.blocked_part,
                     clarification="intent",
                 ).model_dump()
             elif route.intent == "weekly_plan":
                 schedule_schema = ScheduleOutput.model_json_schema()
                 schedule_schema["required"] = [
-                    "scope_question", "scope_explicit", "independent_question",
+                    "scope_question",
+                    "scope_explicit",
+                    "independent_question",
                 ]
-                pending_request = (previous.scope_question if previous
+                pending_request = (
+                    previous.scope_question
+                    if previous
                     and previous.intent == "clarify"
-                    and previous.clarification == "requests" else "")
-                scope_quotes = ([part.strip() for part in re.split(
-                    r"\s+(?:y|además|también)\s+|[;?!¿¡]", pending_request, flags=re.I
-                ) if part.strip()] if pending_request else [request.query])
+                    and previous.clarification == "requests"
+                    else ""
+                )
+                scope_quotes = (
+                    [
+                        part.strip()
+                        for part in re.split(
+                            r"\s+(?:y|además|también)\s+|[;?!¿¡]", pending_request, flags=re.I
+                        )
+                        if part.strip()
+                    ]
+                    if pending_request
+                    else [request.query]
+                )
                 schedule_schema["properties"]["scope_question"]["enum"] = ["", *scope_quotes]
                 explicit_dates = set()
                 for candidate in re.findall(
@@ -513,7 +583,8 @@ class GeminiChatProvider:
                         pass
                 schedule_schema["properties"]["week_start"]["enum"] = ["", *sorted(explicit_dates)]
                 schedule_schema["properties"]["independent_question"]["enum"] = [
-                    "", *sorted(independent_quotes)
+                    "",
+                    *sorted(independent_quotes),
                 ]
                 schedule = ScheduleOutput.model_validate_json(
                     generate_plan(
@@ -522,19 +593,30 @@ class GeminiChatProvider:
                         json.dumps(
                             {
                                 "runtime": request.runtime.model_dump(),
-                                **({"requested_plan": previous.scope_question} if previous
-                                   and previous.intent == "clarify"
-                                   and previous.clarification == "requests" else {}),
+                                **(
+                                    {"requested_plan": previous.scope_question}
+                                    if previous
+                                    and previous.intent == "clarify"
+                                    and previous.clarification == "requests"
+                                    else {}
+                                ),
                                 "query": request.query,
                             },
                             ensure_ascii=False,
                         ),
                     )
                 )
+                if schedule.availability and not availability_hours_are_grounded(
+                    request.query, schedule.availability
+                ):
+                    schedule.availability = None
+                    schedule.availability_unknown = True
                 if schedule.scope_question not in scope_quotes:
                     schedule.scope_question = ""
-                if (schedule.independent_question
-                    and schedule.independent_question not in request.query):
+                if (
+                    schedule.independent_question
+                    and schedule.independent_question not in request.query
+                ):
                     if not ACADEMIC_CATEGORIES.intersection(route.intents):
                         schedule.independent_question = ""
                 other_readers = ACADEMIC_CATEGORIES - {"assignments", "calendar"} | {"document"}
@@ -542,15 +624,23 @@ class GeminiChatProvider:
                     independent_quotes and other_readers.intersection(route.intents)
                 ):
                     data = ConversationPlan(
-                        intent="clarify", clarification="requests", scope_question=request.query,
+                        intent="clarify",
+                        clarification="requests",
+                        scope_question=request.query,
                         blocked_part=route.blocked_part,
                     ).model_dump()
-                elif schedule.week_ambiguous or (
-                    schedule.week_start and schedule.week_start not in explicit_dates
-                ) or (pending_request and explicit_dates and not schedule.week_start):
+                elif (
+                    schedule.week_ambiguous
+                    or (schedule.week_start and schedule.week_start not in explicit_dates)
+                    or (pending_request and explicit_dates and not schedule.week_start)
+                ):
                     data = ConversationPlan(intent="clarify", clarification="week").model_dump()
-                elif (previous and previous.intent == "clarify"
-                      and previous.clarification == "requests" and not schedule.scope_question):
+                elif (
+                    previous
+                    and previous.intent == "clarify"
+                    and previous.clarification == "requests"
+                    and not schedule.scope_question
+                ):
                     data = ConversationPlan(intent="clarify", clarification="course").model_dump()
                 else:
                     data = ConversationPlan(
@@ -560,10 +650,16 @@ class GeminiChatProvider:
                         follow_up=route.follow_up,
                         blocked_part=route.blocked_part,
                     ).model_dump()
-                    data.update(schedule.model_dump(
-                        exclude={"week_ambiguous", "scope_question", "scope_explicit",
-                                 "independent_question"}
-                    ))
+                    data.update(
+                        schedule.model_dump(
+                            exclude={
+                                "week_ambiguous",
+                                "scope_question",
+                                "scope_explicit",
+                                "independent_question",
+                            }
+                        )
+                    )
                     if schedule.scope_question:
                         data["scope_question"] = schedule.scope_question
                     if (
@@ -583,8 +679,11 @@ class GeminiChatProvider:
                         data["availability"]["days"] = [
                             WEEKDAYS.index(day) for day in schedule.availability.days
                         ]
-            elif (ACADEMIC_CATEGORIES.intersection(route.intents) == {"teachers"}
-                    and not route.blocked_part and not route.finance):
+            elif (
+                ACADEMIC_CATEGORIES.intersection(route.intents) == {"teachers"}
+                and not route.blocked_part
+                and not route.finance
+            ):
                 # Verify teacher semantics independently instead of freezing a broad route hint.
                 schema = routing_schema()
                 schema["properties"]["intent"]["enum"] = ["academic"]
@@ -600,19 +699,36 @@ class GeminiChatProvider:
                 schema["properties"]["document_question"]["enum"] = ["", *document_quotes]
                 schema["properties"]["selected_assignment_id"]["enum"] = [0]
                 schema["properties"]["selected_participant_name"]["enum"] = [""]
-                schema["required"].extend([
-                    "categories", "teacher_confirmation", "teacher_reference", "scope_question",
-                    "document_question", "course_mode", "follow_up",
-                    "scope_explicit",
-                ])
-                schema["properties"] = {
-                    key: schema["properties"][key] for key in (
-                        "teacher_confirmation", "teacher_reference", "scope_explicit",
+                schema["required"].extend(
+                    [
+                        "categories",
+                        "teacher_confirmation",
+                        "teacher_reference",
+                        "scope_question",
                         "document_question",
-                        *[key for key in schema["properties"] if key not in {
-                            "teacher_confirmation", "teacher_reference", "scope_explicit",
-                            "document_question",
-                        }],
+                        "course_mode",
+                        "follow_up",
+                        "scope_explicit",
+                    ]
+                )
+                schema["properties"] = {
+                    key: schema["properties"][key]
+                    for key in (
+                        "teacher_confirmation",
+                        "teacher_reference",
+                        "scope_explicit",
+                        "document_question",
+                        *[
+                            key
+                            for key in schema["properties"]
+                            if key
+                            not in {
+                                "teacher_confirmation",
+                                "teacher_reference",
+                                "scope_explicit",
+                                "document_question",
+                            }
+                        ],
                     )
                 }
                 data = json.loads(generate_plan(TEACHER_PROMPT, schema, message))
@@ -635,9 +751,15 @@ class GeminiChatProvider:
                 if not data.get("teacher_confirmation"):
                     data["teacher_reference"] = ""
                 elif data.get("teacher_reference"):
-                    context = " ".join([request.query, *[
-                        turn.question + " " + turn.answer for turn in request.conversation_context
-                    ]]).casefold()
+                    context = " ".join(
+                        [
+                            request.query,
+                            *[
+                                turn.question + " " + turn.answer
+                                for turn in request.conversation_context
+                            ],
+                        ]
+                    ).casefold()
                     if data["teacher_reference"].casefold() not in context:
                         raise ValueError("La referencia docente no procede de la conversación.")
                 data = ConversationPlan.model_validate(data).model_dump()
@@ -656,21 +778,34 @@ class GeminiChatProvider:
                 data["finance"] = route.finance or data["finance"]
             else:
                 schema = routing_schema()
+                schema["required"].append("navigation")
                 course_read = route.intents == ["courses"]
                 if course_read:
                     # A course audience is distinct from the teachers discussed previously.
                     route.confirmation = False
-                selected_task_read = bool(previous and previous.selected_assignment_id
-                    and route.intent == "academic" and route.intents == ["assignments"]
-                    and not route.finance)
-                independent_task_scope = bool(selected_task_read and route.scope_explicit
-                    and not route.follow_up and not route.task_reference)
+                selected_task_read = bool(
+                    previous
+                    and previous.selected_assignment_id
+                    and route.intent == "academic"
+                    and route.intents == ["assignments"]
+                    and not route.finance
+                )
+                independent_task_scope = bool(
+                    selected_task_read
+                    and route.scope_explicit
+                    and not route.follow_up
+                    and not route.task_reference
+                )
                 if selected_task_read:
-                    schema["properties"] = {"scope_explicit": {"type": "boolean",
-                        "description": "TRUE solo si QUERY elige una NUEVA actividad/curso "
-                        "o pide una LISTA general. FALSE si pregunta fecha/hora/estado de "
-                        "la actividad seleccionada antes sin cambiar de actividad."},
-                        **schema["properties"]}
+                    schema["properties"] = {
+                        "scope_explicit": {
+                            "type": "boolean",
+                            "description": "TRUE solo si QUERY elige una NUEVA actividad/curso "
+                            "o pide una LISTA general. FALSE si pregunta fecha/hora/estado de "
+                            "la actividad seleccionada antes sin cambiar de actividad.",
+                        },
+                        **schema["properties"],
+                    }
                     schema["required"].append("scope_explicit")
                 schema["properties"]["selected_assignment_id"]["enum"] = [0]
                 schema["properties"]["selected_participant_name"]["enum"] = [""]
@@ -705,10 +840,15 @@ class GeminiChatProvider:
                     schema["properties"]["teacher_reference"]["enum"] = [""]
                 scope_quotes = []
                 mixed_document = route.intent == "academic" and "document" in route.intents
-                recover_document = (route.intent == "academic" and not mixed_document
+                recover_document = (
+                    route.intent == "academic"
+                    and not mixed_document
                     and (len(clauses) > 1 or selected_task_read)
-                    and not route.confirmation and route.social == "none"
-                    and not route.blocked_part and not route.finance)
+                    and not route.confirmation
+                    and route.social == "none"
+                    and not route.blocked_part
+                    and not route.finance
+                )
                 if mixed_document:
                     schema["properties"]["document_question"]["minLength"] = 1
                     schema["required"].extend(["document_question", "scope_question"])
@@ -721,9 +861,11 @@ class GeminiChatProvider:
                         ["", *dict.fromkeys(clauses)] if recover_document else [""]
                     )
                     scope_quotes = [request.query]
-                    if (previous and (selected_task_read
-                            or route.follow_up and not route.scope_explicit)
-                            and previous.scope_question):
+                    if (
+                        previous
+                        and (selected_task_read or route.follow_up and not route.scope_explicit)
+                        and previous.scope_question
+                    ):
                         scope_quotes.append(previous.scope_question)
                     schema["properties"]["scope_question"]["enum"] = scope_quotes
                 if recover_document:
@@ -735,14 +877,20 @@ class GeminiChatProvider:
                     schema["required"].append("document_question")
                     schema["properties"] = {
                         "document_question": schema["properties"]["document_question"],
-                        **{key: value for key, value in schema["properties"].items()
-                           if key != "document_question"},
+                        **{
+                            key: value
+                            for key, value in schema["properties"].items()
+                            if key != "document_question"
+                        },
                     }
                 if mixed_document:
                     schema["properties"] = {
                         "document_question": schema["properties"]["document_question"],
-                        **{key: value for key, value in schema["properties"].items()
-                           if key != "document_question"},
+                        **{
+                            key: value
+                            for key, value in schema["properties"].items()
+                            if key != "document_question"
+                        },
                     }
                     schema["properties"]["document_question"]["description"] = (
                         "Cláusula que pide una norma publicada, guía o información documental. "
@@ -753,12 +901,16 @@ class GeminiChatProvider:
                     )
                 if "grades" in route.intents:
                     schema["properties"] = {
-                        "personal_grade_read": {"type": "boolean", "description": (
-                            "TRUE si la consulta pide la nota OBTENIDA por una persona, "
-                            "incluyendo seguimientos de sus resultados. FALSE si solo pide "
-                            "una nota mínima exigida, regla aprobatoria o escala institucional. "
-                            "Una regla usa document_question y no lee notas personales."
-                        )},
+                        "personal_grade_read": {
+                            "type": "boolean",
+                            "description": (
+                                "TRUE si la consulta pide la nota OBTENIDA por una persona, "
+                                "incluyendo seguimientos de sus resultados. FALSE si solo pide "
+                            "una nota mínima exigida, regla aprobatoria o escala "
+                            "institucional. "
+                                "Una regla usa document_question y no lee notas personales."
+                            ),
+                        },
                         **schema["properties"],
                     }
                     schema["required"].append("personal_grade_read")
@@ -766,22 +918,41 @@ class GeminiChatProvider:
                     schema["properties"] = {
                         "course_mode": schema["properties"]["course_mode"],
                         "scope_question": schema["properties"]["scope_question"],
-                        **{key: value for key, value in schema["properties"].items()
-                           if key not in {"course_mode", "scope_question"}},
+                        **{
+                            key: value
+                            for key, value in schema["properties"].items()
+                            if key not in {"course_mode", "scope_question"}
+                        },
                     }
                 argument_message = message
-                if (route.scope_explicit and not route.follow_up
-                        and (not selected_task_read or independent_task_scope)):
+                if (
+                    route.scope_explicit
+                    and not route.follow_up
+                    and (not selected_task_read or independent_task_scope)
+                ):
                     # Context was already supplied for routing; a new request has no old filters.
-                    argument_message = json.dumps({
-                        "runtime": request.runtime.model_dump(), "query": request.query,
-                        "state": {}, "conversation_context": [],
-                    }, ensure_ascii=False)
-                data = json.loads(generate_plan(
-                    GRADE_PROMPT if "grades" in route.intents else
-                    SELECTED_TASK_PROMPT if selected_task_read and not recover_document else
-                    COURSE_PROMPT if course_read and not recover_document else INTERPRET_PROMPT,
-                    schema, argument_message))
+                    argument_message = json.dumps(
+                        {
+                            "runtime": request.runtime.model_dump(),
+                            "query": request.query,
+                            "state": {},
+                            "conversation_context": [],
+                        },
+                        ensure_ascii=False,
+                    )
+                data = json.loads(
+                    generate_plan(
+                        GRADE_PROMPT
+                        if "grades" in route.intents
+                        else SELECTED_TASK_PROMPT
+                        if selected_task_read and not recover_document
+                        else COURSE_PROMPT
+                        if course_read and not recover_document
+                        else INTERPRET_PROMPT,
+                        schema,
+                        argument_message,
+                    )
+                )
                 if "grades" in route.intents:
                     personal_grade_read = data.pop("personal_grade_read", None)
                     if not isinstance(personal_grade_read, bool):
@@ -824,8 +995,12 @@ class GeminiChatProvider:
                 elif recover_document and data.get("document_question"):
                     mixed_document = True
                     scope_quotes = list(dict.fromkeys(clauses))
-                if (mixed_document and len(clauses) == 2 and len(scope_quotes) == 2
-                        and data.get("document_question") in scope_quotes):
+                if (
+                    mixed_document
+                    and len(clauses) == 2
+                    and len(scope_quotes) == 2
+                    and data.get("document_question") in scope_quotes
+                ):
                     # A literal documentary clause cannot also become a course/person filter.
                     # With more clauses, retain the chosen request: others may be excluded.
                     data["scope_question"] = " y ".join(
@@ -836,26 +1011,48 @@ class GeminiChatProvider:
                         raise ValueError("Falta un alcance académico literal separado.")
                     else:
                         data["scope_question"] = request.query
-                if mixed_document and (not data.get("document_question") or (
-                        scope_quotes and data["document_question"] not in scope_quotes
-                        or data.get("scope_question") == data["document_question"])):
+                if mixed_document and (
+                    not data.get("document_question")
+                    or (
+                        scope_quotes
+                        and data["document_question"] not in scope_quotes
+                        or data.get("scope_question") == data["document_question"]
+                    )
+                ):
                     raise ValueError("Las solicitudes académica y documental deben separarse.")
                 proposed_document_question = data.get("document_question", "")
-                if ("document" not in route.intents and not mixed_document
-                        and not selected_task_document):
+                if (
+                    "document" not in route.intents
+                    and not mixed_document
+                    and not selected_task_document
+                ):
                     data["document_question"] = ""
-                data["ambiguous_task"] = False if selected_task_document else (
-                    route.task_reference or data.get("ambiguous_task", False)
+                data["ambiguous_task"] = (
+                    False
+                    if selected_task_document
+                    else (route.task_reference or data.get("ambiguous_task", False))
                 )
                 data["selected_assignment_id"] = 0
                 data["selected_participant_name"] = ""
                 data["categories"] = list(dict.fromkeys(data.get("categories", [])))
-                data["follow_up"] = False if selected_task_document else (
-                    (route.follow_up or data.get("follow_up") is True
-                     or bool(previous and route.task_reference)) and not route.scope_explicit
+                data["follow_up"] = (
+                    False
+                    if selected_task_document
+                    else (
+                        (
+                            route.follow_up
+                            or data.get("follow_up") is True
+                            or bool(previous and route.task_reference)
+                        )
+                        and not route.scope_explicit
+                    )
                 )
-                if (data["follow_up"] and previous and previous.selected_assignment_id
-                        and data["categories"] == ["assignments"]):
+                if (
+                    data["follow_up"]
+                    and previous
+                    and previous.selected_assignment_id
+                    and data["categories"] == ["assignments"]
+                ):
                     data["selected_assignment_id"] = previous.selected_assignment_id
                     data["selected_participant_name"] = previous.selected_participant_name
                     data["scope_question"] = previous.scope_question
@@ -947,16 +1144,45 @@ class GeminiChatProvider:
             output = GenerationOutput.model_validate_json(result["message"]["content"])
         except (KeyError, TypeError, ValueError, ValidationError) as exc:
             raise AppError(
-                "invalid_generation", "Gemini devolvió una respuesta no válida."
+                "invalid_generation", "El modelo devolvió una respuesta no válida."
             ) from exc
         return output
+
+
+class DeepSeekChatProvider(GeminiChatProvider):
+    """Use DeepSeek for interpretation and answers with the existing validated prompts."""
+
+    def __init__(self, settings, client=None):
+        self.settings = settings
+        self.client = client or DeepSeekAPI(settings)
+
+    def resolve(self):
+        return {"name": self.settings.deepseek_chat_model, "digest": "deepseek-api"}
+
+    def prepare(self):
+        self.generate(
+            "¿Qué es este documento?",
+            [
+                {
+                    "contenido": "El reglamento académico establece el procedimiento aplicable.",
+                    "alcance": "institutional",
+                    "tipo_documento": "OTRO",
+                    "titulo": "Reglamento académico",
+                }
+            ],
+        )
+        return {
+            "provider": "deepseek",
+            "model": self.settings.deepseek_chat_model,
+            "revision": "api",
+        }
 
 
 class QueryService:
     def __init__(self, settings, repository, embeddings=None, chat=None):
         self.repository = repository
         self.embeddings = embeddings or GeminiEmbeddingProvider(settings)
-        self.chat = chat or GeminiChatProvider(settings)
+        self.chat = chat or DeepSeekChatProvider(settings)
 
     def interpret(self, request):
         return self.chat.interpret(request)
@@ -1064,7 +1290,7 @@ class QueryService:
                     raise
                 return QueryResponse(
                     answer=academic_answer
-                    + ("\nNo pude consultar la parte documental. Inténtalo de nuevo."),
+                    + ("\n\nNo pude consultar la parte documental. Inténtalo de nuevo."),
                     sources=[],
                     insufficient_context=False,
                     request_id=request_id,
@@ -1075,11 +1301,13 @@ class QueryService:
                     if documentary.insufficient_context
                     else documentary.answer
                 )
-                documentary.answer = academic_answer + "\nDocumentos: " + document_answer
+                documentary.answer = (
+                    academic_answer + "\n\nInformación institucional:\n" + document_answer
+                )
                 documentary.insufficient_context = False
                 discrepancies = calendar_discrepancies(academic_context, documentary.sources)
                 if discrepancies:
-                    documentary.answer += "\n" + "\n".join(discrepancies)
+                    documentary.answer += "\n\n" + "\n".join(discrepancies)
             elif documentary.insufficient_context:
                 documentary.answer = (
                     "No encontré evidencia para esa consulta. ¿Puedes precisar qué necesitas?"

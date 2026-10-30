@@ -1,0 +1,4 @@
+{
+  "highest_accepted_level": 25,
+  "scope": "15-minute local endurance screen; not 60-minute or production soak. Increasing browser setup itself ramps load; synchronized request waves are spikes, not a separately controlled 10-to-N-to-10 live population."
+}

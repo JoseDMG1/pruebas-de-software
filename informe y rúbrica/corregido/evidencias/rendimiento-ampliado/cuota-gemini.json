@@ -1,0 +1,13 @@
+{
+  "timestamp_utc": "2026-10-29T18:43:46.455989+00:00",
+  "http_status": 429,
+  "model": "gemini-embedding-001",
+  "quota_violations": [
+    {
+      "quotaMetric": "generativelanguage.googleapis.com/embed_content_free_tier_requests",
+      "quotaId": "EmbedContentRequestsPerDayPerProjectPerModel-FreeTier",
+      "quotaValue": "1000"
+    }
+  ],
+  "retry_delay": "44173s"
+}

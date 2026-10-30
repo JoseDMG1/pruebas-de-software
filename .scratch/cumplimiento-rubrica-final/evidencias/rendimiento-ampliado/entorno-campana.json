@@ -1,0 +1,17 @@
+{
+  "cpu_logical": 4,
+  "source_hashes": {
+    "dev/validation/capacity_chat.py": "c30f57c2aaa40da51d5c79772d0ca9c8f37e2cdd5e91c348b2a225031eee029d",
+    "dev/validation/capacity_campaign.py": "b205b859e78e2d91ed143deae57462179fb9d0f3ba0064a2470e414a9ffe236e",
+    "dev/validation/capacity_report.py": "ebce7bc7f9e1eb78596298f1a44a1fd283d00257889f100368a7f5db91e4476c",
+    "dev/validation/test_capacity_chat.py": "a2a677f19043ef9704a9ca1e3afba344d408a2631e61b0b42a5a326f7e911a8c",
+    "dev/moodle/load-users.php": "d9235498351ffd67a68cab93888d3d751cacbc345ba51cc87c808f6dd4608390"
+  },
+  "container_images": [
+    "/rag-service-api-1 sha256:ac1216c3dce90894479c54b5aee1cd61d1a22cdccfd1fe22c0417e1977f5516e restarts=0",
+    "/rag-service-db-1 sha256:ac08538c6f8b9904c33c8224c5e5706dbe760aca29db1d096972b4052c22a75d restarts=0",
+    "/pruebasdesoftware-moodle-1 sha256:336d612d0925e2f1569a09d89792949ebe7e56af872a0147b90d603cdd2df5eb restarts=0",
+    "/pruebasdesoftware-moodle-db-1 sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24 restarts=0"
+  ],
+  "note": "Snapshot after calibration corrections. Earlier calibration runs are retained. No application image was rebuilt for this campaign."
+}

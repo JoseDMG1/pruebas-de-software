@@ -1,0 +1,92 @@
+Mándame a la tarea con la entrega más próxima de llegar a su fecha límite {'question': 'Mándame a la tarea con la entrega más próxima de llegar a su fecha límite', 'seconds': 3.776, 'answer': 'Estas actividades comparten el vencimiento más próximo.\n\nSegún los datos visibles de Moodle.', 'links': [{'label': 'Reseña crítica de artículo — Comunicacion Academica 105\nVence: 2026-11-1 02:25', 'url': 'http://127.0.0.1:8088/mod/assign/view.php?id=7'}, {'label': 'Análisis descriptivo de datos — Estadistica 106\nVence: 2026-11-1 02:25', 'url': 'http://127.0.0.1:8088/mod/assign/view.php?id=8'}]}
+Abre el curso Metodología de Investigación 103 {'question': 'Abre el curso Metodología de Investigación 103', 'seconds': 4.314, 'answer': 'No encontré un destino disponible con tus permisos actuales. Indica el curso o la actividad que deseas abrir.', 'links': []}
+Abre mis calificaciones de Programacion 104 {'question': 'Abre mis calificaciones de Programacion 104', 'seconds': 3.549, 'answer': 'Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle.', 'links': [{'label': 'Calificaciones — Programacion 104\nAbrir informe', 'url': 'http://127.0.0.1:8088/grade/report/user/index.php?id=27'}]}
+Llévame a mi calendario de Moodle {'question': 'Llévame a mi calendario de Moodle', 'seconds': 3.593, 'answer': 'Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle.', 'links': [{'label': 'Calendario de Moodle\nPróximos eventos', 'url': 'http://127.0.0.1:8088/calendar/view.php?view=upcoming'}]}
+Llévame a calificar las entregas de Programacion 104, un curso que enseño {'question': 'Llévame a calificar las entregas de Programacion 104, un curso que enseño', 'seconds': 3.499, 'answer': 'Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle.', 'links': [{'label': 'Calificar: Práctica de algoritmos — Programacion 104\nVence: 2026-11-2 02:25', 'url': 'http://127.0.0.1:8088/mod/assign/view.php?id=5&action=grading'}, {'label': 'Calificar: Proyecto integrador de programación — Programacion 104\nVence: 2026-11-10 02:25', 'url': 'http://127.0.0.1:8088/mod/assign/view.php?id=6&action=grading'}]}
+Abre el libro de calificaciones de Programacion 104, un curso que enseño {'question': 'Abre el libro de calificaciones de Programacion 104, un curso que enseño', 'seconds': 3.479, 'answer': 'Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle.', 'links': [{'label': 'Calificaciones — Programacion 104\nAbrir informe', 'url': 'http://127.0.0.1:8088/grade/report/grader/index.php?id=27'}]}
+Abre el curso Programacion 104 entre los cursos disponibles que puedo consultar {'question': 'Abre el curso Programacion 104 entre los cursos disponibles que puedo consultar', 'seconds': 3.564, 'answer': 'Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle.', 'links': [{'label': 'Programacion 104\nAbrir curso', 'url': 'http://127.0.0.1:8088/course/view.php?id=27'}]}
+{
+  "complete": true,
+  "cases": [
+    {
+      "question": "Mándame a la tarea con la entrega más próxima de llegar a su fecha límite",
+      "seconds": 3.776,
+      "answer": "Estas actividades comparten el vencimiento más próximo.\n\nSegún los datos visibles de Moodle.",
+      "links": [
+        {
+          "label": "Reseña crítica de artículo — Comunicacion Academica 105\nVence: 2026-11-1 02:25",
+          "url": "http://127.0.0.1:8088/mod/assign/view.php?id=7"
+        },
+        {
+          "label": "Análisis descriptivo de datos — Estadistica 106\nVence: 2026-11-1 02:25",
+          "url": "http://127.0.0.1:8088/mod/assign/view.php?id=8"
+        }
+      ]
+    },
+    {
+      "question": "Abre el curso Metodología de Investigación 103",
+      "seconds": 4.314,
+      "answer": "No encontré un destino disponible con tus permisos actuales. Indica el curso o la actividad que deseas abrir.",
+      "links": []
+    },
+    {
+      "question": "Abre mis calificaciones de Programacion 104",
+      "seconds": 3.549,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle.",
+      "links": [
+        {
+          "label": "Calificaciones — Programacion 104\nAbrir informe",
+          "url": "http://127.0.0.1:8088/grade/report/user/index.php?id=27"
+        }
+      ]
+    },
+    {
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 3.593,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle.",
+      "links": [
+        {
+          "label": "Calendario de Moodle\nPróximos eventos",
+          "url": "http://127.0.0.1:8088/calendar/view.php?view=upcoming"
+        }
+      ]
+    },
+    {
+      "question": "Llévame a calificar las entregas de Programacion 104, un curso que enseño",
+      "seconds": 3.499,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle.",
+      "links": [
+        {
+          "label": "Calificar: Práctica de algoritmos — Programacion 104\nVence: 2026-11-2 02:25",
+          "url": "http://127.0.0.1:8088/mod/assign/view.php?id=5&action=grading"
+        },
+        {
+          "label": "Calificar: Proyecto integrador de programación — Programacion 104\nVence: 2026-11-10 02:25",
+          "url": "http://127.0.0.1:8088/mod/assign/view.php?id=6&action=grading"
+        }
+      ]
+    },
+    {
+      "question": "Abre el libro de calificaciones de Programacion 104, un curso que enseño",
+      "seconds": 3.479,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle.",
+      "links": [
+        {
+          "label": "Calificaciones — Programacion 104\nAbrir informe",
+          "url": "http://127.0.0.1:8088/grade/report/grader/index.php?id=27"
+        }
+      ]
+    },
+    {
+      "question": "Abre el curso Programacion 104 entre los cursos disponibles que puedo consultar",
+      "seconds": 3.564,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle.",
+      "links": [
+        {
+          "label": "Programacion 104\nAbrir curso",
+          "url": "http://127.0.0.1:8088/course/view.php?id=27"
+        }
+      ]
+    }
+  ]
+}

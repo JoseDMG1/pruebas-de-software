@@ -88,22 +88,21 @@ es seguimiento; el filtro actual por frases no puede impedir ese acceso. Mantene
 semántico acotado para referencias y disponibilidad, sin historial persistente. Un plan
 inválido o ambiguo produce aclaración o error explícito, no lecturas más amplias por defecto.
 
-Usar Gemini mediante la API oficial `generateContent` para interpretar consultas y redactar
-respuestas; seleccionar el modelo conversacional con `GEMINI_CHAT_MODEL`. El alias inicial fue
-`gemini-flash-latest`; el usuario autorizó probar un modelo estable por los errores de alta demanda
-y la configuración local usa `gemini-3.5-flash-lite`. Usar Gemini
-Embeddings (`gemini-embedding-001`) para consultas e ingesta, con una dimensión fija de 768 y
-los tipos de tarea de recuperación correspondientes. No usar Ollama ni Bedrock como fallback.
-Validar JSON estructurado con esquemas estrictos en el servidor; no asumir function calling
-nativo. La clave Gemini se configura únicamente en el servidor RAG y nunca se envía a Moodle,
-al navegador, a los modelos como contenido ni a los logs. Mantener acotados los tiempos de
+Usar DeepSeek V4.1 Flash mediante Chat Completions (`deepseek-flash`) para interpretar consultas
+y redactar respuestas. Usar Gemini Embeddings (`gemini-embedding-001`) para consultas e ingesta,
+con una dimensión fija de 768 y los tipos de tarea de recuperación correspondientes; DeepSeek
+no ofrece un endpoint de embeddings. No usar otro modelo de generación ni fallback. Validar JSON
+con los contratos Pydantic del servidor y no asumir function calling para autorizar lecturas.
+Las claves DeepSeek y Gemini se configuran únicamente en el servidor RAG y nunca se envían a
+Moodle, al navegador, como contenido del modelo ni a los logs. Mantener acotados los tiempos de
 espera, tamaños y llamadas. Conservar la firma del cuerpo, identidad y alcance verificados,
 así como compatibilidad de los contratos de consulta existentes.
 
 Reintentar únicamente fallos transitorios con espera exponencial y una pequeña variación
 aleatoria: por defecto dos reintentos adicionales, configurables entre cero y tres mediante
-`GEMINI_MAX_RETRIES`. Un reintento conserva el modelo seleccionado; errores de petición o
-credenciales no se reintentan. Cada intento respeta el timeout configurado.
+`DEEPSEEK_MAX_RETRIES` para generación y `GEMINI_MAX_RETRIES` para embeddings. Un reintento
+conserva el proveedor/modelo seleccionado; errores de petición o credenciales no se reintentan.
+Cada intento respeta el timeout configurado.
 
 Los espacios vectoriales de Ollama/Bedrock no son compatibles con Gemini. La migración de
 base debe admitir embeddings Gemini sin mezclar espacios; un comando de migración recalcula
@@ -143,16 +142,16 @@ para una consulta, conservar el comportamiento de evidencia insuficiente pertine
   preferencia; cero tareas, vencidas, sin fecha, prórrogas, más de 20 pendientes y lectura fallida.
 - Intervalo explícito y por defecto, domingo, zona horaria y rechazo de fechas inventadas.
 - Diferencias de permisos estudiante/docente/autoridad, homónimos y revalidación durante continuación.
-- Datos ficticios del prompt no aparecen como hechos; las citas solo respaldan documentos usados.
+- Datos locales del prompt no aparecen como hechos; las citas solo respaldan documentos usados.
 - Ataques de instrucción directos y documentales; mensajes mixtos atienden la parte autorizada.
-- Proveedor Gemini único para interpretación, respuestas y embeddings; clave ausente, timeout,
+- Proveedor DeepSeek para interpretación y respuestas, Gemini para embeddings; claves ausentes, timeout,
   límite de cuota, respuesta JSON inválida y reindexación sin mezcla de espacios.
 - Nueva conversación, logout y expiración borran referencias, disponibilidad y cursores.
-- Recorrido real Moodle + Gemini con comprobaciones semánticas, además de pruebas de contratos.
+- Recorrido real Moodle + DeepSeek con comprobaciones semánticas, además de pruebas de contratos.
 
 ## Verificación y despliegue
 
-Usar TDD en los seams públicos ya usados: cliente Gemini, proveedor de embeddings, servicios
+Usar TDD en los seams públicos ya usados: cliente DeepSeek, proveedor de embeddings, servicios
 Moodle con usuarios y capacidades nativas, endpoints protegidos RAG, store temporal y
 navegador real. Conservar las suites existentes y ampliar pruebas que detecten respuestas
 incorrectas, no solo transporte HTTP exitoso. Probar contratos JSON, errores del proveedor,
@@ -167,3 +166,23 @@ errores; las metas de carga continúan aplazadas. No publicar ni desplegar fuera
 El usuario confirmó explícitamente el entendimiento compartido y aprobó el alcance
 conjunto de esta spec y los seis tickets. Código implementado en el entorno local;
 la aceptación final sigue pendiente. Véase [verification.md](verification.md).
+
+## Navegación autorizada (2026-10-22)
+
+El asistente interpreta solicitudes para abrir cursos, tareas, informes de notas y calendario.
+Moodle construye los destinos desde registros autorizados y capacidades efectivas. Un docente
+puede recibir enlaces de calificación; un alumno recibe su informe personal. Los enlaces no
+ejecutan modificaciones automáticamente.
+
+Para el vencimiento más próximo, se consideran las fechas futuras efectivas de las tareas
+pendientes, incluidas prórrogas. Se recorren las páginas necesarias y se devuelven todos los
+empates. Si la lectura alcanza un límite, se pide acotar el curso sin afirmar un mínimo global.
+Los destinos se validan y escapan antes de conservarse y mostrarse en la conversación.
+
+## Presentación de respuestas (2026-10-22)
+
+Las respuestas académicas con varias entidades se muestran como encabezados y listas,
+con el nombre de cada elemento separado de sus detalles y fechas en español. Moodle
+escapa el texto antes de generar el marcado de presentación; solo los destinos autorizados
+por Moodle se representan como enlaces. Los detalles de los enlaces aparecen una sola vez.
+Las conversaciones previas conservan el mismo formato al volver a abrir el chat.

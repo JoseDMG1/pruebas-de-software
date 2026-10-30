@@ -1,0 +1,5 @@
+deepseek_total calls 40 max 2.2122 over10s 0
+dns calls 40 max 0.017 over10s 0
+gemini_embedding_total calls 10 max 1.3446 over10s 0
+tcp_connect calls 20 max 0.0475 over10s 0
+tls_handshake calls 20 max 0.047 over10s 0

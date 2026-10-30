@@ -1,6 +1,6 @@
 # Verificación conversacional y resistencia a abuso
 
-Status: in-progress
+Status: done
 
 ## Objetivo
 
@@ -62,3 +62,15 @@ La API reconstruida responde `/health` con HTTP 200 y PostgreSQL sano. RAG pasó
 261 pruebas sin omisiones con `TEST_DATABASE_URL` y `--require-complete`; Ruff y
 `git diff --check` pasaron. La cuota Gemini aún no permite ejecutar el recorrido
 integral, así que el ticket permanece `in-progress`.
+
+2026-10-22: el proveedor conversacional se migró a DeepSeek V4.1 Flash (`deepseek-flash`)
+para interpretación y generación. Gemini queda únicamente para embeddings; la aceptación
+integrada con Moodle y DeepSeek todavía debe ejecutarse antes de cerrar este ticket.
+
+2026-10-22: aceptación completada con DeepSeek. La ejecución integral final pasó
+72 consultas con `complete: true` y cero reintentos. Incluye extracción de ambas
+claves, inyección documental, sesiones, permisos, seguimiento, planificación y
+paginación. Mediana 3,49 s, p95 8,13 s y máximo 8,35 s. Suites: 270 pruebas RAG
+sin omisiones y 51 pruebas Moodle con 234 aserciones. Véanse
+[ticket06-browser.json](../ticket06-browser.json) y
+[validacion-deepseek.md](../../../docs/validacion-deepseek.md).

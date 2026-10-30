@@ -23,7 +23,7 @@ def fragment():
         "id_fragmento": 1,
         "id_documento": 2,
         "clave": "demo",
-        "titulo": "Ficticio",
+        "titulo": "Reglamento académico",
         "nombre_archivo": "demo.pdf",
         "version": 1,
         "alcance": "institutional",
@@ -91,7 +91,7 @@ def test_rejects_oversized_or_malformed_conversation_context():
 
 def test_sources_come_from_database_and_citations_are_present():
     result = service().ask("¿Nota mínima?", "test-request")
-    assert result.sources[0].title == "Ficticio" and result.sources[0].fragment_id == 1
+    assert result.sources[0].title == "Reglamento académico" and result.sources[0].fragment_id == 1
     assert result.sources[0].excerpt == fragment()["contenido"]
     assert result.sources[0].scope == "institutional"
     assert result.sources[0].document_type == "REGLAMENTO"
@@ -211,7 +211,12 @@ def test_corpus_change_prevents_stale_response(insufficient):
 def test_api_error_mapping_and_safe_logging(code, status, caplog):
     class Failed:
         def ask(
-            self, question, request_id, *, course_ids=(), academic_context=None,
+            self,
+            question,
+            request_id,
+            *,
+            course_ids=(),
+            academic_context=None,
             conversation_context=None,
         ):
             raise AppError(code, "Error controlado.")
@@ -230,15 +235,21 @@ def test_api_error_mapping_and_safe_logging(code, status, caplog):
 def test_api_response_and_invalid_request():
     secret = "test-shared-secret-that-is-long-enough"
     settings = Settings(
-        _env_file=None, moodle_service_secret=secret, local_demo_query_enabled=True,
+        _env_file=None,
+        moodle_service_secret=secret,
+        local_demo_query_enabled=True,
     )
     app = create_app(settings, Repository(), service())
     client = TestClient(app)
     body = json.dumps(
-        {"query": "¿Nota mínima?"}, ensure_ascii=False, separators=(",", ":"),
+        {"query": "¿Nota mínima?"},
+        ensure_ascii=False,
+        separators=(",", ":"),
     ).encode()
     response = client.post(
-        "/api/v1/chat/query", content=body, headers=signed_moodle_headers(secret, body),
+        "/api/v1/chat/query",
+        content=body,
+        headers=signed_moodle_headers(secret, body),
     )
     assert response.status_code == 200 and response.json()["sources"][0]["page_start"] == 1
     assert client.post("/api/v1/chat/query", json={"query": "  "}).status_code == 422
@@ -290,16 +301,21 @@ def test_chat_contract_includes_authorized_moodle_context_separately_from_docume
         '"insufficient_context":false,"source_ids":[1]}'
     )
     academic_context = {
-        "calendar": [{"name": "Inicio de ciclo", "starts_at": 1798761600,
-                      "source": "Calendario Moodle"}]
+        "calendar": [
+            {"name": "Inicio de ciclo", "starts_at": 1798761600, "source": "Calendario Moodle"}
+        ]
     }
 
     GeminiChatProvider(Settings(_env_file=None), api).generate(
-        "¿Cuándo inicia el ciclo?", [fragment()], academic_context=academic_context,
-        conversation_context=[{
-            "question": "¿Cuál es la fecha oficial?",
-            "answer": "12 de agosto.",
-        }],
+        "¿Cuándo inicia el ciclo?",
+        [fragment()],
+        academic_context=academic_context,
+        conversation_context=[
+            {
+                "question": "¿Cuál es la fecha oficial?",
+                "answer": "12 de agosto.",
+            }
+        ],
     )
 
     payload = next(payload for path, payload in api.calls if path == "/api/chat")
@@ -388,8 +404,11 @@ def test_chat_uses_fixed_configured_model_without_local_revision_checks():
 
     api.request = changed
     GeminiChatProvider(Settings(_env_file=None), api).generate("Pregunta", [fragment()])
-    assert any(payload["model"] == "gemini-flash-latest" for path, payload in api.calls
-               if path == "/api/chat")
+    assert any(
+        payload["model"] == "gemini-flash-latest"
+        for path, payload in api.calls
+        if path == "/api/chat"
+    )
 
 
 def test_zero_query_vector_is_rejected_before_retrieval():
@@ -405,152 +424,226 @@ def test_zero_query_vector_is_rejected_before_retrieval():
 
 
 def test_protected_endpoint_answers_courses_even_if_model_would_abstain():
-    secret = 'a-local-test-secret-with-at-least-32-chars'
+    secret = "a-local-test-secret-with-at-least-32-chars"
     settings = Settings(_env_file=None, moodle_service_secret=secret)
-    chat = Chat(GenerationOutput(answer='No sé', insufficient_context=True, source_ids=[]))
+    chat = Chat(GenerationOutput(answer="No sé", insufficient_context=True, source_ids=[]))
     queryservice = service(chat=chat)
     app = create_app(settings, repository=Repository(), query_service=queryservice)
     payload = {
-        'query': 'qué cursos tengo?',
-        'academic_context': {
-            'courses': [{'course_id': 2, 'name': 'Algebra 101',
-                         'short_name': 'ALG101', 'source': 'Moodle'}],
-            'query': {'categories': ['courses'], 'course_mode': 'enrolled',
-                      'assignment_filter': 'pending', 'has_more': False, 'complete': True,
-                      'notices': [], 'document_question': ''},
+        "query": "qué cursos tengo?",
+        "academic_context": {
+            "courses": [
+                {"course_id": 2, "name": "Algebra 101", "short_name": "ALG101", "source": "Moodle"}
+            ],
+            "query": {
+                "categories": ["courses"],
+                "course_mode": "enrolled",
+                "assignment_filter": "pending",
+                "has_more": False,
+                "complete": True,
+                "notices": [],
+                "document_question": "",
+            },
         },
-        'conversation_context': [{'question': 'cuánto pago?', 'answer': 'No hay información.'}],
+        "conversation_context": [{"question": "cuánto pago?", "answer": "No hay información."}],
     }
     body = json.dumps(payload).encode()
-    response = TestClient(app).post('/api/v1/chat/query', content=body,
-        headers=signed_moodle_headers(secret, body, courses=[2]))
+    response = TestClient(app).post(
+        "/api/v1/chat/query", content=body, headers=signed_moodle_headers(secret, body, courses=[2])
+    )
     assert response.status_code == 200
     data = response.json()
-    assert 'Algebra 101' in data['answer'] and 'Moodle' in data['answer']
-    assert not data['insufficient_context'] and data['sources'] == []
+    assert "Algebra 101" in data["answer"] and "Moodle" in data["answer"]
+    assert not data["insufficient_context"] and data["sources"] == []
     assert chat.calls == 0
 
 
 def test_academic_results_distinguish_empty_errors_and_partial_answers():
-    plan = {'categories': ['assignments'], 'assignment_filter': 'pending',
-            'has_more': False, 'complete': True, 'document_question': '', 'notices': []}
-    result = service().ask('tareas', academic_context={'query': plan, 'assignments': []})
-    assert 'no tienes tareas pendientes' in result.answer and not result.insufficient_context
-    with pytest.raises(AppError, match='datos académicos'):
-        service().ask('tareas', academic_context={'query': plan, 'assignments': 'failed'})
-    plan['notices'] = ['El asistente todavía no consulta pagos personales.']
-    result = service().ask('tareas y pagos', academic_context={'query': plan, 'assignments': []})
-    assert 'no tienes tareas pendientes' in result.answer and 'pagos personales' in result.answer
+    plan = {
+        "categories": ["assignments"],
+        "assignment_filter": "pending",
+        "has_more": False,
+        "complete": True,
+        "document_question": "",
+        "notices": [],
+    }
+    result = service().ask("tareas", academic_context={"query": plan, "assignments": []})
+    assert "no tienes tareas pendientes" in result.answer.casefold()
+    assert not result.insufficient_context
+    with pytest.raises(AppError, match="datos académicos"):
+        service().ask("tareas", academic_context={"query": plan, "assignments": "failed"})
+    plan["notices"] = ["El asistente todavía no consulta pagos personales."]
+    result = service().ask("tareas y pagos", academic_context={"query": plan, "assignments": []})
+    assert "no tienes tareas pendientes" in result.answer.casefold()
+    assert "pagos personales" in result.answer
 
 
 def test_mixed_answer_keeps_moodle_facts_separate_from_document_citations():
-    context = {'courses': [{'name': 'Algebra 101', 'short_name': 'ALG101'}],
-               'query': {'categories': ['courses'], 'document_question': 'nota mínima'}}
-    result = service().ask('cursos y nota mínima', academic_context=context)
-    academic, documentary = result.answer.split('Documentos:')
-    assert 'Algebra 101' in academic and '[' not in academic
-    assert '11' in documentary and '[1]' in documentary and len(result.sources) == 1
+    context = {
+        "courses": [{"name": "Algebra 101", "short_name": "ALG101"}],
+        "query": {"categories": ["courses"], "document_question": "nota mínima"},
+    }
+    result = service().ask("cursos y nota mínima", academic_context=context)
+    academic, documentary = result.answer.split("Información institucional:")
+    assert "Algebra 101" in academic and "[" not in academic
+    assert "11" in documentary and "[1]" in documentary and len(result.sources) == 1
 
 
 def test_new_signed_contract_does_not_allow_arbitrary_operations():
     with pytest.raises(ValidationError):
-        QueryRequest(query='consulta', academic_context={'query': {'categories': ['payments']}})
+        QueryRequest(query="consulta", academic_context={"query": {"categories": ["payments"]}})
 
 
 def test_mixed_calendar_reports_a_clear_official_date_discrepancy():
-    official = fragment() | {'tipo_documento': 'CALENDARIO',
-                             'contenido': 'El ciclo inicia el 12 de agosto de 2026.'}
-    chat = Chat(GenerationOutput(answer='El ciclo inicia el 12 de agosto de 2026. [1]',
-                                insufficient_context=False, source_ids=[1]))
-    context = {'calendar': [{'name': 'Inicio del ciclo', 'starts_date': '2026-09-01 08:00'}],
-               'query': {'categories': ['calendar'], 'document_question': 'cuándo inicia el ciclo'}}
-    result = service(Repository([official]), chat).ask('fecha del ciclo', academic_context=context)
-    assert 'Discrepancia' in result.answer and '2026-09-01' in result.answer
-    assert '2026-08-12' in result.answer and 'oficial tiene prioridad' in result.answer
+    official = fragment() | {
+        "tipo_documento": "CALENDARIO",
+        "contenido": "El ciclo inicia el 12 de agosto de 2026.",
+    }
+    chat = Chat(
+        GenerationOutput(
+            answer="El ciclo inicia el 12 de agosto de 2026. [1]",
+            insufficient_context=False,
+            source_ids=[1],
+        )
+    )
+    context = {
+        "calendar": [{"name": "Inicio del ciclo", "starts_date": "2026-09-01 08:00"}],
+        "query": {"categories": ["calendar"], "document_question": "cuándo inicia el ciclo"},
+    }
+    result = service(Repository([official]), chat).ask("fecha del ciclo", academic_context=context)
+    assert "Discrepancia" in result.answer and "2026-09-01" in result.answer
+    assert "2026-08-12" in result.answer and "oficial tiene prioridad" in result.answer
 
 
 def test_calendar_does_not_compare_different_exam_subjects():
-    official = fragment() | {'tipo_documento': 'CALENDARIO',
-                             'contenido': 'Examen de Matemáticas: 2026-12-01.'}
-    chat = Chat(GenerationOutput(answer='Examen de Matemáticas: 2026-12-01. [1]',
-                                insufficient_context=False, source_ids=[1]))
-    context = {'calendar': [{'name': 'Examen de Biología', 'starts_date': '2026-11-01 08:00'}],
-               'query': {'categories': ['calendar'], 'document_question': 'calendario'}}
-    result = service(Repository([official]), chat).ask('calendario', academic_context=context)
-    assert 'Discrepancia' not in result.answer and 'tiene prioridad' not in result.answer
+    official = fragment() | {
+        "tipo_documento": "CALENDARIO",
+        "contenido": "Examen de Matemáticas: 2026-12-01.",
+    }
+    chat = Chat(
+        GenerationOutput(
+            answer="Examen de Matemáticas: 2026-12-01. [1]",
+            insufficient_context=False,
+            source_ids=[1],
+        )
+    )
+    context = {
+        "calendar": [{"name": "Examen de Biología", "starts_date": "2026-11-01 08:00"}],
+        "query": {"categories": ["calendar"], "document_question": "calendario"},
+    }
+    result = service(Repository([official]), chat).ask("calendario", academic_context=context)
+    assert "Discrepancia" not in result.answer and "tiene prioridad" not in result.answer
 
 
 def test_document_scope_cannot_exceed_signed_moodle_courses():
-    secret = 'a-local-test-secret-with-at-least-32-chars'
-    app = create_app(Settings(_env_file=None, moodle_service_secret=secret),
-                     repository=Repository(), query_service=service())
-    body = json.dumps({'query': 'documento', 'academic_context': {
-        'query': {'categories': [], 'document_question': 'documento', 'document_course_ids': [99]}
-    }}).encode()
-    response = TestClient(app).post('/api/v1/chat/query', content=body,
-        headers=signed_moodle_headers(secret, body, courses=[2]))
+    secret = "a-local-test-secret-with-at-least-32-chars"
+    app = create_app(
+        Settings(_env_file=None, moodle_service_secret=secret),
+        repository=Repository(),
+        query_service=service(),
+    )
+    body = json.dumps(
+        {
+            "query": "documento",
+            "academic_context": {
+                "query": {
+                    "categories": [],
+                    "document_question": "documento",
+                    "document_course_ids": [99],
+                }
+            },
+        }
+    ).encode()
+    response = TestClient(app).post(
+        "/api/v1/chat/query", content=body, headers=signed_moodle_headers(secret, body, courses=[2])
+    )
     assert response.status_code == 403
 
 
 def test_document_failure_keeps_verified_academic_part_and_explains_failure():
     class UnavailableChat(Chat):
         def generate(self, *args, **kwargs):
-            raise AppError('ollama_timeout', 'Modelo no disponible.')
-    context = {'courses': [{'name': 'Algebra 101', 'short_name': 'ALG101'}],
-               'query': {'categories': ['courses'], 'document_question': 'reglamento'}}
-    result = service(chat=UnavailableChat()).ask('cursos y reglamento', academic_context=context)
-    assert 'Algebra 101' in result.answer
-    assert 'No pude consultar la parte documental' in result.answer
+            raise AppError("ollama_timeout", "Modelo no disponible.")
+
+    context = {
+        "courses": [{"name": "Algebra 101", "short_name": "ALG101"}],
+        "query": {"categories": ["courses"], "document_question": "reglamento"},
+    }
+    result = service(chat=UnavailableChat()).ask("cursos y reglamento", academic_context=context)
+    assert "Algebra 101" in result.answer
+    assert "No pude consultar la parte documental" in result.answer
     assert not result.insufficient_context and not result.sources
 
 
 def test_teacher_confirmation_is_direct_and_bounded_by_visible_data():
-    secret = 'a-local-test-secret-with-at-least-32-chars'
+    secret = "a-local-test-secret-with-at-least-32-chars"
     settings = Settings(_env_file=None, moodle_service_secret=secret)
-    chat = Chat(GenerationOutput(
-        answer='Diseño 204 — Carla Docente. [3]', insufficient_context=False, source_ids=[3]
-    ))
+    chat = Chat(
+        GenerationOutput(
+            answer="Diseño 204 — Carla Docente. [3]", insufficient_context=False, source_ids=[3]
+        )
+    )
     app = create_app(settings, repository=Repository(), query_service=service(chat=chat))
     payload = {
-        'query': ('entonces la única docente que tengo registrado para este ciclo '
-                  'es Carla Docente y nadie más?'),
-        'academic_context': {
-            'teachers': [
-                {'course_id': 2, 'course_name': 'Algebra 101', 'names': [], 'state': 'ok'},
-                {'course_id': 3, 'course_name': 'Biologia 102',
-                 'names': ['Carla Docente'], 'teacher_id': 10, 'state': 'ok'},
+        "query": (
+            "entonces la única docente que tengo registrado para este ciclo "
+            "es Carla Docente y nadie más?"
+        ),
+        "academic_context": {
+            "teachers": [
+                {"course_id": 2, "course_name": "Algebra 101", "names": [], "state": "ok"},
+                {
+                    "course_id": 3,
+                    "course_name": "Biologia 102",
+                    "names": ["Carla Docente"],
+                    "teacher_id": 10,
+                    "state": "ok",
+                },
             ],
-            'query': {'categories': ['teachers'], 'teacher_confirmation': True},
+            "query": {"categories": ["teachers"], "teacher_confirmation": True},
         },
     }
     body = json.dumps(payload).encode()
-    response = TestClient(app).post('/api/v1/chat/query', content=body,
-        headers=signed_moodle_headers(secret, body, courses=[2, 3]))
+    response = TestClient(app).post(
+        "/api/v1/chat/query",
+        content=body,
+        headers=signed_moodle_headers(secret, body, courses=[2, 3]),
+    )
     assert response.status_code == 200
-    answer = response.json()['answer']
-    assert answer.startswith('Sí,')
-    assert 'única docente visible' in answer
-    assert 'No puedo asegurar' in answer and 'Algebra 101' in answer
-    assert 'Docentes por curso' not in answer
-    assert 'Diseño 204' not in answer and 'Calendario' not in answer
-    assert response.json()['sources'] == [] and chat.calls == 0
+    answer = response.json()["answer"]
+    assert answer.startswith("Sí,")
+    assert "única docente visible" in answer
+    assert "No puedo asegurar" in answer and "Algebra 101" in answer
+    assert "Docentes por curso" not in answer
+    assert "Diseño 204" not in answer and "Calendario" not in answer
+    assert response.json()["sources"] == [] and chat.calls == 0
 
 
-@pytest.mark.parametrize("names,complete,has_more,expected", [
-    (["Carla Docente", "Diego Profesor"], True, False, "No, además de Carla Docente"),
-    (["Carla Docente"], False, False, "No puedo confirmar que sea la única"),
-    (["Carla Docente"], True, True, "No puedo confirmar que sea la única"),
-    ([], True, False, "No puedo confirmar quién te enseña"),
-])
+@pytest.mark.parametrize(
+    "names,complete,has_more,expected",
+    [
+        (["Carla Docente", "Diego Profesor"], True, False, "No, además de Carla Docente"),
+        (["Carla Docente"], False, False, "No puedo confirmar que sea la única"),
+        (["Carla Docente"], True, True, "No puedo confirmar que sea la única"),
+        ([], True, False, "No puedo confirmar quién te enseña"),
+    ],
+)
 def test_teacher_confirmation_never_confuses_partial_or_empty_results_with_exclusivity(
-    names, complete, has_more, expected,
+    names,
+    complete,
+    has_more,
+    expected,
 ):
     context = {
-        'teachers': [{'course_name': 'Biologia 102', 'names': names, 'state': 'ok'}],
-        'query': {'categories': ['teachers'], 'teacher_confirmation': True,
-                  'complete': complete, 'has_more': has_more},
+        "teachers": [{"course_name": "Biologia 102", "names": names, "state": "ok"}],
+        "query": {
+            "categories": ["teachers"],
+            "teacher_confirmation": True,
+            "complete": complete,
+            "has_more": has_more,
+        },
     }
-    result = service().ask('¿Carla Docente es mi única docente?', academic_context=context)
+    result = service().ask("¿Carla Docente es mi única docente?", academic_context=context)
     assert result.answer.startswith(expected)
     assert not result.sources
 
@@ -560,16 +653,24 @@ def test_teacher_confirmation_never_confuses_partial_or_empty_results_with_exclu
 )
 def test_teacher_confirmation_counts_people_not_matching_display_names(second_id, prefix):
     context = {
-        'teachers': [
-            {'course_name': 'Biologia 102', 'names': ['Carla Docente'],
-             'teacher_id': 10, 'state': 'ok'},
-            {'course_name': 'Algebra 101', 'names': ['Carla Docente'],
-             'teacher_id': second_id, 'state': 'ok'},
+        "teachers": [
+            {
+                "course_name": "Biologia 102",
+                "names": ["Carla Docente"],
+                "teacher_id": 10,
+                "state": "ok",
+            },
+            {
+                "course_name": "Algebra 101",
+                "names": ["Carla Docente"],
+                "teacher_id": second_id,
+                "state": "ok",
+            },
         ],
-        'query': {'categories': ['teachers'], 'teacher_confirmation': True},
+        "query": {"categories": ["teachers"], "teacher_confirmation": True},
     }
-    result = service().ask('¿Carla Docente es mi única docente?', academic_context=context)
+    result = service().ask("¿Carla Docente es mi única docente?", academic_context=context)
     assert result.answer.startswith(prefix)
     if second_id == 11:
-        assert 'más de una persona' in result.answer
+        assert "más de una persona" in result.answer
     assert not result.sources

@@ -1,0 +1,78 @@
+{
+  "complete": true,
+  "cases": [
+    {
+      "question": "Mándame a la tarea con la entrega más próxima de llegar a su fecha límite",
+      "seconds": 3.494,
+      "links": [
+        {
+          "label": "Reseña crítica de artículo — Comunicacion Academica 105",
+          "url": "http://127.0.0.1:8088/mod/assign/view.php?id=7"
+        },
+        {
+          "label": "Análisis descriptivo de datos — Estadistica 106",
+          "url": "http://127.0.0.1:8088/mod/assign/view.php?id=8"
+        }
+      ]
+    },
+    {
+      "question": "Abre el curso Metodología de Investigación 103",
+      "seconds": 3.636,
+      "links": []
+    },
+    {
+      "question": "Abre mis calificaciones de Programacion 104",
+      "seconds": 3.835,
+      "links": [
+        {
+          "label": "Calificaciones — Programacion 104",
+          "url": "http://127.0.0.1:8088/grade/report/user/index.php?id=27"
+        }
+      ]
+    },
+    {
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 3.901,
+      "links": [
+        {
+          "label": "Calendario de Moodle",
+          "url": "http://127.0.0.1:8088/calendar/view.php?view=upcoming"
+        }
+      ]
+    },
+    {
+      "question": "Llévame a calificar las entregas de Programacion 104, un curso que enseño",
+      "seconds": 3.233,
+      "links": [
+        {
+          "label": "Calificar: Práctica de algoritmos — Programacion 104",
+          "url": "http://127.0.0.1:8088/mod/assign/view.php?id=5&action=grading"
+        },
+        {
+          "label": "Calificar: Proyecto integrador de programación — Programacion 104",
+          "url": "http://127.0.0.1:8088/mod/assign/view.php?id=6&action=grading"
+        }
+      ]
+    },
+    {
+      "question": "Abre el libro de calificaciones de Programacion 104, un curso que enseño",
+      "seconds": 3.819,
+      "links": [
+        {
+          "label": "Calificaciones — Programacion 104",
+          "url": "http://127.0.0.1:8088/grade/report/grader/index.php?id=27"
+        }
+      ]
+    },
+    {
+      "question": "Abre el curso Programacion 104 entre los cursos disponibles que puedo consultar",
+      "seconds": 3.161,
+      "links": [
+        {
+          "label": "Programacion 104",
+          "url": "http://127.0.0.1:8088/course/view.php?id=27"
+        }
+      ]
+    }
+  ]
+}

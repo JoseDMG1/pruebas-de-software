@@ -39,8 +39,8 @@ local = root / ".local"
 local.mkdir(exist_ok=True)
 credentials = local / "sprint2-credentials.md"
 credentials.write_text(
-    "Local test site: http://127.0.0.1:8088\n\n"
-    "Users: admin_sprint2, estudiante1, estudiante2, docente1, autoridad1\n\n"
+    "Institutional portal: http://127.0.0.1:8088\n\n"
+    "Users: admin_udv, estudiante1, estudiante2, docente1, docente2, docente3, docente4, autoridad1\n\n"
     "Password: " + values["MOODLE_DEMO_PASSWORD"] + "\n"
 )
 credentials.chmod(0o600)

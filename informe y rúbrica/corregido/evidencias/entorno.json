@@ -1,0 +1,90 @@
+{
+  "timestamp_utc": "2026-10-29T07:31:38.827726+00:00",
+  "platform": "Linux-7.0.0-38-generic-x86_64-desconocido-with-glibc2.43",
+  "cpu_count": 4,
+  "docker_context": "default",
+  "services": [
+    "rag-service-api-1\tUp 5 minutes\t127.0.0.1:8000->8000/tcp",
+    "rag-service-db-1\tUp 6 minutes (healthy)\t127.0.0.1:55432->5432/tcp",
+    "pruebasdesoftware-moodle-1\tUp 6 minutes\t",
+    "pruebasdesoftware-moodle-db-1\tUp 6 minutes (healthy)\t127.0.0.1:55433->5432/tcp"
+  ],
+  "memory_kib": {
+    "MemTotal": "11598792 kB",
+    "SwapTotal": "4194300 kB"
+  },
+  "git_head": "a8287366b46debf5622b42f29841816ca55487f6",
+  "working_tree": "Includes existing uncommitted changes; evidence describes this working tree, not only HEAD.",
+  "bindings": [
+    {
+      "name": "rag-service-api-1",
+      "image_id": "sha256:ac1216c3dce90894479c54b5aee1cd61d1a22cdccfd1fe22c0417e1977f5516e",
+      "network": "rag-service_default",
+      "ports": {
+        "8000/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "8000"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rag-service-db-1",
+      "image_id": "sha256:ac08538c6f8b9904c33c8224c5e5706dbe760aca29db1d096972b4052c22a75d",
+      "network": "rag-service_default",
+      "ports": {
+        "5432/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "55432"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pruebasdesoftware-moodle-1",
+      "image_id": "sha256:336d612d0925e2f1569a09d89792949ebe7e56af872a0147b90d603cdd2df5eb",
+      "network": "host",
+      "ports": {}
+    },
+    {
+      "name": "pruebasdesoftware-moodle-db-1",
+      "image_id": "sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24",
+      "network": "pruebasdesoftware_default",
+      "ports": {
+        "5432/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "55433"
+          }
+        ]
+      }
+    }
+  ],
+  "apache_listen": "# If you just change the port or add more ports here, you will likely also\n# have to change the VirtualHost statement in\n# /etc/apache2/sites-enabled/000-default.conf\n\nListen 127.0.0.1:8088\n\n<IfModule ssl_module>\n\tListen 443\n</IfModule>\n\n<IfModule mod_gnutls.c>\n\tListen 443\n</IfModule>\n",
+  "validated_api_image": "sha256:ac1216c3dce90894479c54b5aee1cd61d1a22cdccfd1fe22c0417e1977f5516e",
+  "safe_runtime_configuration": {
+    "MAX_PDF_PAGES": "300",
+    "CHUNK_SIZE_CHARS": "2000",
+    "MAX_PDF_BYTES": "20971520",
+    "DEEPSEEK_TIMEOUT": "120",
+    "DEEPSEEK_CHAT_MODEL": "deepseek-flash",
+    "GEMINI_MAX_RETRIES": "2",
+    "GEMINI_TIMEOUT": "120",
+    "GEMINI_EMBEDDING_MODEL": "gemini-embedding-001",
+    "CHUNK_OVERLAP_CHARS": "200",
+    "DEEPSEEK_MAX_RETRIES": "2",
+    "MAX_CHUNKS": "1000",
+    "LOCAL_DEMO_QUERY_ENABLED": "true",
+    "GEMINI_EMBEDDING_DIMENSIONS": "768"
+  },
+  "refreshed_utc": "2026-10-29T08:24:35.833326+00:00",
+  "provider_transport": {
+    "connection_pool": 20,
+    "keepalive_expiry_seconds": 60,
+    "connect_timeout_seconds": 3,
+    "pool_timeout_seconds": 3,
+    "response_cache": false
+  }
+}

@@ -1,0 +1,1306 @@
+{
+  "complete": true,
+  "timestamp_utc": "2026-10-29T08:01:12.005708+00:00",
+  "configuration": {
+    "virtual_users": 10,
+    "rounds": 10,
+    "expected_requests": 100,
+    "warmup_requests": 10,
+    "accounts": [
+      "estudiante1",
+      "estudiante2"
+    ],
+    "independent_browser_contexts": true,
+    "questions": [
+      "¿Cuál es la nota mínima aprobatoria?",
+      "¿Qué cursos tengo?",
+      "¿Qué profesores me enseñan?",
+      "¿Cómo solicito orientación psicológica?",
+      "Llévame a mi calendario de Moodle"
+    ],
+    "measurement": "From submit click to new rendered answer; includes Moodle, RAG and remote providers. Login and warmup excluded. Throughput includes between-round resets.",
+    "threshold": "At least 95% of all requests successful in <=10s; zero application/transport errors.",
+    "retries_by_harness": 0
+  },
+  "host": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-desconocido-with-glibc2.43",
+    "cpu_count": 4
+  },
+  "samples": [
+    {
+      "virtual_user": 1,
+      "round": 1,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 8.8616,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 2,
+      "round": 1,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 23.2572,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (4)\nBiologia 102 (BIO102)\nDiseno Digital 109 (DIS109)\nMetodología de Investigación 103 (RES103)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 3,
+      "round": 1,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 5.3775,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (7)\nAlgebra 101: Carla Rojas\nBiologia 102: Carla Rojas\nComunicacion Academica 105: Valeria Núñez\nEstadistica 106: Diego Salinas\nFisica General 107: Jorge Rivas\nIngles Academico 108: Valeria Núñez\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 4,
+      "round": 1,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 9.4793,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 5,
+      "round": 1,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.0356,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 6,
+      "round": 1,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 9.5029,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 7,
+      "round": 1,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 3.9167,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (7)\nAlgebra 101 (ALG101)\nBiologia 102 (BIO102)\nComunicacion Academica 105 (COM105)\nEstadistica 106 (EST106)\nFisica General 107 (FIS107)\nIngles Academico 108 (ING108)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 8,
+      "round": 1,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 3.8256,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (4)\nBiologia 102: Carla Rojas\nDiseno Digital 109: Jorge Rivas\nMetodología de Investigación 103: Carla Rojas\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 9,
+      "round": 1,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 9.9677,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 10,
+      "round": 1,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 3.7084,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 1,
+      "round": 2,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 4.6636,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (7)\nAlgebra 101 (ALG101)\nBiologia 102 (BIO102)\nComunicacion Academica 105 (COM105)\nEstadistica 106 (EST106)\nFisica General 107 (FIS107)\nIngles Academico 108 (ING108)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 2,
+      "round": 2,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.6505,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (4)\nBiologia 102: Carla Rojas\nDiseno Digital 109: Jorge Rivas\nMetodología de Investigación 103: Carla Rojas\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 3,
+      "round": 2,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 28.3281,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 4,
+      "round": 2,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.5574,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 5,
+      "round": 2,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 8.8613,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 6,
+      "round": 2,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 5.0182,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (4)\nBiologia 102 (BIO102)\nDiseno Digital 109 (DIS109)\nMetodología de Investigación 103 (RES103)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 7,
+      "round": 2,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.5935,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (7)\nAlgebra 101: Carla Rojas\nBiologia 102: Carla Rojas\nComunicacion Academica 105: Valeria Núñez\nEstadistica 106: Diego Salinas\nFisica General 107: Jorge Rivas\nIngles Academico 108: Valeria Núñez\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 8,
+      "round": 2,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 9.1389,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]\n\nLa fuente indica: «Dirección de Bienestar Estudiantil de la Universidad del Valle. Ofrece orientación psicológica breve, consejería vocacional y acompañamiento para adaptación a la vida universitaria. La atención es confidencial y requiere una cita; no reemplaza servicios de emergencia ni atención clínica especializada.». [2]"
+    },
+    {
+      "virtual_user": 9,
+      "round": 2,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 5.2708,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 10,
+      "round": 2,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 9.8739,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 1,
+      "round": 3,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 3.9267,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (7)\nAlgebra 101: Carla Rojas\nBiologia 102: Carla Rojas\nComunicacion Academica 105: Valeria Núñez\nEstadistica 106: Diego Salinas\nFisica General 107: Jorge Rivas\nIngles Academico 108: Valeria Núñez\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 2,
+      "round": 3,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 8.8484,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 3,
+      "round": 3,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.4235,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 4,
+      "round": 3,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 28.7387,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 5,
+      "round": 3,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 3.9979,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (7)\nAlgebra 101 (ALG101)\nBiologia 102 (BIO102)\nComunicacion Academica 105 (COM105)\nEstadistica 106 (EST106)\nFisica General 107 (FIS107)\nIngles Academico 108 (ING108)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 6,
+      "round": 3,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.6236,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (4)\nBiologia 102: Carla Rojas\nDiseno Digital 109: Jorge Rivas\nMetodología de Investigación 103: Carla Rojas\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 7,
+      "round": 3,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 9.5184,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 8,
+      "round": 3,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.5254,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 9,
+      "round": 3,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 8.4211,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 10,
+      "round": 3,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 4.5897,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (4)\nBiologia 102 (BIO102)\nDiseno Digital 109 (DIS109)\nMetodología de Investigación 103 (RES103)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 1,
+      "round": 4,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 9.5337,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 2,
+      "round": 4,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.1782,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 3,
+      "round": 4,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 9.0521,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 4,
+      "round": 4,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 4.2946,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (4)\nBiologia 102 (BIO102)\nDiseno Digital 109 (DIS109)\nMetodología de Investigación 103 (RES103)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 5,
+      "round": 4,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 5.3081,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (7)\nAlgebra 101: Carla Rojas\nBiologia 102: Carla Rojas\nComunicacion Academica 105: Valeria Núñez\nEstadistica 106: Diego Salinas\nFisica General 107: Jorge Rivas\nIngles Academico 108: Valeria Núñez\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 6,
+      "round": 4,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 8.5231,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 7,
+      "round": 4,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.1298,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 8,
+      "round": 4,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 8.8676,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 9,
+      "round": 4,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 4.0891,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (7)\nAlgebra 101 (ALG101)\nBiologia 102 (BIO102)\nComunicacion Academica 105 (COM105)\nEstadistica 106 (EST106)\nFisica General 107 (FIS107)\nIngles Academico 108 (ING108)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 10,
+      "round": 4,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.2022,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (4)\nBiologia 102: Carla Rojas\nDiseno Digital 109: Jorge Rivas\nMetodología de Investigación 103: Carla Rojas\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 1,
+      "round": 5,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.1954,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 2,
+      "round": 5,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 8.4648,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 3,
+      "round": 5,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 3.6024,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (7)\nAlgebra 101 (ALG101)\nBiologia 102 (BIO102)\nComunicacion Academica 105 (COM105)\nEstadistica 106 (EST106)\nFisica General 107 (FIS107)\nIngles Academico 108 (ING108)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 4,
+      "round": 5,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 3.4679,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (4)\nBiologia 102: Carla Rojas\nDiseno Digital 109: Jorge Rivas\nMetodología de Investigación 103: Carla Rojas\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 5,
+      "round": 5,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 7.654,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 6,
+      "round": 5,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.2313,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 7,
+      "round": 5,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 29.5125,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 8,
+      "round": 5,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 4.2112,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (4)\nBiologia 102 (BIO102)\nDiseno Digital 109 (DIS109)\nMetodología de Investigación 103 (RES103)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 9,
+      "round": 5,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 3.6465,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (7)\nAlgebra 101: Carla Rojas\nBiologia 102: Carla Rojas\nComunicacion Academica 105: Valeria Núñez\nEstadistica 106: Diego Salinas\nFisica General 107: Jorge Rivas\nIngles Academico 108: Valeria Núñez\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 10,
+      "round": 5,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 9.0142,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 1,
+      "round": 6,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 27.5533,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 2,
+      "round": 6,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 4.4797,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (4)\nBiologia 102 (BIO102)\nDiseno Digital 109 (DIS109)\nMetodología de Investigación 103 (RES103)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 3,
+      "round": 6,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.8726,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (7)\nAlgebra 101: Carla Rojas\nBiologia 102: Carla Rojas\nComunicacion Academica 105: Valeria Núñez\nEstadistica 106: Diego Salinas\nFisica General 107: Jorge Rivas\nIngles Academico 108: Valeria Núñez\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 4,
+      "round": 6,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 8.9151,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 5,
+      "round": 6,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.0247,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 6,
+      "round": 6,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 7.7791,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 7,
+      "round": 6,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 4.0307,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (7)\nAlgebra 101 (ALG101)\nBiologia 102 (BIO102)\nComunicacion Academica 105 (COM105)\nEstadistica 106 (EST106)\nFisica General 107 (FIS107)\nIngles Academico 108 (ING108)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 8,
+      "round": 6,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.2398,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (4)\nBiologia 102: Carla Rojas\nDiseno Digital 109: Jorge Rivas\nMetodología de Investigación 103: Carla Rojas\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 9,
+      "round": 6,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 27.9216,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 10,
+      "round": 6,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.0497,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 1,
+      "round": 7,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 3.826,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (7)\nAlgebra 101 (ALG101)\nBiologia 102 (BIO102)\nComunicacion Academica 105 (COM105)\nEstadistica 106 (EST106)\nFisica General 107 (FIS107)\nIngles Academico 108 (ING108)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 2,
+      "round": 7,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.7281,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (4)\nBiologia 102: Carla Rojas\nDiseno Digital 109: Jorge Rivas\nMetodología de Investigación 103: Carla Rojas\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 3,
+      "round": 7,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 9.7526,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 4,
+      "round": 7,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 3.713,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 5,
+      "round": 7,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 9.0966,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 6,
+      "round": 7,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 4.7001,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (4)\nBiologia 102 (BIO102)\nDiseno Digital 109 (DIS109)\nMetodología de Investigación 103 (RES103)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 7,
+      "round": 7,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.7539,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (7)\nAlgebra 101: Carla Rojas\nBiologia 102: Carla Rojas\nComunicacion Academica 105: Valeria Núñez\nEstadistica 106: Diego Salinas\nFisica General 107: Jorge Rivas\nIngles Academico 108: Valeria Núñez\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 8,
+      "round": 7,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 9.9316,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 9,
+      "round": 7,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 3.4783,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 10,
+      "round": 7,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 8.7741,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 1,
+      "round": 8,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.4159,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (7)\nAlgebra 101: Carla Rojas\nBiologia 102: Carla Rojas\nComunicacion Academica 105: Valeria Núñez\nEstadistica 106: Diego Salinas\nFisica General 107: Jorge Rivas\nIngles Academico 108: Valeria Núñez\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 2,
+      "round": 8,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 9.2445,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 3,
+      "round": 8,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.407,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 4,
+      "round": 8,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 9.4208,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 5,
+      "round": 8,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 4.4569,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (7)\nAlgebra 101 (ALG101)\nBiologia 102 (BIO102)\nComunicacion Academica 105 (COM105)\nEstadistica 106 (EST106)\nFisica General 107 (FIS107)\nIngles Academico 108 (ING108)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 6,
+      "round": 8,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 24.0119,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (4)\nBiologia 102: Carla Rojas\nDiseno Digital 109: Jorge Rivas\nMetodología de Investigación 103: Carla Rojas\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 7,
+      "round": 8,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 10.3256,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 8,
+      "round": 8,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.1928,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 9,
+      "round": 8,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 28.1885,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 10,
+      "round": 8,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 4.3423,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (4)\nBiologia 102 (BIO102)\nDiseno Digital 109 (DIS109)\nMetodología de Investigación 103 (RES103)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 1,
+      "round": 9,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 28.2629,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 2,
+      "round": 9,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 3.4923,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 3,
+      "round": 9,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 28.5245,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 4,
+      "round": 9,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 4.5724,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (4)\nBiologia 102 (BIO102)\nDiseno Digital 109 (DIS109)\nMetodología de Investigación 103 (RES103)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 5,
+      "round": 9,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.5977,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (7)\nAlgebra 101: Carla Rojas\nBiologia 102: Carla Rojas\nComunicacion Academica 105: Valeria Núñez\nEstadistica 106: Diego Salinas\nFisica General 107: Jorge Rivas\nIngles Academico 108: Valeria Núñez\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 6,
+      "round": 9,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 8.5189,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 7,
+      "round": 9,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.0465,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 8,
+      "round": 9,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 7.8832,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 9,
+      "round": 9,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 3.5242,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (7)\nAlgebra 101 (ALG101)\nBiologia 102 (BIO102)\nComunicacion Academica 105 (COM105)\nEstadistica 106 (EST106)\nFisica General 107 (FIS107)\nIngles Academico 108 (ING108)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 10,
+      "round": 9,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.1082,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (4)\nBiologia 102: Carla Rojas\nDiseno Digital 109: Jorge Rivas\nMetodología de Investigación 103: Carla Rojas\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 1,
+      "round": 10,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.0769,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 2,
+      "round": 10,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 9.4838,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 3,
+      "round": 10,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 3.9535,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (7)\nAlgebra 101 (ALG101)\nBiologia 102 (BIO102)\nComunicacion Academica 105 (COM105)\nEstadistica 106 (EST106)\nFisica General 107 (FIS107)\nIngles Academico 108 (ING108)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 4,
+      "round": 10,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.534,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (4)\nBiologia 102: Carla Rojas\nDiseno Digital 109: Jorge Rivas\nMetodología de Investigación 103: Carla Rojas\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 5,
+      "round": 10,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 8.944,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 6,
+      "round": 10,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 3.8633,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 7,
+      "round": 10,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 10.1128,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 8,
+      "round": 10,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 3.9195,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (4)\nBiologia 102 (BIO102)\nDiseno Digital 109 (DIS109)\nMetodología de Investigación 103 (RES103)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 9,
+      "round": 10,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.025,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (7)\nAlgebra 101: Carla Rojas\nBiologia 102: Carla Rojas\nComunicacion Academica 105: Valeria Núñez\nEstadistica 106: Diego Salinas\nFisica General 107: Jorge Rivas\nIngles Academico 108: Valeria Núñez\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 10,
+      "round": 10,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 8.6784,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    }
+  ],
+  "warmup": [
+    {
+      "virtual_user": 1,
+      "round": 0,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 29.6043,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 2,
+      "round": 0,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 4.0834,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (4)\nBiologia 102 (BIO102)\nDiseno Digital 109 (DIS109)\nMetodología de Investigación 103 (RES103)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 3,
+      "round": 0,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.0483,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (7)\nAlgebra 101: Carla Rojas\nBiologia 102: Carla Rojas\nComunicacion Academica 105: Valeria Núñez\nEstadistica 106: Diego Salinas\nFisica General 107: Jorge Rivas\nIngles Academico 108: Valeria Núñez\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 4,
+      "round": 0,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 8.35,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]"
+    },
+    {
+      "virtual_user": 5,
+      "round": 0,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.6973,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 6,
+      "round": 0,
+      "question": "¿Cuál es la nota mínima aprobatoria?",
+      "seconds": 9.6701,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Universidad del Valle. Reglamento académico, versión 2026-II. La nota mínima aprobatoria es 11 en la escala de 0 a 20. Para rendir la evaluación final se requiere una asistencia mínima del 70 por ciento. La evaluación continua representa el 60 por ciento de la nota del curso y la evaluación final representa el 40 por ciento.». [1]"
+    },
+    {
+      "virtual_user": 7,
+      "round": 0,
+      "question": "¿Qué cursos tengo?",
+      "seconds": 4.0331,
+      "ok": true,
+      "error": null,
+      "answer": "Cursos con matrícula vigente (7)\nAlgebra 101 (ALG101)\nBiologia 102 (BIO102)\nComunicacion Academica 105 (COM105)\nEstadistica 106 (EST106)\nFisica General 107 (FIS107)\nIngles Academico 108 (ING108)\nProgramacion 104 (PROG104)\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 8,
+      "round": 0,
+      "question": "¿Qué profesores me enseñan?",
+      "seconds": 4.0812,
+      "ok": true,
+      "error": null,
+      "answer": "Docentes por curso (4)\nBiologia 102: Carla Rojas\nDiseno Digital 109: Jorge Rivas\nMetodología de Investigación 103: Carla Rojas\nProgramacion 104: Diego Salinas\n\nSegún los datos visibles de Moodle."
+    },
+    {
+      "virtual_user": 9,
+      "round": 0,
+      "question": "¿Cómo solicito orientación psicológica?",
+      "seconds": 8.7752,
+      "ok": true,
+      "error": null,
+      "answer": "Información institucional:\n\nLa fuente indica: «Bienestar Estudiantil. Las citas se solicitan por correo a bienestar@udv.edu.pe. Horario de atención: lunes a viernes de 9:00 a 17:00. La primera entrevista dura aproximadamente treinta minutos. Si una persona necesita apoyo inmediato, debe comunicarse con los servicios de emergencia de su localidad.». [1]\n\nLa fuente indica: «Dirección de Bienestar Estudiantil de la Universidad del Valle. Ofrece orientación psicológica breve, consejería vocacional y acompañamiento para adaptación a la vida universitaria. La atención es confidencial y requiere una cita; no reemplaza servicios de emergencia ni atención clínica especializada.». [2]"
+    },
+    {
+      "virtual_user": 10,
+      "round": 0,
+      "question": "Llévame a mi calendario de Moodle",
+      "seconds": 4.5803,
+      "ok": true,
+      "error": null,
+      "answer": "Puedes abrir los siguientes destinos de Moodle.\n\nSegún los datos visibles de Moodle."
+    }
+  ],
+  "availability_samples": [
+    {
+      "timestamp_utc": "2026-10-29T08:02:22.479234+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:02:27.690206+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:02:32.840568+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:02:37.972526+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:02:43.103569+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:02:48.209538+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:02:53.311256+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:02:58.372723+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:03:03.512898+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:03:08.636691+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:03:13.763821+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:03:18.871484+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:03:23.984960+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:03:29.137559+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:03:34.306469+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:03:39.448521+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:03:44.576485+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:03:49.685817+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:03:54.808282+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:03:59.939532+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:04:05.073538+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:04:10.184801+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:04:15.331549+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:04:20.542074+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:04:25.654547+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:04:30.780544+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:04:35.895467+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:04:41.003527+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:04:46.140563+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:04:51.262149+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:04:56.382549+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:05:01.506490+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:05:06.612540+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:05:11.722639+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:05:16.873399+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:05:22.116537+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:05:27.236916+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:05:32.711854+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:05:37.872468+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:05:43.076493+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:05:48.205513+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:05:53.320539+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:05:58.441030+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:06:03.617528+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:06:08.774493+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:06:13.888465+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:06:19.035527+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:06:24.178510+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:06:29.288487+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:06:34.456994+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:06:39.570242+00:00",
+      "rag": true,
+      "moodle": true
+    },
+    {
+      "timestamp_utc": "2026-10-29T08:06:44.693662+00:00",
+      "rag": true,
+      "moodle": true
+    }
+  ],
+  "browser": "153.0.8010.12",
+  "summary": {
+    "requests": 100,
+    "errors": 0,
+    "error_percent": 0.0,
+    "successful_within_10_seconds": 88,
+    "successful_within_10_percent": 88.0,
+    "p95_seconds": 28.1885,
+    "median_seconds": 4.68185,
+    "maximum_seconds": 29.5125,
+    "elapsed_seconds": 262.363,
+    "throughput_requests_per_second": 0.381,
+    "accepted": false
+  },
+  "availability": {
+    "samples": 52,
+    "interval_seconds": 5,
+    "successful_samples": 52,
+    "percent": 100.0,
+    "scope": "Sampled HTTP availability during this run only; does not measure long-term uptime or AI answer quality."
+  }
+}

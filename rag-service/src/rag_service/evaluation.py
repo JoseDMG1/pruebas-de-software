@@ -1,7 +1,8 @@
-"""Evaluación real reproducible con Gemini; no cambia las preguntas."""
+"""Evaluación real reproducible con DeepSeek; no cambia las preguntas."""
 
 import argparse
 import json
+import math
 import re
 import statistics
 import time
@@ -45,11 +46,23 @@ def contains_fact(answer, option):
     return option in answer
 
 
+def acceptance_met(positive, positives, negative, negatives, completed, expected):
+    """Final-project gate: 90% factual answers and every required abstention."""
+    return (
+        completed == expected
+        and positives > 0
+        and positive >= math.ceil(positives * 0.9)
+        and negative == negatives
+    )
+
+
 def main():
     settings = Settings()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
-    parser.add_argument("--output", type=Path, default=Path("docs/evaluation-results.json"))
+    parser.add_argument(
+        "--output", type=Path, default=Path("docs/evaluation-deepseek-results.json")
+    )
     args = parser.parse_args()
     cases = json.loads(files("rag_service").joinpath("demo/evaluation.json").read_text())
     results = []
@@ -87,22 +100,36 @@ def main():
     positive = sum(item["passed"] for item in results if not item["case"].get("insufficient"))
     negative = sum(item["passed"] for item in results if item["case"].get("insufficient"))
     latencies = sorted(item["elapsed_seconds"] for item in results)
+    positives = sum(not item.get("insufficient") for item in cases)
+    negatives = sum(bool(item.get("insufficient")) for item in cases)
+    p95_index = max(0, math.ceil(len(latencies) * 0.95) - 1)
+    total_elapsed = sum(item["elapsed_seconds"] for item in results)
     summary = {
         "positive_passed": positive,
-        "positive_total": 20,
+        "positive_total": positives,
         "negative_passed": negative,
-        "negative_total": 5,
-        "accepted": len(results) == 25 and positive >= 16 and negative == 5,
+        "negative_total": negatives,
+        "accepted": acceptance_met(
+            positive, positives, negative, negatives, len(results), len(cases)
+        ),
+        "minimum_positive_accuracy": 0.9,
+        "requests": len(results),
+        "total_elapsed_seconds": round(total_elapsed, 3),
+        "requests_per_second": round(len(results) / total_elapsed, 3) if total_elapsed else 0,
+        "minimum_seconds": round(latencies[0], 3),
         "median_seconds": round(statistics.median(latencies), 3),
-        "p95_seconds": latencies[23],
+        "mean_seconds": round(statistics.mean(latencies), 3),
+        "p95_seconds": latencies[p95_index],
+        "maximum_seconds": round(latencies[-1], 3),
         "scoring": "Expected facts and document keys; inspect answers for semantic correctness.",
     }
     output = {
         "complete": True,
         "timestamp_utc": datetime.now(UTC).isoformat(),
-        "provider": "gemini",
+        "provider": "deepseek",
         "embedding_model": settings.gemini_embedding_model,
-        "chat_model": settings.gemini_chat_model,
+        "embedding_provider": "gemini",
+        "chat_model": settings.deepseek_chat_model,
         "summary": summary,
         "results": results,
     }
